@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bella Learns">
-<meta name="theme-color" content="#f3e3ff">
+<meta name="theme-color" content="#1a1040">
 <title>Bella Learns</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
@@ -20,14 +20,23 @@
 html,body{margin:0;height:100%}
 body{
   font-family:'Fredoka',ui-rounded,system-ui,sans-serif;color:var(--ink);
-  background:linear-gradient(180deg,var(--sky1),var(--sky2));
+  background:linear-gradient(180deg,#1a1040 0%,#341a68 55%,#5e2a88 100%);
   min-height:100dvh;overflow:hidden;
   -webkit-user-select:none;user-select:none;touch-action:manipulation;
 }
-body::before{ /* soft rainbow behind everything */
-  content:'';position:fixed;left:50%;bottom:-75vmax;width:150vmax;height:150vmax;transform:translateX(-50%);
-  border-radius:50%;z-index:-1;opacity:.45;
-  background:radial-gradient(circle,transparent 52%,#ffadb5 52% 55%,#ffd3a1 55% 58%,#fff1a1 58% 61%,#bff0bf 61% 64%,#a9dcff 64% 67%,#d2baff 67% 70%,transparent 70%);
+body::before{ /* spotlights and twinkly stars */
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(2px 2px at 8% 22%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 30% 8%,#fff 50%,transparent 51%),
+    radial-gradient(2px 2px at 62% 14%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 88% 26%,#fff 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 46% 32%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 76% 6%,#fff 50%,transparent 51%),
+    conic-gradient(from 150deg at 12% -6%,rgba(255,120,210,0) 0deg,rgba(255,120,210,.26) 7deg,rgba(255,120,210,0) 14deg,transparent 14deg),
+    conic-gradient(from 196deg at 88% -6%,rgba(110,220,255,0) 0deg,rgba(110,220,255,.24) 7deg,rgba(110,220,255,0) 14deg,transparent 14deg),
+    conic-gradient(from 173deg at 50% -10%,rgba(255,230,140,0) 0deg,rgba(255,230,140,.16) 7deg,rgba(255,230,140,0) 14deg,transparent 14deg);
+}
+body::after{ /* glowing stage floor */
+  content:'';position:fixed;left:0;right:0;bottom:0;height:16vh;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(255,110,200,.28));
 }
 #app{display:flex;flex-direction:column;height:100dvh;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
@@ -43,7 +52,7 @@ body::before{ /* soft rainbow behind everything */
 main{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:4px 16px 16px}
 .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;width:100%}
 h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
-  background:linear-gradient(90deg,#ff6fae,#b07cf2,#4fb8f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  background:linear-gradient(90deg,#ff8fd0,#d3a8ff,#7fe3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .big-btn{font:inherit;font-size:clamp(1.3rem,5.5vw,1.8rem);font-weight:700;border:0;border-radius:999px;padding:16px 34px;
   background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;box-shadow:0 6px 0 #9a6fd8;cursor:pointer}
 .big-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #9a6fd8}
@@ -103,7 +112,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
   cursor:pointer;font:inherit;color:var(--ink);animation:bob 3.2s ease-in-out infinite;animation-delay:var(--d)}
 .balloon::before{content:'';position:absolute;inset:0 0 15% 0;border-radius:50% 50% 47% 47%/56% 56% 44% 44%;
   background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.85) 0 9%,transparent 10%),var(--c);
-  box-shadow:inset -10px -14px 0 rgba(0,0,0,.07)}
+  box-shadow:inset -10px -14px 0 rgba(0,0,0,.07),0 0 26px rgba(255,255,255,.28)}
 .balloon::after{content:'';position:absolute;left:50%;bottom:0;width:2px;height:16%;background:#a99bc7;transform:translateX(-50%)}
 .balloon span{position:absolute;inset:0 0 15% 0;display:flex;align-items:center;justify-content:center;
   font-size:clamp(1.9rem,9vw,2.9rem);font-weight:700;z-index:1}
@@ -118,7 +127,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .say-panel[hidden]{display:none}
 .word-card{background:#fff;border-radius:28px;padding:10px 44px;font-size:clamp(3.2rem,16vw,5.5rem);font-weight:700;
   box-shadow:0 6px 0 #e0d3f7;min-width:200px;text-align:center}
-.say-msg{font-size:clamp(1.2rem,5vw,1.6rem);font-weight:600;text-align:center;min-height:2.2em}
+.say-msg{color:#fff;font-size:clamp(1.2rem,5vw,1.6rem);font-weight:600;text-align:center;min-height:2.2em}
 .mic-btn{font:inherit;border:0;cursor:pointer;width:clamp(130px,36vw,170px);aspect-ratio:1;border-radius:50%;
   background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;box-shadow:0 7px 0 #9a6fd8;
   display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(2.6rem,11vw,3.4rem)}
@@ -139,7 +148,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .ob{font-size:var(--os,2.4rem);line-height:1.1;display:inline-block;transition:transform .25s,opacity .4s,filter .4s}
 .ob.gone{opacity:.45;filter:grayscale(1);transform:translateY(-8px) scale(.8)}
 .ob.lit{transform:scale(1.35);filter:drop-shadow(0 0 6px #ffd34d)}
-.sign{font-size:clamp(2rem,9vw,3.2rem);font-weight:700}
+.sign{color:#fff;font-size:clamp(2rem,9vw,3.2rem);font-weight:700}
 .answers{display:flex;gap:clamp(14px,5vw,32px);justify-content:center;margin:10px 0 8px}
 .ans{font:inherit;font-size:clamp(2.2rem,10vw,3.2rem);font-weight:700;color:var(--ink);width:clamp(86px,24vw,120px);aspect-ratio:1;
   border-radius:50%;border:0;cursor:pointer;background:var(--c);box-shadow:0 6px 0 rgba(74,59,107,.18)}
@@ -159,7 +168,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 <body>
 <div id="app">
   <header class="topbar" id="topbar" hidden>
-    <button class="icon-btn" id="homeBtn" aria-label="Castle map">🏰</button>
+    <button class="icon-btn" id="homeBtn" aria-label="Home">🏠</button>
     <div class="row"><button class="icon-btn" id="setBtn" aria-label="Grown-up settings">⚙️</button>
     <div class="gems" id="gems">💎 <span id="gemCount">0</span></div></div>
   </header>
@@ -173,7 +182,7 @@ const WORDS = [
   ['all','am','are','at','ate','be','black','brown','but','came','did','do','eat','four','get','good','have','he','into','like','must','new','no','now','on','our','out','please','pretty','ran','ride','saw','say','she','so','soon','that','there','they','this','too','under','want','was','well','went','what','white','who','will','with','yes'],
   ['after','again','an','any','as','ask','by','could','every','fly','from','give','going','had','has','her','him','his','how','just','know','let','live','may','of','old','once','open','over','put','round','some','stop','take','thank','them','then','think','walk','were','when']
 ];
-const LEVEL_NAMES = ['Pink Floor','Purple Floor','Rainbow Floor'];
+const LEVEL_NAMES = ['Pink Lights','Purple Lights','Rainbow Lights'];
 // Words that sound the same can't be told apart by ear, so never show them together.
 const SAME_SOUND = [['to','two','too'],['for','four'],['no','know']];
 // What the speech recognizer may write when she says the word correctly.
@@ -189,7 +198,7 @@ const SOUNDS_LIKE = {
 
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
-const DEFAULTS = { unicornName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] } };
+const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
   catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
@@ -286,7 +295,18 @@ const sfx = {
   pop:   () => tone([620, 940], .07, 'triangle'),
   chime: () => tone([660, 880, 1320], .12),
   oops:  () => tone([320, 250], .12, 'triangle'),
-  tada:  () => tone([523, 659, 784, 1047], .13)
+  tada:  () => tone([523, 659, 784, 1047], .13),
+  cheer: () => { // a short crowd cheer made from filtered noise
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const len = Math.floor(ac.sampleRate * 1.6), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+      for (let k = 0; k < len; k++) d[k] = (Math.random() * 2 - 1) * (0.65 + 0.35 * Math.sin(k / ac.sampleRate * 47));
+      const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(), t = ac.currentTime;
+      src.buffer = buf; f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = .6;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .2); g.gain.exponentialRampToValueAtTime(.0001, t + 1.6);
+      src.connect(f).connect(g).connect(ac.destination); src.start();
+    } catch(e){}
+  }
 };
 function confetti(n = 30){
   const cols = ['#ff8fc8','#b794f6','#7fd1ff','#ffd34d','#8be0a0'];
@@ -302,29 +322,28 @@ function confetti(n = 30){
   }
 }
 
-/* ---------- Unicorn drawing ---------- */
-function unicornSVG(){
-  return `<svg viewBox="0 0 220 190" aria-hidden="true">
-  <defs><linearGradient id="hornG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffcf3a"/><stop offset="1" stop-color="#fff4b8"/></linearGradient></defs>
-  <path d="M54 104 C24 96 14 126 24 150 C30 132 38 124 56 118Z" fill="#ff8fc8"/>
-  <path d="M56 112 C30 114 26 144 40 164 C40 144 48 134 60 126Z" fill="#b794f6"/>
-  <path d="M60 120 C44 132 46 160 62 174 C58 154 62 142 68 134Z" fill="#7fd1ff"/>
-  <g fill="#fff" stroke="#d9c8f5" stroke-width="3">
-    <rect x="66" y="128" width="17" height="50" rx="8"/><rect x="88" y="134" width="17" height="44" rx="8"/>
-    <rect x="122" y="134" width="17" height="44" rx="8"/><rect x="143" y="128" width="17" height="50" rx="8"/>
-  </g>
-  <g fill="#ffb3d9"><rect x="66" y="168" width="17" height="10" rx="4"/><rect x="88" y="168" width="17" height="10" rx="4"/><rect x="122" y="168" width="17" height="10" rx="4"/><rect x="143" y="168" width="17" height="10" rx="4"/></g>
-  <ellipse cx="112" cy="114" rx="60" ry="34" fill="#fff" stroke="#d9c8f5" stroke-width="3"/>
-  <path d="M134 104 C140 82 146 66 154 52 L180 66 C170 82 164 98 162 118Z" fill="#fff" stroke="#d9c8f5" stroke-width="3" stroke-linejoin="round"/>
-  <ellipse cx="175" cy="58" rx="30" ry="21" transform="rotate(18 175 58)" fill="#fff" stroke="#d9c8f5" stroke-width="3"/>
-  <ellipse cx="196" cy="70" rx="12" ry="10" fill="#ffe3f1"/>
-  <circle cx="199" cy="68" r="1.8" fill="#c08aa8"/>
-  <path d="M160 40 L162 22 L172 38Z" fill="#fff" stroke="#d9c8f5" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M172 38 L189 4 L184 42Z" fill="url(#hornG)" stroke="#f0b400" stroke-width="2" stroke-linejoin="round"/>
-  <path d="M158 42 C142 44 136 60 142 70 C128 74 126 90 136 98 C124 104 126 118 138 122 C142 106 148 92 154 78 C158 66 162 54 168 44Z" fill="#ff8fc8"/>
-  <path d="M164 40 C152 48 150 60 154 68 C146 76 144 88 148 96 C152 84 158 70 162 60Z" fill="#b794f6"/>
-  <circle cx="179" cy="56" r="5.5" fill="#4a3b6b"/><circle cx="181" cy="54" r="1.8" fill="#fff"/>
-  <ellipse cx="176" cy="70" rx="6" ry="3.5" fill="#ffb3d9" opacity=".85"/>
+/* ---------- Singer drawing (original character) ---------- */
+function guideSVG(){
+  return `<svg viewBox="0 0 200 230" aria-hidden="true">
+  <defs>
+    <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6fae"/><stop offset="1" stop-color="#a95cf0"/></linearGradient>
+    <linearGradient id="topG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd8e8"/><stop offset="1" stop-color="#7c6cf5"/></linearGradient>
+  </defs>
+  <circle cx="52" cy="42" r="24" fill="url(#hairG)"/><circle cx="148" cy="42" r="24" fill="url(#hairG)"/>
+  <path d="M40 92 C40 40 160 40 160 92 L164 140 C150 150 140 146 134 140 L66 140 C60 146 50 150 36 140Z" fill="url(#hairG)"/>
+  <path d="M62 168 C62 150 80 142 100 142 C120 142 138 150 138 168 L146 228 L54 228Z" fill="url(#topG)"/>
+  <path d="M100 172 l6 12 13 2 -9 9 2 13 -12 -6 -12 6 2 -13 -9 -9 13 -2z" fill="#ffe36b"/>
+  <rect x="90" y="132" width="20" height="16" rx="6" fill="#f5c4a8"/>
+  <circle cx="100" cy="92" r="50" fill="#ffdcc6"/>
+  <path d="M50 88 C48 52 76 38 100 38 C124 38 152 52 150 88 C140 74 126 66 112 64 C116 72 112 78 108 80 C100 70 84 64 66 72 C60 76 54 82 50 88Z" fill="url(#hairG)"/>
+  <ellipse cx="80" cy="100" rx="7" ry="9" fill="#3b2a55"/><ellipse cx="120" cy="100" rx="7" ry="9" fill="#3b2a55"/>
+  <circle cx="82.5" cy="96" r="2.6" fill="#fff"/><circle cx="122.5" cy="96" r="2.6" fill="#fff"/>
+  <ellipse cx="68" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/><ellipse cx="132" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/>
+  <path d="M90 118 Q100 128 110 118" stroke="#3b2a55" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <circle cx="50" cy="104" r="8" fill="#3b2a55"/>
+  <path d="M50 110 Q58 130 82 126" stroke="#3b2a55" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="85" cy="125" r="4.5" fill="#3b2a55"/>
+  <path d="M140 56 l4 8 9 1 -6 6 1.5 9 -8.5 -4.5 -8.5 4.5 1.5 -9 -6 -6 9 -1z" fill="#ffe36b" stroke="#f0b400" stroke-width="1.5"/>
   </svg>`;
 }
 
@@ -405,7 +424,7 @@ function checkMathUp(){
   const last = m.recent.slice(-8);
   if (last.length >= 8 && last.reduce((x, y) => x + y, 0) >= 7){
     m.stage++; m.recent = [];
-    return `Flower Math level ${m.stage + 1}: ${MATH_STAGES[m.stage].name}`;
+    return `Star Math level ${m.stage + 1}: ${MATH_STAGES[m.stage].name}`;
   }
   return null;
 }
@@ -487,7 +506,7 @@ function voiceScreen(){
   screen.querySelectorAll('.voice-row').forEach(b => b.onclick = () => {
     voice = vs[+b.dataset.k]; S.voiceName = voice.name; save();
     screen.querySelectorAll('.voice-row').forEach(x => x.classList.toggle('on', x === b));
-    say(`Hi Bella! It's me, ${S.unicornName || 'your unicorn'}. Do you like my voice?`);
+    say(`Hi Bella! It's me, ${S.guideName || 'your singer'}. Do you like my voice?`);
   });
   $('#vDone').onclick = () => mapScreen();
 }
@@ -496,30 +515,30 @@ function voiceScreen(){
 function splash(){
   setTop(false);
   screen.innerHTML = `<div class="center">
-    <div class="uni bounce">${unicornSVG()}</div>
-    <h1 class="title">Bella's<br>Rainbow Kingdom</h1>
+    <div class="uni bounce">${guideSVG()}</div>
+    <h1 class="title">Bella's<br>Pop Star Stage</h1>
     <button class="big-btn" id="go">▶ Play</button>
   </div>`;
   $('#go').onclick = () => {
     tone([1], .01); // wakes up sound on iPhone/iPad
     try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
-    if (!S.unicornName) return nameScreen();
+    if (!S.guideName) return nameScreen();
     mapScreen();
-    say(`Hi Bella! It's me, ${S.unicornName}! Where do you want to play?`);
+    say(`Hi Bella! It's me, ${S.guideName}! Where do you want to play?`);
   };
 }
 
 function nameScreen(){
   setTop(false);
-  const names = ['Sparkle','Rainbow','Twinkle','Moonbeam','Glitter','Daisy'];
+  const names = ['Star','Luna','Nova','Melody','Jazzy','Sky'];
   screen.innerHTML = `<div class="center">
-    <div class="bubble">Hi Bella! I'm your unicorn friend.<br>What's my name?</div>
-    <div class="uni bounce">${unicornSVG()}</div>
+    <div class="bubble">Hi Bella! I'm the lead singer of your band.<br>What's my name?</div>
+    <div class="uni bounce">${guideSVG()}</div>
     <div class="chips">${names.map(n => `<button class="chip" data-n="${n}">${n}</button>`).join('')}</div>
     <input id="nm" class="name-input" maxlength="14" placeholder="or type a name" autocomplete="off">
     <button class="big-btn" id="ok" disabled>That's my name! ✨</button>
   </div>`;
-  say("Hi Bella! I'm your unicorn friend. What should my name be?");
+  say("Hi Bella! I'm the lead singer of your band. What should my name be?");
   const nm = $('#nm'), ok = $('#ok');
   const upd = () => { ok.disabled = !nm.value.trim(); };
   nm.oninput = () => { screen.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); upd(); };
@@ -529,42 +548,42 @@ function nameScreen(){
     say(c.dataset.n);
   });
   ok.onclick = () => {
-    S.unicornName = cap(nm.value.trim()); save();
+    S.guideName = cap(nm.value.trim()); save();
     sfx.tada(); confetti(40);
     mapScreen();
-    say(`Yay! My name is ${S.unicornName}! Let's go to the castle!`);
+    say(`Yay! My name is ${S.guideName}! Let's go to the stage!`);
   };
 }
 
 function mapScreen(){
   setTop(true, false);
-  const name = esc(S.unicornName);
+  const name = esc(S.guideName);
   screen.innerHTML = `
     <div class="guide">
-      <div class="uni sm" id="uniTap">${unicornSVG()}</div>
+      <div class="uni sm" id="uniTap">${guideSVG()}</div>
       <div class="bubble">Hi Bella! Where do you want to play?</div>
     </div>
     <div class="map">
-      <button class="place open" id="tower"><span class="ico">🏰</span><b>Word Tower</b>
+      <button class="place open" id="tower"><span class="ico">🎤</span><b>Word Stage</b>
         <small>${LEVEL_NAMES[S.level]}</small><span class="bar"><i style="width:${levelPct()}%"></i></span></button>
-      <button class="place open" id="garden"><span class="ico">🌷</span><b>Number Garden</b>
+      <button class="place open" id="garden"><span class="ico">🎧</span><b>Number Studio</b>
         <small>Math · Level ${S.math.stage + 1}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">👗</span><b>${name}'s Closet</b><small>Coming soon!</small></button>
-      <button class="place locked"><span class="ico">🗝️</span><b>Secret Rooms</b><small>Coming soon!</small></button>
+      <button class="place locked"><span class="ico">👗</span><b>Dressing Room</b><small>Coming soon!</small></button>
+      <button class="place locked"><span class="ico">🌟</span><b>New Stages</b><small>Coming soon!</small></button>
     </div>`;
   $('#tower').onclick = () => { sfx.pop(); balloonGame(); };
-  $('#garden').onclick = () => { sfx.pop(); gardenScreen(); say('Welcome to the Number Garden! Tap Flower Math to play!'); };
+  $('#garden').onclick = () => { sfx.pop(); gardenScreen(); say('Welcome to the Number Studio! Pick a game!'); };
   bindLocked();
   const u = $('#uniTap');
   u.onclick = () => {
     u.classList.remove('hop'); void u.offsetWidth; u.classList.add('hop');
-    say(`Hi Bella! I'm ${S.unicornName}. Where do you want to play?`);
+    say(`Hi Bella! I'm ${S.guideName}. Where do you want to play?`);
   };
 }
 function bindLocked(){
   screen.querySelectorAll('.place.locked').forEach(b => b.onclick = () => {
     b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
-    say("That one is still magic. It's coming soon!");
+    say("That one is coming soon!");
   });
 }
 
@@ -572,11 +591,11 @@ function gardenScreen(){
   setTop(true, true);
   screen.innerHTML = `
     <div class="guide">
-      <div class="uni sm">${unicornSVG()}</div>
-      <div class="bubble">Welcome to the Number Garden! 🌷</div>
+      <div class="uni sm">${guideSVG()}</div>
+      <div class="bubble">Welcome to the Number Studio! 🎧</div>
     </div>
     <div class="map">
-      <button class="place open" id="flowerMath"><span class="ico">🌸</span><b>Flower Math</b>
+      <button class="place open" id="flowerMath"><span class="ico">⭐</span><b>Star Math</b>
         <small>Level ${S.math.stage + 1}: ${MATH_STAGES[S.math.stage].name}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
       <button class="place open" id="countTile"><span class="ico">💯</span><b>Count to 100</b>
         <small>Level ${S.count.stage + 1}: ${COUNT_STAGES[S.count.stage].name}</small><span class="bar"><i style="width:${countPct()}%"></i></span></button>
@@ -595,7 +614,7 @@ function countGame(){
   let i = 0, earned = 0, speakIt = null;
   screen.innerHTML = `
     <div class="game-head">
-      <div class="uni xs">${unicornSVG()}</div>
+      <div class="uni xs">${guideSVG()}</div>
       <div class="bubble" id="prompt"></div>
       <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
     </div>
@@ -663,7 +682,7 @@ function mathGame(){
   let i = 0, earned = 0, speakIt = null;
   screen.innerHTML = `
     <div class="game-head">
-      <div class="uni xs">${unicornSVG()}</div>
+      <div class="uni xs">${guideSVG()}</div>
       <div class="bubble" id="prompt"></div>
       <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
     </div>
@@ -689,8 +708,8 @@ function mathGame(){
     objs.style.setProperty('--os', total <= 10 ? 'clamp(1.9rem,7.5vw,2.8rem)' : 'clamp(1.6rem,6.4vw,2.3rem)');
     const ob = (e, n) => Array.from({ length:n }, () => `<span class="ob">${e}</span>`).join('');
     objs.innerHTML = p.op === '+'
-      ? `<div class="grp">${ob('🌸', p.a)}</div><div class="sign">+</div><div class="grp">${ob('🌼', p.b)}</div>`
-      : `<div class="grp">${ob('🌸', p.a)}</div>`;
+      ? `<div class="grp">${ob('⭐', p.a)}</div><div class="sign">+</div><div class="grp">${ob('💖', p.b)}</div>`
+      : `<div class="grp">${ob('⭐', p.a)}</div>`;
     if (p.op === '-'){
       const all = objs.querySelectorAll('.ob');
       setTimeout(() => { if (my !== nav) return; for (let k = p.a - p.b; k < p.a; k++) all[k].classList.add('gone'); sfx.pop(); }, 900);
@@ -735,14 +754,14 @@ function mathGame(){
 function roundDone(earned, unlock, again){
   save();
   setTop(true, true);
-  sfx.tada(); confetti(70);
+  sfx.tada(); sfx.cheer(); confetti(70);
   screen.innerHTML = `<div class="center">
-    <div class="uni bounce">${unicornSVG()}</div>
+    <div class="uni bounce">${guideSVG()}</div>
     <div class="bubble">You did it, Bella! 🎉<br>You earned <b>${earned}</b> 💎</div>
     ${unlock ? `<div class="bubble gold">Unlocked: ${esc(unlock)}! 🌈</div>` : ''}
     <div class="row">
       <button class="big-btn" id="playAgain">Play again</button>
-      <button class="soft-btn" id="toMap">🏰 Castle</button>
+      <button class="soft-btn" id="toMap">🏠 Home</button>
     </div>
   </div>`;
   say(`You did it, Bella! You earned ${earned} gems!` + (unlock ? ` And you unlocked ${unlock}!` : ''));
@@ -756,7 +775,7 @@ function balloonGame(){
   let i = 0, earned = 0;
   screen.innerHTML = `
     <div class="game-head">
-      <div class="uni xs">${unicornSVG()}</div>
+      <div class="uni xs">${guideSVG()}</div>
       <div class="bubble" id="prompt">Pop the word you hear!</div>
       <button class="icon-btn" id="hear" aria-label="Hear the word">🔊</button>
     </div>
@@ -874,7 +893,7 @@ function balloonGame(){
   function finish(){
     S.rounds++;
     const up = checkLevelUp();
-    roundDone(earned, up ? `the ${LEVEL_NAMES[S.level]} of the Word Tower` : null, balloonGame);
+    roundDone(earned, up ? `${LEVEL_NAMES[S.level]} on the Word Stage` : null, balloonGame);
   }
 
   next();
