@@ -176,6 +176,14 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .time-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(74,59,107,.18)}
 .time-btn:disabled{opacity:.35}
 .time-btn.right{background:#8be0a0;transform:scale(1.12);transition:transform .2s}
+/* coins */
+.coin-btn{padding:4px}
+.coin-btn svg,.coin-big svg,.coin-sm svg{width:100%;height:auto;display:block}
+.coin-big{width:clamp(190px,58vw,300px);filter:drop-shadow(0 6px 0 rgba(0,0,0,.25))}
+.coin-row{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:min(560px,100%);
+  background:rgba(255,255,255,.9);border-radius:24px;padding:12px}
+.coin-sm{width:clamp(62px,17vw,96px);transition:transform .25s}
+.coin-sm.lit{transform:scale(1.18);filter:drop-shadow(0 0 8px #ffd34d)}
 /* dressing room */
 .closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
 .uni.preview{width:clamp(130px,36vw,200px);cursor:default}
@@ -233,7 +241,7 @@ const SOUNDS_LIKE = {
 
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
-const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] },
+const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] }, coin:{ stage:0, recent:[] },
   closet:{ owned:['h0','t0','a0'], hair:'h0', top:'t0', acc:'a0' } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
@@ -659,6 +667,55 @@ function timeChoices(t, st){
 }
 const clockPct = () => Math.round(S.clock.stage / (CLOCK_STAGES.length - 1) * 100);
 
+/* ---------- Coins ---------- */
+// Sizes follow real US coins: dime smallest, then penny, nickel, quarter.
+const COINS = {
+  penny:   { v:1,  r:37, fill:'#d98a4e', rim:'#a85f2b', txt:'ONE CENT' },
+  nickel:  { v:5,  r:41, fill:'#cdd2da', rim:'#8d939c', txt:'FIVE CENTS' },
+  dime:    { v:10, r:35, fill:'#e2e6ee', rim:'#9aa1ab', txt:'ONE DIME' },
+  quarter: { v:25, r:47, fill:'#d4d9e1', rim:'#8b919a', txt:'QUARTER' }
+};
+const COIN_ORDER = ['quarter','dime','nickel','penny'];
+const COIN_STAGES = [
+  { name:'Name the coin',      mode:'find' },
+  { name:'Coin values',        mode:'value' },
+  { name:'Count same coins',   mode:'same' },
+  { name:'Count mixed coins',  mode:'mixed' }
+];
+const centsSay = c => `${c} ${c === 1 ? 'cent' : 'cents'}`;
+function coinSVG(name){
+  const c = COINS[name], n = ++svgN, r = c.r, ri = r - 5;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <defs><path id="arc${n}" d="M ${50 - ri + 7} 50 A ${ri - 7} ${ri - 7} 0 0 1 ${50 + ri - 7} 50"/>
+      <radialGradient id="cg${n}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".35" stop-color="${c.fill}"/><stop offset="1" stop-color="${c.rim}"/></radialGradient></defs>
+    <circle cx="50" cy="50" r="${r}" fill="${c.rim}"/>
+    <circle cx="50" cy="50" r="${ri}" fill="url(#cg${n})"/>
+    <text font-size="${r > 40 ? 8.5 : 7.5}" font-weight="700" fill="${c.rim}" letter-spacing=".6" font-family="Fredoka,sans-serif"><textPath href="#arc${n}" startOffset="50%" text-anchor="middle">${c.txt}</textPath></text>
+    <path d="M50 ${50 - r * .22} l${r * .07} ${r * .15} ${r * .16} ${r * .02} -${r * .12} ${r * .11} ${r * .03} ${r * .16} -${r * .14} -${r * .08} -${r * .14} ${r * .08} ${r * .03} -${r * .16} -${r * .12} -${r * .11} ${r * .16} -${r * .02}z" fill="${c.rim}" opacity=".55"/>
+  </svg>`;
+}
+function makeCoins(st){
+  if (st.mode === 'same'){
+    const kind = pick(['penny','nickel','dime']);
+    const n = kind === 'penny' ? rand(3, 9) : kind === 'nickel' ? rand(2, 6) : rand(2, 5);
+    return Array(n).fill(kind);
+  }
+  for (;;){
+    const q = rand(0, 1), d = rand(0, 2), nk = rand(0, 2), p = rand(0, 4);
+    const kinds = [q, d, nk, p].filter(x => x > 0).length;
+    const total = q * 25 + d * 10 + nk * 5 + p;
+    if (kinds >= 2 && total >= 6 && total <= 50)
+      return [...Array(q).fill('quarter'), ...Array(d).fill('dime'), ...Array(nk).fill('nickel'), ...Array(p).fill('penny')];
+  }
+}
+function centChoices(ans, step){
+  const c = new Set([ans]);
+  for (const x of shuffle([ans + step, ans - step, ans + 5, ans - 5, ans + 10, ans - 10, ans + 1, ans - 1]))
+    { if (c.size >= 3) break; if (x > 0) c.add(x); }
+  return shuffle([...c]);
+}
+const coinPct = () => Math.round(S.coin.stage / (COIN_STAGES.length - 1) * 100);
+
 /* ---------- Top bar ---------- */
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
@@ -788,12 +845,14 @@ function gardenScreen(){
         <small>Level ${S.shape.stage + 1}: ${SHAPE_STAGES[S.shape.stage].name}</small><span class="bar"><i style="width:${shapePct()}%"></i></span></button>
       <button class="place open" id="clocksTile"><span class="ico">🕐</span><b>Clocks</b>
         <small>Level ${S.clock.stage + 1}: ${CLOCK_STAGES[S.clock.stage].name}</small><span class="bar"><i style="width:${clockPct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">🪙</span><b>Coins</b><small>Coming soon!</small></button>
+      <button class="place open" id="coinsTile"><span class="ico">🪙</span><b>Coins</b>
+        <small>Level ${S.coin.stage + 1}: ${COIN_STAGES[S.coin.stage].name}</small><span class="bar"><i style="width:${coinPct()}%"></i></span></button>
     </div>`;
   $('#flowerMath').onclick = () => { sfx.pop(); mathGame(); };
   $('#countTile').onclick = () => { sfx.pop(); countGame(); };
   $('#shapesTile').onclick = () => { sfx.pop(); shapeGame(); };
   $('#clocksTile').onclick = () => { sfx.pop(); clockGame(); };
+  $('#coinsTile').onclick = () => { sfx.pop(); coinGame(); };
   bindLocked();
 }
 
@@ -1114,6 +1173,110 @@ function clockGame(){
           await say(`That clock says ${timeSay(o.h, o.m)}. Find ${timeSay(t.h, t.m)}!`);
           busy = false;
         }
+      });
+    }
+  }
+  next();
+}
+
+function coinGame(){
+  setTop(true, true);
+  const my = nav, N = 8, st = COIN_STAGES[S.coin.stage];
+  let i = 0, earned = 0, speakIt = null, lastKind = null;
+  screen.innerHTML = `
+    <div class="game-head">
+      <div class="uni xs">${guideSVG()}</div>
+      <div class="bubble" id="prompt"></div>
+      <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
+    </div>
+    <div class="dots" id="dots">${'<span></span>'.repeat(N)}</div>
+    <div class="shape-area" id="area"></div>
+    <div class="answers" id="answers"></div>`;
+  const area = $('#area'), answers = $('#answers'), prompt = $('#prompt');
+  $('#hear').onclick = () => speakIt && speakIt();
+  const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
+
+  function record(firstTry){
+    S.coin.recent.push(firstTry ? 1 : 0); S.coin.recent = S.coin.recent.slice(-10);
+    if (firstTry){ earned++; addGems(1); }
+    save();
+  }
+  function wrongTap(b){
+    b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+  }
+  function centButtons(choices, onPick){
+    answers.innerHTML = choices.map((c, k) =>
+      `<button class="time-btn" data-n="${c}" style="--c:${COLORS[(i * 2 + k) % COLORS.length]}">${c}¢</button>`).join('');
+    answers.querySelectorAll('.time-btn').forEach(b => b.onclick = () => onPick(b, +b.dataset.n));
+  }
+  function next(){
+    if (my !== nav) return;
+    if (i >= N) return roundDone(earned, trackUp(S.coin, COIN_STAGES, 'Coins'), coinGame);
+    screen.querySelectorAll('#dots span').forEach((d, k) => { d.className = k < i ? 'done' : k === i ? 'now' : ''; });
+    let firstTry = true, solved = false, busy = false;
+    const done = async (b, line) => {
+      solved = true; b.classList.add('right'); sfx.tada(); confetti(20); record(firstTry);
+      await say(line); i++; setTimeout(next, 300);
+    };
+
+    if (st.mode === 'find' || st.mode === 'value'){
+      let kind; do { kind = pick(COIN_ORDER); } while (kind === lastKind);
+      lastKind = kind;
+      const v = COINS[kind].v;
+      if (st.mode === 'find'){
+        const opts = shuffle([kind, ...shuffle(COIN_ORDER.filter(x => x !== kind)).slice(0, 2)]);
+        prompt.textContent = `Find the ${kind}!`;
+        speakIt = () => say(`Find the ${kind}!`);
+        answers.innerHTML = '';
+        area.innerHTML = `<div class="shape-row">${opts.map(o => `<button class="shape-btn coin-btn" data-c="${o}">${coinSVG(o)}</button>`).join('')}</div>`;
+        speakIt();
+        area.querySelectorAll('.coin-btn').forEach(b => b.onclick = async () => {
+          if (solved || busy) return;
+          const o = b.dataset.c;
+          if (o === kind) return done(b, `Yes! That's a ${kind}. It's worth ${centsSay(v)}!`);
+          firstTry = false; busy = true; wrongTap(b);
+          await say(`That's a ${o}. Find the ${kind}!`);
+          busy = false;
+        });
+      } else {
+        prompt.textContent = 'How much is it worth?';
+        speakIt = () => say(`How much is a ${kind} worth?`);
+        area.innerHTML = `<div class="coin-big">${coinSVG(kind)}</div>`;
+        const choices = shuffle([v, ...shuffle([1, 5, 10, 25].filter(x => x !== v)).slice(0, 2)]);
+        speakIt();
+        centButtons(choices, async (b, n) => {
+          if (solved || busy) return;
+          if (n === v) return done(b, `Yes! A ${kind} is worth ${centsSay(v)}!`);
+          firstTry = false; busy = true; wrongTap(b);
+          await say(`Not quite. A ${kind} is worth ${centsSay(v)}. Now you try!`);
+          busy = false;
+        });
+      }
+    } else {
+      const coins = makeCoins(st);
+      const total = coins.reduce((x, c) => x + COINS[c].v, 0);
+      const smallest = Math.min(...coins.map(c => COINS[c].v));
+      prompt.textContent = 'How much money?';
+      speakIt = () => say('How much money is this?');
+      area.innerHTML = `<div class="coin-row">${coins.map(c => `<span class="coin-sm">${coinSVG(c)}</span>`).join('')}</div>`;
+      speakIt();
+      centButtons(centChoices(total, smallest), async (b, n) => {
+        if (solved || busy) return;
+        if (n === total) return done(b, `Yes! That's ${centsSay(total)}!`);
+        firstTry = false; busy = true; wrongTap(b);
+        await say("Let's count it together!");
+        const els = [...area.querySelectorAll('.coin-sm')];
+        let run = 0;
+        for (let k = 0; k < coins.length; k++){
+          if (my !== nav) return;
+          run += COINS[coins[k]].v;
+          els[k].classList.add('lit');
+          await say(String(run), { rate:1.05 });
+        }
+        if (my !== nav) return;
+        await say('Now you try!');
+        els.forEach(x => x.classList.remove('lit'));
+        busy = false;
       });
     }
   }
