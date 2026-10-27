@@ -165,6 +165,17 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .shape-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #e0d3f7}
 .shape-btn:disabled{opacity:.35}
 .shape-btn.right{outline:6px solid #8be0a0;transform:scale(1.08)}
+/* clocks */
+.clock-big{width:clamp(200px,62vw,330px);filter:drop-shadow(0 6px 0 rgba(0,0,0,.2))}
+.clock-big svg,.clock-btn svg{width:100%;height:auto;display:block}
+.clock-btn{padding:6px}
+.clock-target{font-size:clamp(3rem,15vw,5rem);font-weight:700;background:#fff;color:var(--ink);border-radius:24px;padding:0 30px;margin-bottom:18px;box-shadow:0 6px 0 #e0d3f7;font-variant-numeric:tabular-nums}
+.shape-area{flex-direction:column}
+.time-btn{font:inherit;font-size:clamp(1.7rem,7.5vw,2.6rem);font-weight:700;color:var(--ink);border:0;border-radius:22px;cursor:pointer;
+  padding:12px clamp(12px,4vw,26px);background:var(--c);box-shadow:0 6px 0 rgba(74,59,107,.18);font-variant-numeric:tabular-nums}
+.time-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(74,59,107,.18)}
+.time-btn:disabled{opacity:.35}
+.time-btn.right{background:#8be0a0;transform:scale(1.12);transition:transform .2s}
 /* dressing room */
 .closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
 .uni.preview{width:clamp(130px,36vw,200px);cursor:default}
@@ -222,7 +233,7 @@ const SOUNDS_LIKE = {
 
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
-const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] },
+const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] },
   closet:{ owned:['h0','t0','a0'], hair:'h0', top:'t0', acc:'a0' } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
@@ -602,6 +613,52 @@ function trackUp(track, stages, label){
 }
 const shapePct = () => Math.round(S.shape.stage / (SHAPE_STAGES.length - 1) * 100);
 
+/* ---------- Clocks ---------- */
+const CLOCK_STAGES = [
+  { name:"O'clock",            mins:[0],     mode:'read' },
+  { name:'Half past',          mins:[0, 30], mode:'read' },
+  { name:'Find the clock',     mins:[0, 30], mode:'match' },
+  { name:'Mixed',              mins:[0, 30], mode:'mix' }
+];
+const timeText = (h, m) => `${h}:${m === 0 ? '00' : m}`;
+const timeSay = (h, m) => m === 0 ? `${h} o'clock` : `${h} thirty`;
+function clockSVG(h, m, hl){
+  const hourA = ((h % 12) + m / 60) * 30, minA = m * 6;
+  const nums = Array.from({ length:12 }, (_, k) => {
+    const n = k + 1, a = n * 30 * Math.PI / 180;
+    return `<text x="${(100 + 70 * Math.sin(a)).toFixed(1)}" y="${(100 - 70 * Math.cos(a) + 7).toFixed(1)}" text-anchor="middle" font-size="20" font-weight="700" fill="#3b2a55" font-family="Fredoka,sans-serif">${n}</text>`;
+  }).join('');
+  const ticks = Array.from({ length:60 }, (_, k) => {
+    const a = k * 6 * Math.PI / 180, r1 = k % 5 ? 88 : 84;
+    return `<line x1="${(100 + r1 * Math.sin(a)).toFixed(1)}" y1="${(100 - r1 * Math.cos(a)).toFixed(1)}" x2="${(100 + 92 * Math.sin(a)).toFixed(1)}" y2="${(100 - 92 * Math.cos(a)).toFixed(1)}" stroke="#b9a8d9" stroke-width="${k % 5 ? 1.5 : 3}"/>`;
+  }).join('');
+  const glow = w => `<line x1="100" y1="100" x2="100" y2="${100 - w}" stroke="#ffd34d" stroke-width="16" stroke-linecap="round" opacity=".9"/>`;
+  return `<svg viewBox="0 0 200 200" aria-hidden="true">
+    <circle cx="100" cy="100" r="96" fill="#fff" stroke="#ff8ac6" stroke-width="7"/>
+    ${ticks}${nums}
+    <g transform="rotate(${minA} 100 100)">${hl === 'min' ? glow(72) : ''}<line x1="100" y1="108" x2="100" y2="28" stroke="#7c6cf5" stroke-width="6" stroke-linecap="round"/></g>
+    <g transform="rotate(${hourA} 100 100)">${hl === 'hour' ? glow(48) : ''}<line x1="100" y1="106" x2="100" y2="54" stroke="#ff4f9a" stroke-width="9" stroke-linecap="round"/></g>
+    <circle cx="100" cy="100" r="7" fill="#3b2a55"/>
+  </svg>`;
+}
+function makeTime(st, avoid){
+  let h, m;
+  do { h = rand(1, 12); m = pick(st.mins); } while (avoid && h === avoid.h && m === avoid.m);
+  return { h, m };
+}
+function timeChoices(t, st){
+  const key = x => x.h + ':' + x.m, seen = new Set([key(t)]), out = [t];
+  const wrap = h => ((h + 11) % 12) + 1;
+  const cands = shuffle([
+    { h:wrap(t.h + 1), m:t.m }, { h:wrap(t.h - 1), m:t.m },
+    ...(st.mins.length > 1 ? [{ h:t.h, m:t.m ? 0 : 30 }, { h:wrap(t.h - 1), m:t.m ? 0 : 30 }] : []),
+    { h:rand(1, 12), m:pick(st.mins) }, { h:rand(1, 12), m:pick(st.mins) }
+  ]);
+  for (const c of cands){ if (out.length >= 3) break; if (!seen.has(key(c))){ seen.add(key(c)); out.push(c); } }
+  return shuffle(out);
+}
+const clockPct = () => Math.round(S.clock.stage / (CLOCK_STAGES.length - 1) * 100);
+
 /* ---------- Top bar ---------- */
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
@@ -729,12 +786,14 @@ function gardenScreen(){
         <small>Level ${S.count.stage + 1}: ${COUNT_STAGES[S.count.stage].name}</small><span class="bar"><i style="width:${countPct()}%"></i></span></button>
       <button class="place open" id="shapesTile"><span class="ico">🔷</span><b>Shapes</b>
         <small>Level ${S.shape.stage + 1}: ${SHAPE_STAGES[S.shape.stage].name}</small><span class="bar"><i style="width:${shapePct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">🕐</span><b>Clocks</b><small>Coming soon!</small></button>
+      <button class="place open" id="clocksTile"><span class="ico">🕐</span><b>Clocks</b>
+        <small>Level ${S.clock.stage + 1}: ${CLOCK_STAGES[S.clock.stage].name}</small><span class="bar"><i style="width:${clockPct()}%"></i></span></button>
       <button class="place locked"><span class="ico">🪙</span><b>Coins</b><small>Coming soon!</small></button>
     </div>`;
   $('#flowerMath').onclick = () => { sfx.pop(); mathGame(); };
   $('#countTile').onclick = () => { sfx.pop(); countGame(); };
   $('#shapesTile').onclick = () => { sfx.pop(); shapeGame(); };
+  $('#clocksTile').onclick = () => { sfx.pop(); clockGame(); };
   bindLocked();
 }
 
@@ -963,6 +1022,96 @@ function shapeGame(){
           if (my !== nav) return;
           await say('Now you try!');
           area.innerHTML = `<div class="shape-big">${shapeSVG(target, color)}</div>`;
+          busy = false;
+        }
+      });
+    }
+  }
+  next();
+}
+
+function clockGame(){
+  setTop(true, true);
+  const my = nav, N = 8, st = CLOCK_STAGES[S.clock.stage];
+  let i = 0, earned = 0, speakIt = null, last = null;
+  screen.innerHTML = `
+    <div class="game-head">
+      <div class="uni xs">${guideSVG()}</div>
+      <div class="bubble" id="prompt"></div>
+      <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
+    </div>
+    <div class="dots" id="dots">${'<span></span>'.repeat(N)}</div>
+    <div class="shape-area" id="area"></div>
+    <div class="answers" id="answers"></div>`;
+  const area = $('#area'), answers = $('#answers'), prompt = $('#prompt');
+  $('#hear').onclick = () => speakIt && speakIt();
+  const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
+
+  function record(firstTry){
+    S.clock.recent.push(firstTry ? 1 : 0); S.clock.recent = S.clock.recent.slice(-10);
+    if (firstTry){ earned++; addGems(1); }
+    save();
+  }
+  async function hint(t, show){
+    // show(hl) redraws the clock with the hour or minute hand glowing
+    show('hour');
+    await say(`The short hand points to the hour. It's on ${t.h}.`);
+    if (my !== nav) return false;
+    show('min');
+    await say(t.m === 0 ? `The long hand is on 12. That means o'clock.` : `The long hand is on 6. That means thirty.`);
+    if (my !== nav) return false;
+    show(null);
+    await say(`So it's ${timeSay(t.h, t.m)}! Now you try!`);
+    return my === nav;
+  }
+  function next(){
+    if (my !== nav) return;
+    if (i >= N) return roundDone(earned, trackUp(S.clock, CLOCK_STAGES, 'Clocks'), clockGame);
+    screen.querySelectorAll('#dots span').forEach((d, k) => { d.className = k < i ? 'done' : k === i ? 'now' : ''; });
+    const t = makeTime(st, last); last = t;
+    const mode = st.mode === 'mix' ? pick(['read', 'match']) : st.mode;
+    const opts = timeChoices(t, st);
+    let firstTry = true, solved = false, busy = false;
+
+    if (mode === 'read'){
+      prompt.textContent = 'What time is it?';
+      speakIt = () => say('What time is it?');
+      const show = hl => { area.innerHTML = `<div class="clock-big">${clockSVG(t.h, t.m, hl)}</div>`; };
+      show(null);
+      answers.innerHTML = opts.map((o, k) =>
+        `<button class="time-btn" data-k="${k}" style="--c:${COLORS[(i * 2 + k) % COLORS.length]}">${timeText(o.h, o.m)}</button>`).join('');
+      speakIt();
+      answers.querySelectorAll('.time-btn').forEach(b => b.onclick = async () => {
+        if (solved || busy) return;
+        const o = opts[+b.dataset.k];
+        if (o.h === t.h && o.m === t.m){
+          solved = true; b.classList.add('right'); sfx.tada(); confetti(20); record(firstTry);
+          await say(`Yes! It's ${timeSay(t.h, t.m)}!`);
+          i++; setTimeout(next, 300);
+        } else {
+          firstTry = false; busy = true;
+          b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+          if (await hint(t, show)) busy = false;
+        }
+      });
+    } else {
+      prompt.textContent = `Find ${timeText(t.h, t.m)}!`;
+      speakIt = () => say(`Find the clock that says ${timeSay(t.h, t.m)}!`);
+      answers.innerHTML = '';
+      area.innerHTML = `<div class="clock-target">${timeText(t.h, t.m)}</div>
+        <div class="shape-row">${opts.map((o, k) => `<button class="shape-btn clock-btn" data-k="${k}">${clockSVG(o.h, o.m)}</button>`).join('')}</div>`;
+      speakIt();
+      area.querySelectorAll('.clock-btn').forEach(b => b.onclick = async () => {
+        if (solved || busy) return;
+        const o = opts[+b.dataset.k];
+        if (o.h === t.h && o.m === t.m){
+          solved = true; b.classList.add('right'); sfx.tada(); confetti(20); record(firstTry);
+          await say(`Yes! That clock says ${timeSay(t.h, t.m)}!`);
+          i++; setTimeout(next, 300);
+        } else {
+          firstTry = false; busy = true;
+          b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+          await say(`That clock says ${timeSay(o.h, o.m)}. Find ${timeSay(t.h, t.m)}!`);
           busy = false;
         }
       });
