@@ -184,9 +184,51 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
   background:rgba(255,255,255,.9);border-radius:24px;padding:12px}
 .coin-sm{width:clamp(62px,17vw,96px);transition:transform .25s}
 .coin-sm.lit{transform:scale(1.18);filter:drop-shadow(0 0 8px #ffd34d)}
+/* story */
+.place.adventure{background:linear-gradient(160deg,#fff,#e6fff1);outline:4px solid #a6f0c6}
+.place.world{background:var(--wbg);color:#fff}
+.place.world small{color:rgba(255,255,255,.85)}
+.place.world.locked{opacity:.55}
+.grumble svg{width:100%;height:auto}
+.friend-shadow{filter:brightness(.25) drop-shadow(0 0 10px rgba(255,255,255,.4))}
+.chapter-head{display:flex;flex-direction:column;align-items:center;color:#fff;margin-bottom:8px}
+.chapter-head b{font-size:clamp(1.3rem,5.5vw,1.8rem)}.chapter-head small{font-size:1.05rem;opacity:.85}
+.world-map{position:relative;width:100%;max-width:560px;aspect-ratio:3/4;max-height:72dvh;border-radius:28px;overflow:hidden;box-shadow:0 8px 0 rgba(0,0,0,.25)}
+.deco{position:absolute;font-size:clamp(1.4rem,6vw,2.2rem);opacity:.9;pointer-events:none}
+.trail{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;transform:translate(-50%,-50%);width:clamp(48px,13vw,64px);aspect-ratio:1;border-radius:50%;border:4px solid #fff;
+  font:inherit;font-weight:700;font-size:1.4rem;color:var(--ink);background:#e9e2f7;box-shadow:0 5px 0 rgba(0,0,0,.25);cursor:pointer;z-index:2}
+.node.done{background:#8be0a0}.node.now{background:#ffd34d;animation:pulse2 1.4s ease-in-out infinite}
+.node.later{opacity:.7}.node.boss{width:clamp(58px,16vw,78px);font-size:1.7rem}
+.node.wobble{animation:wobble .45s}
+@keyframes pulse2{50%{box-shadow:0 5px 0 rgba(0,0,0,.25),0 0 0 10px rgba(255,211,77,.35)}}
+.nstars{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.7rem;white-space:nowrap}
+.walker{position:absolute;width:clamp(44px,12vw,60px);transform:translate(-50%,-96%);transition:left .5s ease,top .5s ease;z-index:3;pointer-events:none}
+.walker svg,.freed svg,.scene svg{width:100%;height:auto;display:block}
+.freed{position:absolute;width:clamp(44px,12vw,60px);transform:translate(10%,-110%);z-index:2}
+.scene{position:relative;width:100%;max-width:760px;height:clamp(96px,15dvh,140px);border-radius:22px;margin:8px 0 2px;overflow:hidden;flex:none}
+.scene-me{position:absolute;left:8%;bottom:-4px;height:96%;aspect-ratio:200/392}
+.scene-friend{position:absolute;right:10%;bottom:-4px;height:96%;aspect-ratio:200/392}
+.scene-goal{position:absolute;right:12%;bottom:12%;font-size:clamp(2.4rem,10vw,3.4rem)}
+.scene-dots{position:absolute;top:6px;left:50%;transform:translateX(-50%);margin:0}
+.cage{position:absolute;inset:-4% -18%;display:flex;justify-content:space-around}
+.cage i{width:9%;border-radius:8px;background:linear-gradient(#2f8f3a,#1d6b2a);box-shadow:0 0 0 2px #5fc46b inset;transition:transform .5s,opacity .5s}
+.cage i.broke{transform:translateY(-120%) rotate(40deg);opacity:0}
+.qarea{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0}
+.qarea .field{flex:none}
+.qarea .eq{font-size:clamp(2rem,9vw,3.2rem)}
+.clock-big.sm{width:clamp(170px,48vw,260px)}
+.big-stars{display:flex;gap:10px;font-size:clamp(2.6rem,12vw,3.6rem)}
+.big-stars span{filter:grayscale(1) brightness(.6);transition:.3s}.big-stars span.on{filter:none;animation:bump .6s}
+.duo{display:flex;gap:6px;align-items:flex-end}
 /* dressing room */
 .closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
-.uni.preview{width:clamp(130px,36vw,200px);cursor:default}
+.uni.preview{width:clamp(120px,34vw,180px);cursor:default}
+.uni.full{width:clamp(120px,34vw,190px)}
+.tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;flex:none}
+.sw-svg{width:54px;height:60px;display:block}.sw-svg svg{width:100%;height:100%}
 .tabs{display:flex;gap:8px;background:rgba(255,255,255,.18);border-radius:999px;padding:6px}
 .tab{font:inherit;font-size:clamp(1rem,4.2vw,1.2rem);font-weight:600;border:0;border-radius:999px;padding:10px 16px;background:transparent;color:#fff;cursor:pointer}
 .tab.on{background:#fff;color:var(--ink)}
@@ -242,7 +284,8 @@ const SOUNDS_LIKE = {
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
 const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] }, coin:{ stage:0, recent:[] },
-  closet:{ owned:['h0','t0','a0'], hair:'h0', top:'t0', acc:'a0' } };
+  look:null, owned:null,
+  story:{ chapter:0, level:0, stars:{}, friends:['', '', ''] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
   catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
@@ -366,69 +409,174 @@ function confetti(n = 30){
   }
 }
 
-/* ---------- Singer drawing (original character, dressable) ---------- */
-const HAIR = [
-  { id:'h0', name:'Pink Pop',  cost:0,  c:['#ff6fae','#a95cf0'] },
-  { id:'h1', name:'Sky Blue',  cost:10, c:['#7fd8ff','#4a7cf0'] },
-  { id:'h2', name:'Sunshine',  cost:10, c:['#ffe066','#ff9a3c'] },
-  { id:'h3', name:'Mint',      cost:10, c:['#9ff5d2','#2bbfa0'] },
-  { id:'h4', name:'Midnight',  cost:12, c:['#6a5ab0','#21183f'] },
-  { id:'h5', name:'Rainbow',   cost:20, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] }
+/* ---------- Bella's avatar (full body, dressable) ---------- */
+// Every item fills one slot. Optional slots (head, face, neck) can be taken off.
+const ITEMS = [
+  // hair styles
+  { id:'bun',  slot:'hairStyle', name:"Bella's Puffs", cost:0 },
+  { id:'long', slot:'hairStyle', name:'Long & Loose',  cost:10 },
+  { id:'pony', slot:'hairStyle', name:'High Ponytail', cost:12 },
+  { id:'pig',  slot:'hairStyle', name:'Pigtails',      cost:12 },
+  // hair colors
+  { id:'hn', slot:'hairColor', name:'Natural',   cost:0,  c:['#3b2a24','#1c1310'] },
+  { id:'hb', slot:'hairColor', name:'Brown',     cost:8,  c:['#8a5a3b','#4e301e'] },
+  { id:'h0', slot:'hairColor', name:'Pink Pop',  cost:10, c:['#ff6fae','#a95cf0'] },
+  { id:'h1', slot:'hairColor', name:'Sky Blue',  cost:10, c:['#7fd8ff','#4a7cf0'] },
+  { id:'h2', slot:'hairColor', name:'Sunshine',  cost:10, c:['#ffe066','#ff9a3c'] },
+  { id:'h3', slot:'hairColor', name:'Mint',      cost:10, c:['#9ff5d2','#2bbfa0'] },
+  { id:'h4', slot:'hairColor', name:'Midnight',  cost:12, c:['#6a5ab0','#21183f'] },
+  { id:'h5', slot:'hairColor', name:'Rainbow',   cost:20, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] },
+  // tops
+  { id:'t1', slot:'top', name:'Pink Heart',     cost:0,  c:['#ff8ac6','#ff4f9a'], badge:'heart' },
+  { id:'t0', slot:'top', name:'Teal Star',      cost:0,  c:['#4fd8e8','#7c6cf5'], badge:'star' },
+  { id:'t2', slot:'top', name:'Gold Note',      cost:8,  c:['#ffe27a','#f5a623'], badge:'note' },
+  { id:'t3', slot:'top', name:'Purple Sparkle', cost:10, c:['#c9a0ff','#7a3cf0'], badge:'star' },
+  { id:'t4', slot:'top', name:'Mint Heart',     cost:10, c:['#a8f0d0','#33b98c'], badge:'heart' },
+  // bottoms
+  { id:'b0', slot:'bottom', name:'Pink Skirt',    cost:0,  c:['#ffb3d9','#ff6fae'] },
+  { id:'b1', slot:'bottom', name:'Denim Shorts',  cost:8,  c:['#7fa8e8','#4a72c0'] },
+  { id:'b2', slot:'bottom', name:'Purple Tutu',   cost:12, c:['#e2c6ff','#a876f0'] },
+  { id:'b3', slot:'bottom', name:'Jeans',         cost:10, c:['#5f86cf','#34539a'] },
+  // shoes
+  { id:'s0', slot:'shoes', name:'White Sneakers', cost:0,  c:['#ffffff','#e7e2f2'] },
+  { id:'s1', slot:'shoes', name:'Pink Sneakers',  cost:8,  c:['#ffb3d9','#ff5fa2'] },
+  { id:'s2', slot:'shoes', name:'Sparkle Boots',  cost:15, c:['#c9a0ff','#7a3cf0'] },
+  { id:'s3', slot:'shoes', name:'Gold Shoes',     cost:12, c:['#ffe27a','#e0a800'] },
+  // extras
+  { id:'n1', slot:'neck', name:'Silver Necklace', cost:0,  svg:'<svg viewBox="0 0 40 44"><path d="M8 4 Q12 24 20 28 Q28 24 32 4" stroke="#aeb4bf" stroke-width="2" fill="none"/><ellipse cx="20" cy="33" rx="6" ry="8.5" fill="#eef0f5" stroke="#8d939c" stroke-width="2"/></svg>' },
+  { id:'a0', slot:'head', name:'Star Clip',  cost:0,  icon:'⭐' },
+  { id:'a1', slot:'head', name:'Bow',        cost:12, icon:'🎀' },
+  { id:'a2', slot:'head', name:'Heart Clip', cost:12, icon:'💗' },
+  { id:'a3', slot:'head', name:'Flower',     cost:15, icon:'🌼' },
+  { id:'a5', slot:'head', name:'Crown',      cost:25, icon:'👑' },
+  { id:'a4', slot:'face', name:'Sunglasses', cost:18, icon:'🕶️' }
 ];
-const TOPS = [
-  { id:'t0', name:'Teal Star',      cost:0,  c:['#4fd8e8','#7c6cf5'], badge:'star' },
-  { id:'t1', name:'Pink Heart',     cost:8,  c:['#ff8ac6','#ff4f9a'], badge:'heart' },
-  { id:'t2', name:'Gold Note',      cost:8,  c:['#ffe27a','#f5a623'], badge:'note' },
-  { id:'t3', name:'Purple Sparkle', cost:10, c:['#c9a0ff','#7a3cf0'], badge:'star' },
-  { id:'t4', name:'Mint Heart',     cost:10, c:['#a8f0d0','#33b98c'], badge:'heart' }
-];
-const ACCS = [
-  { id:'a0', name:'Star Clip',  cost:0,  icon:'⭐' },
-  { id:'a1', name:'Bow',        cost:12, icon:'🎀' },
-  { id:'a2', name:'Heart Clip', cost:12, icon:'💗' },
-  { id:'a3', name:'Flower',     cost:15, icon:'🌼' },
-  { id:'a4', name:'Sunglasses', cost:18, icon:'🕶️' },
-  { id:'a5', name:'Crown',      cost:25, icon:'👑' }
-];
+const OPTIONAL = ['head', 'face', 'neck'];
+const START_OWNED = ['bun','hn','t1','t0','b0','s0','n1','a0'];
+const BELLA_LOOK = { hairStyle:'bun', hairColor:'hn', top:'t1', bottom:'b0', shoes:'s0', neck:'n1', head:null, face:null };
+const item = id => ITEMS.find(x => x.id === id);
+const SKIN = '#dba27c', SKIN_D = '#c48760';
 let svgN = 0;
-function guideSVG(look){
-  const L = look || S.closet, n = ++svgN;
-  const hair = HAIR.find(h => h.id === L.hair) || HAIR[0];
-  const top = TOPS.find(t => t.id === L.top) || TOPS[0];
+
+function guideSVG(look, view = 'head'){
+  const L = Object.assign({}, BELLA_LOOK, look || S.look), n = ++svgN;
+  const SK = L.skin || SKIN, SKD = L.skinD || SKIN_D;
+  const hc = (item(L.hairColor) || item('hn')).c, top = item(L.top) || item('t1');
+  const bot = item(L.bottom) || item('b0'), sh = item(L.shoes) || item('s0');
   const stops = arr => arr.map((c, k) => `<stop offset="${arr.length > 1 ? k / (arr.length - 1) : 0}" stop-color="${c}"/>`).join('');
+  const H = `url(#hg${n})`, ties = '#ffc83d';
+
+  // ----- hair (back layer and front layer for each style) -----
+  const capCenterPart = `<path d="M47 106 Q44 50 100 44 Q156 50 153 106 Q147 80 128 70 Q112 63 100 66 Q88 63 72 70 Q53 80 47 106Z" fill="${H}"/>
+    <path d="M100 46 V66" stroke="rgba(255,255,255,.25)" stroke-width="2"/>`;
+  const hair = {
+    bun: {
+      back: `<path d="M46 100 Q44 56 100 46 Q156 56 154 100 L160 226 Q130 238 100 232 Q70 238 40 226Z" fill="${H}"/>`,
+      front: `${capCenterPart}
+        <circle cx="70" cy="44" r="15" fill="${H}"/><circle cx="130" cy="44" r="15" fill="${H}"/>
+        <ellipse cx="76" cy="58" rx="6" ry="4" fill="${ties}" transform="rotate(-30 76 58)"/>
+        <ellipse cx="124" cy="58" rx="6" ry="4" fill="${ties}" transform="rotate(30 124 58)"/>`
+    },
+    long: {
+      back: `<path d="M44 100 Q42 52 100 44 Q158 52 156 100 L164 258 Q132 270 100 264 Q68 270 36 258Z" fill="${H}"/>`,
+      front: `<path d="M47 110 Q42 48 100 42 Q158 48 153 110 Q150 84 134 72 Q114 88 76 82 Q58 88 47 110Z" fill="${H}"/>`
+    },
+    pony: {
+      back: `<ellipse cx="100" cy="98" rx="55" ry="57" fill="${H}"/>
+        <path d="M120 54 Q178 40 176 112 Q174 168 150 204 Q160 140 142 96 Q134 72 116 62Z" fill="${H}"/>`,
+      front: `${capCenterPart}<ellipse cx="124" cy="54" rx="7" ry="5" fill="${ties}" transform="rotate(25 124 54)"/>`
+    },
+    pig: {
+      back: `<ellipse cx="100" cy="98" rx="55" ry="57" fill="${H}"/>
+        <path d="M54 90 Q20 112 26 172 Q30 204 46 212 Q38 160 60 112Z" fill="${H}"/>
+        <path d="M146 90 Q180 112 174 172 Q170 204 154 212 Q162 160 140 112Z" fill="${H}"/>`,
+      front: `${capCenterPart}<circle cx="52" cy="96" r="6" fill="${ties}"/><circle cx="148" cy="96" r="6" fill="${ties}"/>`
+    }
+  }[L.hairStyle] || null;
+  const hs = hair || { back:'', front:capCenterPart };
+
+  // ----- clothes -----
   const badge = {
-    star: `<path d="M100 172 l6 12 13 2 -9 9 2 13 -12 -6 -12 6 2 -13 -9 -9 13 -2z" fill="#ffe36b"/>`,
-    heart: `<path d="M100 206 C84 196 80 184 88 178 C94 174 100 180 100 184 C100 180 106 174 112 178 C120 184 116 196 100 206Z" fill="#fff"/>`,
-    note: `<g fill="#fff"><ellipse cx="94" cy="200" rx="8" ry="6"/><rect x="99" y="170" width="4" height="30"/><path d="M103 170 q14 4 10 16 q0 -8 -10 -8z"/></g>`
-  }[top.badge];
-  const acc = {
-    a0: `<path d="M140 56 l4 8 9 1 -6 6 1.5 9 -8.5 -4.5 -8.5 4.5 1.5 -9 -6 -6 9 -1z" fill="#ffe36b" stroke="#f0b400" stroke-width="1.5"/>`,
-    a1: `<path d="M140 54 L124 43 L124 65Z M140 54 L156 43 L156 65Z" fill="#ff5fa2" stroke="#d63c80" stroke-width="2" stroke-linejoin="round"/><circle cx="140" cy="54" r="5" fill="#ff8ac6" stroke="#d63c80" stroke-width="2"/>`,
-    a2: `<path d="M140 68 C128 60 126 50 132 46 C136 43 140 47 140 50 C140 47 144 43 148 46 C154 50 152 60 140 68Z" fill="#ff4f9a" stroke="#c22d6e" stroke-width="1.5"/>`,
-    a3: `<g fill="#fff" stroke="#ff8ac6" stroke-width="1.5"><circle cx="140" cy="47" r="6"/><circle cx="148.5" cy="53" r="6"/><circle cx="145" cy="63" r="6"/><circle cx="135" cy="63" r="6"/><circle cx="131.5" cy="53" r="6"/></g><circle cx="140" cy="56" r="4.5" fill="#ffd34d"/>`,
-    a4: `<g><rect x="64" y="89" width="31" height="22" rx="9" fill="#2a2140"/><rect x="105" y="89" width="31" height="22" rx="9" fill="#2a2140"/><path d="M95 98 H105" stroke="#2a2140" stroke-width="4"/><path d="M70 95 h7 M111 95 h7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/></g>`,
-    a5: `<path d="M74 46 L76 18 L88 32 L100 12 L112 32 L124 18 L126 46Z" fill="#ffd34d" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="26" r="3.5" fill="#ff5fa2"/>`
-  }[L.acc] || '';
-  return `<svg viewBox="0 0 200 230" aria-hidden="true">
-  <defs>
-    <linearGradient id="hg${n}" x1="0" y1="0" x2="${hair.c.length > 2 ? 1 : 0}" y2="1">${stops(hair.c)}</linearGradient>
-    <linearGradient id="tg${n}" x1="0" y1="0" x2="1" y2="1">${stops(top.c)}</linearGradient>
-  </defs>
-  <circle cx="52" cy="42" r="24" fill="url(#hg${n})"/><circle cx="148" cy="42" r="24" fill="url(#hg${n})"/>
-  <path d="M40 92 C40 40 160 40 160 92 L164 140 C150 150 140 146 134 140 L66 140 C60 146 50 150 36 140Z" fill="url(#hg${n})"/>
-  <path d="M62 168 C62 150 80 142 100 142 C120 142 138 150 138 168 L146 228 L54 228Z" fill="url(#tg${n})"/>
-  ${badge}
-  <rect x="90" y="132" width="20" height="16" rx="6" fill="#f5c4a8"/>
-  <circle cx="100" cy="92" r="50" fill="#ffdcc6"/>
-  <path d="M50 88 C48 52 76 38 100 38 C124 38 152 52 150 88 C140 74 126 66 112 64 C116 72 112 78 108 80 C100 70 84 64 66 72 C60 76 54 82 50 88Z" fill="url(#hg${n})"/>
-  <ellipse cx="80" cy="100" rx="7" ry="9" fill="#3b2a55"/><ellipse cx="120" cy="100" rx="7" ry="9" fill="#3b2a55"/>
-  <circle cx="82.5" cy="96" r="2.6" fill="#fff"/><circle cx="122.5" cy="96" r="2.6" fill="#fff"/>
-  <ellipse cx="68" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/><ellipse cx="132" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/>
-  <path d="M90 118 Q100 128 110 118" stroke="#3b2a55" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-  <circle cx="50" cy="104" r="8" fill="#3b2a55"/>
-  <path d="M50 110 Q58 130 82 126" stroke="#3b2a55" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <circle cx="85" cy="125" r="4.5" fill="#3b2a55"/>
-  ${acc}
+    star: `<path d="M100 202 l5 10 11 2 -8 8 2 11 -10 -5 -10 5 2 -11 -8 -8 11 -2z" fill="#ffe36b"/>`,
+    heart: `<path d="M100 226 C86 217 82 206 89 201 C94 197 100 202 100 206 C100 202 106 197 111 201 C118 206 114 217 100 226Z" fill="#fff"/>`,
+    note: `<g fill="#fff"><ellipse cx="95" cy="222" rx="7" ry="5"/><rect x="99" y="196" width="4" height="26"/><path d="M103 196 q12 4 9 14 q0 -7 -9 -7z"/></g>`
+  }[top.badge] || '';
+  const B = `url(#bg${n})`;
+  const bottomSVG = {
+    b0: `<path d="M60 244 H140 L156 292 Q100 304 44 292Z" fill="${B}"/><path d="M48 288 Q100 300 152 288" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`,
+    b1: `<path d="M60 244 H140 L146 282 H105 L100 266 L95 282 H54Z" fill="${B}"/><path d="M60 252 H140" stroke="#fff" stroke-width="2" opacity=".35"/>`,
+    b2: `<path d="M60 244 H140 L162 286 L150 280 L140 292 L128 282 L116 294 L104 283 L92 294 L80 282 L68 292 L56 280 L38 286Z" fill="${B}" opacity=".95"/>`,
+    b3: `<path d="M60 244 H140 L132 352 H106 L100 272 L94 352 H68Z" fill="${B}"/>`
+  }[bot.id] || '';
+  const tallBoot = sh.id === 's2';
+  const shoe = x => tallBoot
+    ? `<path d="M${x - 10} 326 H${x + 10} V362 Q${x + 20} 364 ${x + 18} 378 H${x - 14} Q${x - 16} 362 ${x - 10} 360Z" fill="url(#sg${n})" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>
+       <path d="M${x - 4} 336 l2 4 4 .5 -3 3 .8 4 -3.8 -2 -3.8 2 .8 -4 -3 -3 4 -.5z" fill="#fff"/>`
+    : `<path d="M${x - 15} 378 Q${x - 17} 360 ${x - 4} 356 H${x + 8} Q${x + 20} 362 ${x + 17} 378Z" fill="url(#sg${n})" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+       <rect x="${x - 15}" y="372" width="32" height="6" rx="3" fill="${sh.id === 's0' ? '#ff8ac6' : '#fff'}" opacity=".9"/>`;
+
+  // ----- extras -----
+  const head = {
+    a0: `<path d="M138 60 l4 8 9 1 -6 6 1.5 9 -8.5 -4.5 -8.5 4.5 1.5 -9 -6 -6 9 -1z" fill="#ffe36b" stroke="#f0b400" stroke-width="1.5"/>`,
+    a1: `<path d="M140 62 L124 51 L124 73Z M140 62 L156 51 L156 73Z" fill="#ff5fa2" stroke="#d63c80" stroke-width="2" stroke-linejoin="round"/><circle cx="140" cy="62" r="5" fill="#ff8ac6" stroke="#d63c80" stroke-width="2"/>`,
+    a2: `<path d="M140 76 C128 68 126 58 132 54 C136 51 140 55 140 58 C140 55 144 51 148 54 C154 58 152 68 140 76Z" fill="#ff4f9a" stroke="#c22d6e" stroke-width="1.5"/>`,
+    a3: `<g fill="#fff" stroke="#ff8ac6" stroke-width="1.5"><circle cx="140" cy="55" r="6"/><circle cx="148.5" cy="61" r="6"/><circle cx="145" cy="71" r="6"/><circle cx="135" cy="71" r="6"/><circle cx="131.5" cy="61" r="6"/></g><circle cx="140" cy="64" r="4.5" fill="#ffd34d"/>`,
+    a5: `<path d="M72 40 L74 10 L87 26 L100 4 L113 26 L126 10 L128 40Z" fill="#ffd34d" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="20" r="3.5" fill="#ff5fa2"/>`
+  }[L.head] || '';
+  const face = L.face === 'a4'
+    ? `<g><rect x="68" y="97" width="29" height="21" rx="9" fill="#2a2140"/><rect x="103" y="97" width="29" height="21" rx="9" fill="#2a2140"/><path d="M97 105 H103" stroke="#2a2140" stroke-width="4"/><path d="M74 103 h7 M109 103 h7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/></g>` : '';
+  const neck = L.neck === 'n1'
+    ? `<path d="M88 164 Q91 177 100 181 Q109 177 112 164" stroke="#cfd3dc" stroke-width="1.6" fill="none"/>
+       <ellipse cx="100" cy="187" rx="5" ry="7" fill="#eef0f5" stroke="#9aa1ab" stroke-width="1.5"/>` : '';
+
+  // ----- the girl -----
+  const eye = x => `
+    <ellipse cx="${x}" cy="108" rx="8.5" ry="10" fill="#3a2216"/>
+    <circle cx="${x + 3}" cy="104" r="3" fill="#fff"/><circle cx="${x - 3}" cy="112" r="1.4" fill="#fff" opacity=".8"/>
+    <path d="M${x - 11} 102 Q${x} 92 ${x + 11} 102" stroke="#1f1410" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    <path d="M${x + (x < 100 ? -10 : 10)} 101 l${x < 100 ? -5 : 5} -4" stroke="#1f1410" stroke-width="2.4" stroke-linecap="round"/>`;
+  const body = `
+    <rect x="80" y="276" width="13" height="84" rx="6" fill="${SK}"/>
+    <rect x="107" y="276" width="13" height="84" rx="6" fill="${SK}"/>
+    ${shoe(86)}${shoe(114)}
+    ${bot.id === 'b3' ? '' : ''}
+    <path d="M47 186 Q40 222 50 252" stroke="${SK}" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <circle cx="51" cy="255" r="8" fill="${SK}"/>
+    <rect x="90" y="146" width="20" height="22" rx="7" fill="${SKD}"/>
+    <path d="M62 180 Q64 164 84 162 H116 Q136 164 138 180 L142 250 H58Z" fill="url(#tg${n})"/>
+    <path d="M86 162 Q100 176 114 162" fill="${SKD}"/>
+    ${badge}
+    <path d="M64 168 Q48 172 45 196 L60 200 Q62 184 72 176Z" fill="url(#tg${n})"/>
+    <path d="M136 168 Q152 172 155 196 L140 200 Q138 184 128 176Z" fill="url(#tg${n})"/>
+    ${bottomSVG}
+    ${neck}
+    <path d="M153 190 Q164 214 146 226" stroke="${SK}" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <path d="M146 226 L136 196" stroke="#3b2a55" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="135" cy="190" r="9" fill="#d8d9e6" stroke="#3b2a55" stroke-width="2.5"/>
+    <path d="M129 187 h12 M128 192 h14" stroke="#9a9ab0" stroke-width="1.2"/>
+    <circle cx="146" cy="226" r="8" fill="${SK}"/>`;
+  const headSVG = `
+    <ellipse cx="48" cy="110" rx="8" ry="11" fill="${SKD}"/><ellipse cx="152" cy="110" rx="8" ry="11" fill="${SKD}"/>
+    <ellipse cx="100" cy="102" rx="52" ry="54" fill="${SK}"/>
+    ${hs.front}
+    <path d="M70 90 Q81 84 92 89" stroke="#24170f" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    <path d="M108 89 Q119 84 130 90" stroke="#24170f" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    ${eye(81)}${eye(119)}
+    <path d="M97 120 Q100 123 103 120" stroke="${SKD}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="68" cy="128" rx="9" ry="5" fill="#f08f8f" opacity=".35"/><ellipse cx="132" cy="128" rx="9" ry="5" fill="#f08f8f" opacity=".35"/>
+    ${L.mark === false ? '' : '<circle cx="71" cy="122" r="2.3" fill="#5a3527"/>'}
+    <path d="M89 132 Q100 141 111 132 Q100 136 89 132Z" fill="#d9707e" stroke="#b5525e" stroke-width="2" stroke-linejoin="round"/>
+    ${face}${head}`;
+  const vb = view === 'full' ? '0 -6 200 392' : '28 0 144 160';
+  return `<svg viewBox="${vb}" aria-hidden="true">
+    <defs>
+      <linearGradient id="hg${n}" x1="0" y1="0" x2="${hc.length > 2 ? 1 : 0}" y2="1">${stops(hc)}</linearGradient>
+      <linearGradient id="tg${n}" x1="0" y1="0" x2="1" y2="1">${stops(top.c)}</linearGradient>
+      <linearGradient id="bg${n}" x1="0" y1="0" x2="0" y2="1">${stops(bot.c)}</linearGradient>
+      <linearGradient id="sg${n}" x1="0" y1="0" x2="0" y2="1">${stops(sh.c)}</linearGradient>
+    </defs>
+    ${hs.back}${view === 'full' ? body : `<rect x="90" y="146" width="20" height="22" rx="7" fill="${SKD}"/><path d="M58 186 Q62 164 84 162 H116 Q138 164 142 186Z" fill="url(#tg${n})"/>${neck}`}
+    ${headSVG}
   </svg>`;
 }
 
@@ -783,7 +931,7 @@ function voiceScreen(){
   screen.querySelectorAll('.voice-row').forEach(b => b.onclick = () => {
     voice = vs[+b.dataset.k]; S.voiceName = voice.name; save();
     screen.querySelectorAll('.voice-row').forEach(x => x.classList.toggle('on', x === b));
-    say(`Hi Bella! It's me, ${S.guideName || 'your singer'}. Do you like my voice?`);
+    say('Hi Bella! Do you like this voice?');
   });
   $('#vDone').onclick = () => mapScreen();
 }
@@ -792,49 +940,21 @@ function voiceScreen(){
 function splash(){
   setTop(false);
   screen.innerHTML = `<div class="center">
-    <div class="uni bounce">${guideSVG()}</div>
+    <div class="uni full bounce">${guideSVG(null, 'full')}</div>
     <h1 class="title">Bella's<br>Pop Star Stage</h1>
     <button class="big-btn" id="go">▶ Play</button>
   </div>`;
   $('#go').onclick = () => {
     tone([1], .01); // wakes up sound on iPhone/iPad
     try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
-    if (!S.guideName) return nameScreen();
     mapScreen();
-    say(`Hi Bella! It's me, ${S.guideName}! Where do you want to play?`);
+    say('Hi Bella! Where do you want to play?');
   };
 }
 
-function nameScreen(){
-  setTop(false);
-  const names = ['Star','Luna','Nova','Melody','Jazzy','Sky'];
-  screen.innerHTML = `<div class="center">
-    <div class="bubble">Hi Bella! I'm the lead singer of your band.<br>What's my name?</div>
-    <div class="uni bounce">${guideSVG()}</div>
-    <div class="chips">${names.map(n => `<button class="chip" data-n="${n}">${n}</button>`).join('')}</div>
-    <input id="nm" class="name-input" maxlength="14" placeholder="or type a name" autocomplete="off">
-    <button class="big-btn" id="ok" disabled>That's my name! ✨</button>
-  </div>`;
-  say("Hi Bella! I'm the lead singer of your band. What should my name be?");
-  const nm = $('#nm'), ok = $('#ok');
-  const upd = () => { ok.disabled = !nm.value.trim(); };
-  nm.oninput = () => { screen.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); upd(); };
-  screen.querySelectorAll('.chip').forEach(c => c.onclick = () => {
-    nm.value = c.dataset.n; upd();
-    screen.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
-    say(c.dataset.n);
-  });
-  ok.onclick = () => {
-    S.guideName = cap(nm.value.trim()); save();
-    sfx.tada(); confetti(40);
-    mapScreen();
-    say(`Yay! My name is ${S.guideName}! Let's go to the stage!`);
-  };
-}
 
 function mapScreen(){
   setTop(true, false);
-  const name = esc(S.guideName);
   screen.innerHTML = `
     <div class="guide">
       <div class="uni sm" id="uniTap">${guideSVG()}</div>
@@ -846,16 +966,17 @@ function mapScreen(){
       <button class="place open" id="garden"><span class="ico">🎧</span><b>Number Studio</b>
         <small>Math · Level ${S.math.stage + 1}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
       <button class="place open" id="closetTile"><span class="ico">👗</span><b>Dressing Room</b><small>Spend your 💎</small></button>
-      <button class="place locked"><span class="ico">🌟</span><b>New Stages</b><small>Coming soon!</small></button>
+      <button class="place open adventure" id="advTile"><span class="ico">🗺️</span><b>Adventure</b><small>${storyTileText()}</small></button>
     </div>`;
   $('#tower').onclick = () => { sfx.pop(); balloonGame(); };
   $('#garden').onclick = () => { sfx.pop(); gardenScreen(); say('Welcome to the Number Studio! Pick a game!'); };
-  $('#closetTile').onclick = () => { sfx.pop(); closetScreen('hair'); say('Welcome to the dressing room! Pick something to wear!'); };
+  $('#advTile').onclick = () => { sfx.pop(); worldScreen(); };
+  $('#closetTile').onclick = () => { sfx.pop(); closetScreen('hairStyle'); say('Welcome to the dressing room! Pick something to wear!'); };
   bindLocked();
   const u = $('#uniTap');
   u.onclick = () => {
     u.classList.remove('hop'); void u.offsetWidth; u.classList.add('hop');
-    say(`Hi Bella! I'm ${S.guideName}. Where do you want to play?`);
+    say('Hi Bella! You look amazing! Where do you want to play?');
   };
 }
 function bindLocked(){
@@ -1321,28 +1442,36 @@ function coinGame(){
 
 function closetScreen(tab){
   setTop(true, true);
-  const lists = { hair:HAIR, top:TOPS, acc:ACCS };
-  const swatch = it => it.icon ? `<span class="sw-ico">${it.icon}</span>`
+  const TABS = [['hairStyle','💇 Style'],['hairColor','🎨 Color'],['top','👚 Top'],['bottom','👗 Bottom'],['shoes','👟 Shoes'],['extras','✨ Extras']];
+  const list = ITEMS.filter(it => tab === 'extras' ? OPTIONAL.includes(it.slot) : it.slot === tab);
+  const swatch = it => it.slot === 'hairStyle'
+      ? `<span class="sw-svg">${guideSVG(Object.assign({}, S.look, { hairStyle:it.id, head:null, face:null }))}</span>`
+    : it.svg ? `<span class="sw-svg">${it.svg}</span>`
+    : it.icon ? `<span class="sw-ico">${it.icon}</span>`
     : `<span class="sw" style="background:linear-gradient(135deg,${it.c.join(',')})"></span>`;
   screen.innerHTML = `<div class="closet">
-    <div class="uni preview" id="preview">${guideSVG()}</div>
-    <div class="tabs">${[['hair','💇 Hair'],['top','👚 Outfit'],['acc','✨ Extras']].map(([k, l]) =>
-      `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
-    <div class="items">${lists[tab].map(it => {
-      const own = S.closet.owned.includes(it.id), wearing = S.closet[tab] === it.id;
+    <div class="uni preview" id="preview">${guideSVG(null, 'full')}</div>
+    <div class="tabs">${TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="items">${list.map(it => {
+      const own = S.owned.includes(it.id), wearing = S.look[it.slot] === it.id;
+      const tag = wearing ? 'Wearing ✓' : own ? 'Wear' : '💎 ' + it.cost;
       return `<button class="item${wearing ? ' on' : ''}${own ? '' : ' locked-item'}" data-id="${it.id}">
-        ${swatch(it)}<b>${it.name}</b><small>${wearing ? 'Wearing ✓' : own ? 'Wear' : '💎 ' + it.cost}</small></button>`;
+        ${swatch(it)}<b>${it.name}</b><small>${tag}</small></button>`;
     }).join('')}</div>
   </div>`;
+  const tabsEl = screen.querySelector('.tabs'), onTab = tabsEl.querySelector('.on');
+  if (onTab) tabsEl.scrollLeft = onTab.offsetLeft - 20;
   screen.querySelectorAll('.tab').forEach(b => b.onclick = () => { sfx.pop(); closetScreen(b.dataset.t); });
   screen.querySelectorAll('.item').forEach(b => b.onclick = () => {
-    const it = lists[tab].find(x => x.id === b.dataset.id);
-    const own = S.closet.owned.includes(it.id);
-    if (own){
-      S.closet[tab] = it.id; save(); sfx.chime();
+    const it = item(b.dataset.id);
+    const own = S.owned.includes(it.id), wearing = S.look[it.slot] === it.id;
+    if (own && wearing && OPTIONAL.includes(it.slot)){
+      S.look[it.slot] = null; save(); sfx.pop(); closetScreen(tab);
+    } else if (own){
+      S.look[it.slot] = it.id; save(); sfx.chime();
       closetScreen(tab); say(`Ooh, ${it.name}!`);
     } else if (S.gems >= it.cost){
-      S.gems -= it.cost; S.closet.owned.push(it.id); S.closet[tab] = it.id; save();
+      S.gems -= it.cost; S.owned.push(it.id); S.look[it.slot] = it.id; save();
       sfx.tada(); sfx.cheer(); confetti(40);
       closetScreen(tab); say(`You got ${it.name}! It looks amazing!`);
     } else {
@@ -1353,12 +1482,358 @@ function closetScreen(tab){
   });
 }
 
+/* ================= STORY MODE ================= */
+const FRIEND_LOOKS = [
+  { hairStyle:'pony', hairColor:'h0', top:'t3', bottom:'b2', shoes:'s1', neck:null, skin:'#f1c9a8', skinD:'#d9ab88', mark:false },
+  { hairStyle:'pig',  hairColor:'h1', top:'t4', bottom:'b1', shoes:'s0', neck:null, skin:'#9c6644', skinD:'#80513a', mark:false },
+  { hairStyle:'long', hairColor:'h2', top:'t2', bottom:'b3', shoes:'s3', neck:null, skin:'#e6b48e', skinD:'#cb9671', mark:false }
+];
+const CHAPTERS = [
+  { id:'forest', name:'Whispering Forest', icon:'🌲', ready:true,
+    bg:'linear-gradient(180deg,#1f4d3a 0%,#2f6b45 55%,#4f8a3c 100%)', deco:['🌲','🌳','🍄','🌲','🦋','🌼','🌳','🍄','🐿️','🌲'],
+    cage:'vine', cageName:'vine cage',
+    levels:[
+      'The Whispering Forest! Let\'s follow the sparkly path.',
+      'A little bunny lost his carrots. Let\'s help him!',
+      'A wobbly bridge! Answer to cross it safely.',
+      'Wise Owl has some puzzles for you!',
+      'Look! A music note on a mushroom. It belongs to your friend!',
+      'The fireflies light the way when you get it right!',
+      'Shh! I can hear singing. We\'re getting close!',
+      'There she is! Grumble trapped your friend in a vine cage!'
+    ],
+    names:['Luna','Melody','Ruby','Coco','Sky'] },
+  { id:'ocean', name:'Coral Ocean', icon:'🌊', ready:false, bg:'linear-gradient(180deg,#0e4f7a,#1b86b5)', deco:['🐠','🐚','🪸','🫧','🐙','🐢','🐬','🦀'] },
+  { id:'castle', name:'Crystal Castle', icon:'🏰', ready:false, bg:'linear-gradient(180deg,#5a3d8f,#a77fd6)', deco:['🏰','✨','🦄','👑','💎','🌙'] },
+  { id:'concert', name:'The Big Concert', icon:'🎤', ready:false, bg:'linear-gradient(180deg,#2a1350,#7a2d8f)', deco:['🎤','🎸','🥁','🎹','⭐','🎶'] }
+];
+const LEVEL_POS = [[18,88],[50,80],[80,70],[56,60],[24,50],[40,38],[74,28],[50,12]]; // % positions on the map
+function storyTileText(){
+  const st = S.story;
+  if (st.chapter >= CHAPTERS.length || !CHAPTERS[st.chapter].ready) return 'More worlds coming soon!';
+  return `${CHAPTERS[st.chapter].name} · Level ${st.level + 1}`;
+}
+function grumbleSVG(){
+  return `<svg viewBox="0 0 120 80" aria-hidden="true"><g fill="#8d8fa8">
+    <circle cx="34" cy="44" r="22"/><circle cx="60" cy="32" r="28"/><circle cx="88" cy="44" r="22"/><rect x="20" y="44" width="82" height="22" rx="11"/></g>
+    <path d="M44 34 l12 5 M78 34 l-12 5" stroke="#3b2a55" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="50" cy="44" r="4" fill="#3b2a55"/><circle cx="72" cy="44" r="4" fill="#3b2a55"/>
+    <path d="M52 58 Q61 52 70 58" stroke="#3b2a55" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M40 70 l-6 9 M62 70 l-6 9 M84 70 l-6 9" stroke="#7fd1ff" stroke-width="3" stroke-linecap="round"/></svg>`;
+}
+const friendName = k => S.story.friends[k] || 'your friend';
+
+/* ---- world picker ---- */
+function worldScreen(){
+  setTop(true, true);
+  const st = S.story;
+  screen.innerHTML = `
+    <div class="guide">
+      <div class="uni sm grumble">${grumbleSVG()}</div>
+      <div class="bubble">Oh no! Grumble blew your band away before the big concert! Let's find them!</div>
+    </div>
+    <div class="map">${CHAPTERS.map((c, k) => {
+      const open = c.ready && k <= st.chapter, done = k < st.chapter;
+      return `<button class="place ${open ? 'open' : 'locked'} world" data-k="${k}" style="--wbg:${c.bg}">
+        <span class="ico">${c.icon}</span><b>${c.name}</b>
+        <small>${done ? '⭐ Rescued ' + esc(friendName(k)) + '!' : open ? 'Level ' + (st.level + 1) + ' of 8' : !c.ready ? 'Coming soon!' : '🔒 Locked'}</small></button>`;
+    }).join('')}</div>`;
+  if (!st.seenIntro){
+    st.seenIntro = true; save();
+    say("Oh no! A grumpy cloud named Grumble blew your band away, right before the big concert! Let's go find your friends!");
+  }
+  screen.querySelectorAll('.world').forEach(b => b.onclick = () => {
+    const k = +b.dataset.k, c = CHAPTERS[k];
+    if (!c.ready){ b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops(); return say('That world is coming soon!'); }
+    if (k > st.chapter){ b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops(); return say('Finish the world before it first!'); }
+    sfx.pop();
+    if (k < CHAPTERS.length - 1 && !st.friends[k]) return nameFriend(k);
+    chapterMap(k);
+  });
+}
+
+/* ---- she names her friend ---- */
+function nameFriend(k){
+  setTop(true, true);
+  const c = CHAPTERS[k];
+  const chips = [...new Set([S.guideName, ...c.names].filter(Boolean))].slice(0, 6);
+  screen.innerHTML = `<div class="center">
+    <div class="bubble">One of your bandmates is lost in the ${c.name}!<br>What's her name?</div>
+    <div class="uni full friend-shadow">${guideSVG(FRIEND_LOOKS[k], 'full')}</div>
+    <div class="chips">${chips.map(n => `<button class="chip" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+    <input id="nm" class="name-input" maxlength="14" placeholder="or type a name" autocomplete="off">
+    <button class="big-btn" id="ok" disabled>That's her name! ✨</button>
+  </div>`;
+  say(`One of your bandmates is lost in the ${c.name}! What is her name?`);
+  const nm = $('#nm'), ok = $('#ok');
+  const upd = () => { ok.disabled = !nm.value.trim(); };
+  nm.oninput = () => { screen.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); upd(); };
+  screen.querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    nm.value = ch.dataset.n; upd();
+    screen.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === ch));
+    say(ch.dataset.n);
+  });
+  ok.onclick = () => {
+    S.story.friends[k] = cap(nm.value.trim()); save();
+    sfx.tada(); confetti(30);
+    say(`Let's go rescue ${S.story.friends[k]}!`);
+    chapterMap(k);
+  };
+}
+
+/* ---- the path map for one world ---- */
+function chapterMap(k){
+  setTop(true, true);
+  const c = CHAPTERS[k], st = S.story;
+  const cur = k < st.chapter ? 8 : st.level;            // finished worlds show every level done
+  const at = Math.min(cur, 7);
+  const deco = c.deco.map((e, i) => `<span class="deco" style="left:${(i * 37) % 92}%;top:${(i * 53 + 7) % 90}%">${e}</span>`).join('');
+  const path = LEVEL_POS.map(([x, y]) => `${x},${y}`).join(' ');
+  screen.innerHTML = `
+    <div class="chapter-head"><b>${c.icon} ${c.name}</b><small>Rescue ${esc(friendName(k))}!</small></div>
+    <div class="world-map" style="background:${c.bg}">
+      ${deco}
+      <svg class="trail" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${path}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6" stroke-dasharray="2 2.2" stroke-linecap="round"/></svg>
+      ${LEVEL_POS.map(([x, y], i) => {
+        const stars = st.stars[c.id + '-' + i] || 0, last = i === 7;
+        const state = i < cur ? 'done' : i === cur ? 'now' : 'later';
+        return `<button class="node ${state}${last ? ' boss' : ''}" data-i="${i}" style="left:${x}%;top:${y}%">
+          ${last ? (i < cur ? '🎉' : '🔒') : i + 1}${stars ? `<span class="nstars">${'⭐'.repeat(stars)}</span>` : ''}</button>`;
+      }).join('')}
+      ${cur < 8 ? '' : `<div class="freed" style="left:${LEVEL_POS[7][0]}%;top:${LEVEL_POS[7][1]}%">${guideSVG(FRIEND_LOOKS[k], 'head')}</div>`}
+      <div class="walker" id="walker" style="left:${LEVEL_POS[at][0]}%;top:${LEVEL_POS[at][1]}%">${guideSVG(null, 'full')}</div>
+    </div>`;
+  screen.querySelectorAll('.node').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (i > cur){ b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops(); return say('Finish the level before it first!'); }
+    sfx.pop();
+    const w = $('#walker'); w.style.left = LEVEL_POS[i][0] + '%'; w.style.top = LEVEL_POS[i][1] + '%';
+    setTimeout(() => storyLevel(k, i), 550);
+  });
+  if (cur < 8) say(c.levels[at].replace('your friend', friendName(k)));
+}
+
+/* ---- one level: a few mixed challenges ---- */
+function storyLevel(k, i){
+  setTop(true, true);
+  const c = CHAPTERS[k], boss = i === 7, N = boss ? 5 : 3, my = nav;
+  let q = 0, firstTries = 0, earned = 0;
+  const kinds = boss ? ['word','math','word','shape','word'] : storyKinds();
+  screen.innerHTML = `
+    <div class="game-head">
+      <div class="uni xs">${guideSVG()}</div>
+      <div class="bubble" id="prompt"></div>
+      <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
+    </div>
+    <div class="scene" style="background:${c.bg}">
+      <div class="scene-me">${guideSVG(null, 'full')}</div>
+      ${boss ? `<div class="scene-friend">${guideSVG(FRIEND_LOOKS[k], 'full')}<div class="cage" id="cage">${'<i></i>'.repeat(N)}</div></div>`
+             : `<div class="scene-goal">${c.deco[i % c.deco.length]}</div>`}
+      <div class="dots scene-dots" id="dots">${'<span></span>'.repeat(N)}</div>
+    </div>
+    <div class="qarea" id="qa"></div>`;
+  const qa = $('#qa'), prompt = $('#prompt');
+  let speakIt = null;
+  $('#hear').onclick = () => speakIt && speakIt();
+  const ctx = {
+    my, qa, setPrompt: (t, spoken) => { prompt.textContent = t; speakIt = () => say(spoken || t); speakIt(); },
+    gem: () => { earned++; addGems(1); }
+  };
+  const intro = boss ? `${friendName(k)} is trapped in a ${c.cageName}! Answer to break it!` : c.levels[i].replace('your friend', friendName(k));
+  prompt.textContent = intro;
+  say(intro).then(next);
+
+  function next(){
+    if (my !== nav) return;
+    screen.querySelectorAll('#dots span').forEach((d, j) => { d.className = j < q ? 'done' : j === q ? 'now' : ''; });
+    if (q >= N) return finish();
+    CHALLENGES[kinds[q]](ctx, ok => {
+      if (ok) firstTries++;
+      if (boss){ const bar = $('#cage').children[q]; if (bar) bar.classList.add('broke'); }
+      q++; setTimeout(next, 350);
+    });
+  }
+  function finish(){
+    const stars = boss ? 3 : firstTries === N ? 3 : firstTries >= N - 1 ? 2 : 1;
+    const key = c.id + '-' + i, st = S.story;
+    st.stars[key] = Math.max(st.stars[key] || 0, stars);
+    const firstClear = st.chapter === k && st.level === i;
+    let bonus = firstClear ? (boss ? 15 : 3) : 1;
+    addGems(bonus); earned += bonus;
+    if (firstClear){
+      if (boss){ st.chapter = k + 1; st.level = 0; } else st.level = i + 1;
+    }
+    save();
+    if (boss) return rescueScene(k, earned);
+    sfx.tada(); sfx.cheer(); confetti(50);
+    setTop(true, true);
+    screen.innerHTML = `<div class="center">
+      <div class="big-stars">${[1, 2, 3].map(n => `<span class="${n <= stars ? 'on' : ''}">⭐</span>`).join('')}</div>
+      <div class="uni full bounce">${guideSVG(null, 'full')}</div>
+      <div class="bubble">Level ${i + 1} done! You earned <b>${earned}</b> 💎</div>
+      <div class="row">
+        <button class="big-btn" id="goOn">${firstClear ? 'Keep going ➜' : 'Back to map'}</button>
+        <button class="soft-btn" id="redo">↻ Play again</button>
+      </div></div>`;
+    say(`${stars === 3 ? 'Three stars! Amazing!' : 'Great job!'} You earned ${earned} gems!`);
+    $('#goOn').onclick = () => chapterMap(k);
+    $('#redo').onclick = () => storyLevel(k, i);
+  }
+}
+function rescueScene(k, earned){
+  setTop(true, true);
+  sfx.tada(); sfx.cheer(); confetti(90);
+  const nm = friendName(k), nextC = CHAPTERS[k + 1];
+  screen.innerHTML = `<div class="center">
+    <div class="duo"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="uni full bounce" style="animation-delay:-.8s">${guideSVG(FRIEND_LOOKS[k], 'full')}</div></div>
+    <div class="bubble gold">You rescued ${esc(nm)}! 🎉<br>She's back in the band!</div>
+    <div class="bubble">You earned <b>${earned}</b> 💎</div>
+    <button class="big-btn" id="goOn">Yay! ➜</button></div>`;
+  say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`);
+  $('#goOn').onclick = () => worldScreen();
+}
+function storyKinds(){
+  const bag = ['word','word','math','count','shape','clock','coin','word','math'];
+  const out = [shuffle(['word','word','math'])[0]];
+  while (out.length < 3){ const t = pick(bag); if (!out.includes(t) || t === 'word') out.push(t); }
+  return shuffle(out);
+}
+
+/* ---- the challenges (one question each) ---- */
+const SC_COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
+function trackResult(track, ok){ track.recent.push(ok ? 1 : 0); track.recent = track.recent.slice(-10); save(); }
+function choiceRound(ctx, html, isRight, onWrong, done){
+  ctx.qa.innerHTML = html;
+  let first = true, solved = false, busy = false;
+  ctx.qa.querySelectorAll('[data-v]').forEach(b => b.onclick = async () => {
+    if (solved || busy) return;
+    if (isRight(b.dataset.v)){
+      solved = true; b.classList.add('right'); sfx.tada(); confetti(16);
+      if (first) ctx.gem();
+      setTimeout(() => done(first), 500);
+    } else {
+      first = false; busy = true;
+      b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+      await onWrong(b.dataset.v);
+      busy = false;
+    }
+  });
+}
+const CHALLENGES = {
+  word(ctx, done){
+    const w = pickRound(1)[0];
+    const sayT = () => sayWord(w).then(() => CLUES[w] ? say(CLUES[w]).then(() => sayWord(w)) : null);
+    ctx.setPrompt('Pop the word you hear!', 'Find the word');
+    sayT();
+    const colors = shuffle([0, 1, 2, 3, 4, 5]);
+    let first = true, solved = false;
+    ctx.qa.innerHTML = `<div class="field">${shuffle([w, ...distractors(w, 3)]).map((c, k) =>
+      `<button class="balloon c${colors[k]}" data-w="${esc(c)}" style="--d:-${(Math.random() * 3).toFixed(2)}s"><span>${esc(c)}</span></button>`).join('')}</div>`;
+    ctx.qa.querySelectorAll('.balloon').forEach(b => b.onclick = () => {
+      if (solved) return;
+      if (b.dataset.w === w){
+        solved = true; b.classList.add('popped'); sfx.pop(); setTimeout(sfx.chime, 120);
+        if (first) ctx.gem();
+        setTimeout(() => sayStep(first), 600);
+      } else {
+        first = false; b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
+        say(`That one says ${b.dataset.w}. Try again!`).then(sayT);
+      }
+    });
+    function sayStep(popFirst){
+      if (ctx.my !== nav) return;
+      const canMic = SR && !micBlocked;
+      let tries = 0;
+      ctx.setPrompt('Now you say it!', `Now you say it. ${w}`);
+      ctx.qa.innerHTML = `<div class="say-panel">
+        <div class="word-card">${esc(w)}</div>
+        <div class="say-msg" id="sm">${canMic ? 'Tap the mic and say it!' : 'Say it out loud!'}</div>
+        ${canMic ? '<button class="mic-btn" id="mic">🎤<span>Tap & say it</span></button>' : '<button class="big-btn" id="said">I said it! ⭐</button>'}
+        <button class="soft-btn" id="skip">Next ➜</button></div>`;
+      const end = ok => { scoreWord(w, popFirst, ok); save(); done(popFirst); };
+      $('#skip').onclick = () => end(null);
+      if (!canMic){ $('#said').onclick = () => { st(w).said++; ctx.gem(); sfx.chime(); end(true); }; return; }
+      const mic = $('#mic'), sm = $('#sm');
+      mic.onclick = async () => {
+        if (mic.classList.contains('listening')) return;
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        mic.classList.add('listening'); sm.textContent = 'Listening… 👂';
+        const r = await listen(); mic.classList.remove('listening');
+        if (!r.ok && ['not-allowed','service-not-allowed','audio-capture','unsupported','start'].includes(r.err)){
+          micBlocked = true; sm.textContent = "The mic is off. That's okay!";
+          mic.outerHTML = '<button class="big-btn" id="said">I said it! ⭐</button>';
+          $('#said').onclick = () => { ctx.gem(); end(true); }; return;
+        }
+        if (heard(w, r.alts || [])){ st(w).said++; ctx.gem(); sfx.tada(); confetti(20); await say(pick(['Perfect!','You said it!','Amazing!'])); return end(true); }
+        if (++tries < 3){ sm.textContent = r.alts && r.alts.length ? `I heard “${r.alts[0]}”. Try again!` : "I didn't hear you. Try again!"; await say('Almost! Listen.'); await sayWord(w); }
+        else { sm.textContent = 'Good try! 💜'; await say(`Good try! This word is ${w}.`); end(false); }
+      };
+    }
+  },
+  math(ctx, done){
+    const p = makeProblem(new Set()), sym = p.op === '+' ? '+' : '−';
+    const words = p.op === '+' ? `${p.a} plus ${p.b}` : `${p.a} take away ${p.b}`;
+    ctx.setPrompt(`${p.a} ${sym} ${p.b} = ?`, `What is ${words}?`);
+    const ob = (e, n) => Array.from({ length:n }, () => `<span class="ob">${e}</span>`).join('');
+    const total = p.op === '+' ? p.a + p.b : p.a;
+    choiceRound(ctx, `<div class="eq">${p.a} ${sym} ${p.b} = ?</div>
+      <div class="objs" style="--os:${total <= 10 ? 'clamp(1.6rem,6.5vw,2.4rem)' : 'clamp(1.3rem,5vw,2rem)'}">${p.op === '+'
+        ? `<div class="grp">${ob('⭐', p.a)}</div><div class="sign">+</div><div class="grp">${ob('💖', p.b)}</div>`
+        : `<div class="grp">${ob('⭐', p.a - p.b)}${Array.from({ length:p.b }, () => '<span class="ob gone">⭐</span>').join('')}</div>`}</div>
+      <div class="answers">${mathChoices(p).map((n, j) => `<button class="ans" data-v="${n}" style="--c:${SC_COLORS[j]}">${n}</button>`).join('')}</div>`,
+      v => +v === p.ans, () => say("Count the stars and try again!"),
+      ok => { trackResult(S.math, ok); done(ok); });
+  },
+  count(ctx, done){
+    const p = makeCount(new Set()), atEnd = p.miss === p.seq.length - 1;
+    ctx.setPrompt(atEnd ? 'What comes next?' : 'What number is missing?',
+      atEnd ? `${p.seq.slice(0, -1).join(', ')}. What comes next?` : `${p.seq.map((n, j) => j === p.miss ? 'hmm' : n).join(', ')}. What number is missing?`);
+    choiceRound(ctx, `<div class="stones">${p.seq.map((n, j) => j === p.miss ? '<span class="stone miss">?</span>' : `<span class="stone" style="--c:${SC_COLORS[j]}">${n}</span>`).join('')}</div>
+      <div class="answers">${countChoices(p).map((n, j) => `<button class="ans" data-v="${n}" style="--c:${SC_COLORS[j + 2]}">${n}</button>`).join('')}</div>`,
+      v => +v === p.ans, () => say(`Count with me: ${p.seq.slice(0, p.miss).join(', ')}. What comes after?`),
+      ok => { trackResult(S.count, ok); done(ok); });
+  },
+  shape(ctx, done){
+    const stg = SHAPE_STAGES[S.shape.stage];
+    const set = stg.mode === 'sides' ? SHAPE_STAGES[1].set : stg.set;
+    const target = pick(set), opts = shuffle([target, ...shuffle(set.filter(x => x !== target)).slice(0, 2)]);
+    ctx.setPrompt(`Find the ${shapeLabel(target)}!`);
+    const cols = shuffle(SHAPE_COLORS);
+    choiceRound(ctx, `<div class="shape-row">${opts.map((o, j) => `<button class="shape-btn" data-v="${o}">${shapeSVG(o, cols[j], shapeRot(o))}</button>`).join('')}</div>`,
+      v => v === target, v => say(`That's ${withA(shapeLabel(v))}. Find the ${shapeLabel(target)}!`),
+      ok => { trackResult(S.shape, ok); done(ok); });
+  },
+  clock(ctx, done){
+    const stg = CLOCK_STAGES[S.clock.stage], t = makeTime(stg), opts = timeChoices(t, stg);
+    ctx.setPrompt('What time is it?');
+    choiceRound(ctx, `<div class="clock-big sm">${clockSVG(t.h, t.m)}</div>
+      <div class="answers">${opts.map((o, j) => `<button class="time-btn" data-v="${o.h}:${o.m}" style="--c:${SC_COLORS[j]}">${timeText(o.h, o.m)}</button>`).join('')}</div>`,
+      v => v === `${t.h}:${t.m}`, () => say(`The short hand shows the hour. The long hand on ${t.m ? '6 means thirty' : "12 means o'clock"}.`),
+      ok => { trackResult(S.clock, ok); done(ok); });
+  },
+  coin(ctx, done){
+    const stg = COIN_STAGES[S.coin.stage];
+    if (stg.mode === 'find' || stg.mode === 'value'){
+      const kind = pick(COIN_ORDER), opts = shuffle([kind, ...shuffle(COIN_ORDER.filter(x => x !== kind)).slice(0, 2)]);
+      ctx.setPrompt(`Find the ${kind}!`);
+      choiceRound(ctx, `<div class="shape-row">${opts.map(o => `<button class="shape-btn coin-btn" data-v="${o}">${coinSVG(o)}</button>`).join('')}</div>`,
+        v => v === kind, v => say(`That's a ${v}. Find the ${kind}!`), ok => { trackResult(S.coin, ok); done(ok); });
+    } else {
+      const coins = makeCoins(stg), total = coins.reduce((a, x) => a + COINS[x].v, 0), small = Math.min(...coins.map(x => COINS[x].v));
+      ctx.setPrompt('How much money?', 'How much money is this?');
+      choiceRound(ctx, `<div class="coin-row">${coins.map(x => `<span class="coin-sm">${coinSVG(x)}</span>`).join('')}</div>
+        <div class="answers">${centChoices(total, small).map((n, j) => `<button class="time-btn" data-v="${n}" style="--c:${SC_COLORS[j]}">${n}¢</button>`).join('')}</div>`,
+        v => +v === total, () => say('Start with the biggest coin, then count on!'), ok => { trackResult(S.coin, ok); done(ok); });
+    }
+  }
+};
+
 function roundDone(earned, unlock, again){
   save();
   setTop(true, true);
   sfx.tada(); sfx.cheer(); confetti(70);
   screen.innerHTML = `<div class="center">
-    <div class="uni bounce">${guideSVG()}</div>
+    <div class="uni full bounce">${guideSVG(null, 'full')}</div>
     <div class="bubble">You did it, Bella! 🎉<br>You earned <b>${earned}</b> 💎</div>
     ${unlock ? `<div class="bubble gold">Unlocked: ${esc(unlock)}! 🌈</div>` : ''}
     <div class="row">
@@ -1511,6 +1986,14 @@ function balloonGame(){
   }
 
   next();
+}
+
+// One-time move to the full-body avatar: keep everything she bought, dress her as herself.
+if (!S.look){
+  const old = S.closet || {};
+  S.owned = [...new Set([...START_OWNED, ...(old.owned || [])])];
+  S.look = Object.assign({}, BELLA_LOOK);
+  delete S.closet; save();
 }
 
 splash();
