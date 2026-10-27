@@ -269,6 +269,33 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .stone.lit{transform:scale(1.18);box-shadow:0 0 0 5px #ffd34d,0 5px 0 rgba(74,59,107,.15)}
 .conf{position:fixed;top:-14px;width:10px;height:14px;border-radius:3px;z-index:50;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(106vh) rotate(600deg)}}
+/* gems + treasure chests */
+.flygem{position:fixed;left:0;top:0;z-index:60;pointer-events:none;display:flex;align-items:center;gap:2px;
+  font-weight:700;font-size:1.5rem;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.flygem svg{width:44px;height:44px;filter:drop-shadow(0 0 8px rgba(255,255,255,.8))}
+.gemico{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.18em}
+.gemico svg{width:100%;height:100%}
+.chest-row{display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.chest-row .uni.full{width:clamp(110px,30vw,170px)}
+.chest-box{display:flex;flex-direction:column;align-items:center;gap:4px}
+.chest{border:0;background:none;padding:0;cursor:pointer;width:clamp(110px,30vw,150px);position:relative}
+.chest svg{width:100%;height:auto;display:block;overflow:visible}
+.chest.shake{animation:chestShake .45s}
+@keyframes chestShake{20%{transform:rotate(-9deg) scale(1.05)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg) scale(1.08)}80%{transform:rotate(4deg)}}
+.chest .crack{opacity:0;transition:opacity .2s}
+.chest.c1 .k1,.chest.c2 .crack{opacity:1}
+.chest .lid{transform-box:fill-box;transform-origin:0% 100%;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.chest.open .lid{transform:rotate(-38deg) translate(-4px,-10px)}
+.chest .glow{opacity:0;transition:opacity .3s}.chest.open .glow{opacity:1}
+.chest-tap{color:#fff;font-weight:700;font-size:1.15rem;animation:bounce 1.2s infinite}
+.prize{background:#fff;border-radius:24px;padding:12px 22px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  box-shadow:0 0 0 6px rgba(255,211,77,.5);animation:prizePop .55s cubic-bezier(.3,1.6,.5,1)}
+.prize b{font-size:1.3rem}.prize .sw-svg{width:70px;height:78px}.prize .sw-ico{font-size:3rem;line-height:60px;height:60px}
+.prize .sw{width:58px;height:58px}
+.prize .gemrow{display:flex;gap:4px}.prize .gemrow svg{width:46px;height:46px}
+@keyframes prizePop{from{transform:scale(.2);opacity:0}}
+.prize-ov{position:fixed;inset:0;z-index:55;background:rgba(26,16,64,.72);display:flex;align-items:center;justify-content:center;padding:20px}
+.prize .row{margin-top:6px}
 </style>
 </head>
 <body>
@@ -305,7 +332,7 @@ const SOUNDS_LIKE = {
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
 const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] }, coin:{ stage:0, recent:[] },
-  look:null, owned:null,
+  look:null, owned:null, chests:0,
   story:{ chapter:0, level:0, stars:{}, friends:['', '', ''] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
@@ -404,6 +431,8 @@ const sfx = {
   chime: () => tone([660, 880, 1320], .12),
   oops:  () => tone([320, 250], .12, 'triangle'),
   tada:  () => tone([523, 659, 784, 1047], .13),
+  sparkle: () => tone([1319, 1760, 2093, 2637], .07),
+  knock: () => tone([200, 150], .09, 'square'),
   cheer: () => { // a short crowd cheer made from filtered noise
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
@@ -925,6 +954,7 @@ const coinPct = () => Math.round(S.coin.stage / (COIN_STAGES.length - 1) * 100);
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
   nav++;
+  document.querySelectorAll('.prize-ov').forEach(e => e.remove());
   $('#topbar').hidden = !show;
   $('#homeBtn').hidden = !home;
   $('#setBtn').hidden = home; // settings only on the castle map
@@ -934,6 +964,37 @@ function addGems(n){
   S.gems += n; save();
   $('#gemCount').textContent = S.gems;
   const g = $('#gems'); g.classList.remove('bump'); void g.offsetWidth; g.classList.add('bump');
+}
+/* Gem types: pink = 1, blue = 5, gold = 10 */
+const GEM = { pink:{ v:1, c:['#ffc2e6','#ff5fae','#c2187a'] }, blue:{ v:5, c:['#c6f0ff','#3fa6f5','#1c5fb8'] }, gold:{ v:10, c:['#fff3b0','#ffc93a','#c98a00'] } };
+function gemSVG(kind){
+  const [l, m, d] = GEM[kind].c;
+  return `<svg viewBox="0 0 40 40"><path d="M10 6h20l8 10-18 20L2 16z" fill="${m}"/><path d="M10 6h20l-4 10H14z" fill="${l}"/>
+    <path d="M2 16h12l6 20z" fill="${d}" opacity=".55"/><path d="M38 16H26l-6 20z" fill="${d}" opacity=".35"/>
+    <path d="M14 16h12l-6 20z" fill="${m}"/><path d="M13 9l3 4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9"/></svg>`;
+}
+const gemIco = k => `<span class="gemico">${gemSVG(k)}</span>`;
+function flyGem(kind, label){ // a gem pops up and flies to the counter
+  try {
+    const el = document.createElement('div');
+    el.className = 'flygem'; el.innerHTML = gemSVG(kind) + (label ? `<span>${label}</span>` : '');
+    document.body.appendChild(el);
+    const r = $('#gems').getBoundingClientRect();
+    const x0 = innerWidth / 2 - 22, y0 = innerHeight * .42, x1 = r.left + 10, y1 = r.top + 4;
+    const a = el.animate([
+      { transform:`translate(${x0}px,${y0}px) scale(.3)`, opacity:0 },
+      { transform:`translate(${x0}px,${y0 - 50}px) scale(1.3)`, opacity:1, offset:.3 },
+      { transform:`translate(${x0}px,${y0 - 50}px) scale(1.1)`, opacity:1, offset:.5 },
+      { transform:`translate(${x1}px,${y1}px) scale(.45)`, opacity:.8 }
+    ], { duration: kind === 'pink' ? 900 : 1500, easing:'ease-in' });
+    a.onfinish = () => el.remove(); setTimeout(() => el.remove(), 2000);
+  } catch(e){}
+}
+function lucky(){ // a right answer: usually a pink gem, sometimes a lucky blue or gold one
+  const r = Math.random(), kind = r < .04 ? 'gold' : r < .16 ? 'blue' : 'pink', v = GEM[kind].v;
+  addGems(v); flyGem(kind, kind === 'pink' ? '' : '+' + v);
+  if (kind !== 'pink') sfx.sparkle();
+  return v;
 }
 $('#homeBtn').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); mapScreen(); };
 $('#setBtn').onclick = () => voiceScreen();
@@ -1077,7 +1138,7 @@ function countGame(){
         b.classList.add('right'); sfx.tada(); confetti(20);
         missEl.classList.remove('miss'); missEl.style.setProperty('--c', '#8be0a0'); missEl.textContent = p.ans;
         S.count.recent.push(firstTry ? 1 : 0); S.count.recent = S.count.recent.slice(-10);
-        if (firstTry){ earned++; addGems(1); }
+        if (firstTry){ earned += lucky(); }
         save();
         await say(`Yes! ${p.seq.join(', ')}!`);
         i++; setTimeout(next, 300);
@@ -1152,7 +1213,7 @@ function mathGame(){
         solved = true;
         b.classList.add('right'); sfx.tada(); confetti(20);
         S.math.recent.push(firstTry ? 1 : 0); S.math.recent = S.math.recent.slice(-10);
-        if (firstTry){ earned++; addGems(1); }
+        if (firstTry){ earned += lucky(); }
         save();
         eq.textContent = `${p.a} ${sym} ${p.b} = ${p.ans}`;
         await say(`${words} is ${p.ans}!`);
@@ -1195,7 +1256,7 @@ function shapeGame(){
 
   function record(firstTry){
     S.shape.recent.push(firstTry ? 1 : 0); S.shape.recent = S.shape.recent.slice(-10);
-    if (firstTry){ earned++; addGems(1); }
+    if (firstTry){ earned += lucky(); }
     save();
   }
   function next(){
@@ -1286,7 +1347,7 @@ function clockGame(){
 
   function record(firstTry){
     S.clock.recent.push(firstTry ? 1 : 0); S.clock.recent = S.clock.recent.slice(-10);
-    if (firstTry){ earned++; addGems(1); }
+    if (firstTry){ earned += lucky(); }
     save();
   }
   async function hint(t, show){
@@ -1376,7 +1437,7 @@ function coinGame(){
 
   function record(firstTry){
     S.coin.recent.push(firstTry ? 1 : 0); S.coin.recent = S.coin.recent.slice(-10);
-    if (firstTry){ earned++; addGems(1); }
+    if (firstTry){ earned += lucky(); }
     save();
   }
   function wrongTap(b){
@@ -1461,15 +1522,85 @@ function coinGame(){
   next();
 }
 
-function closetScreen(tab){
-  setTop(true, true);
-  const TABS = [['hairStyle','💇 Style'],['hairColor','🎨 Color'],['top','👚 Top'],['bottom','👗 Bottom'],['shoes','👟 Shoes'],['extras','✨ Extras']];
-  const list = ITEMS.filter(it => tab === 'extras' ? OPTIONAL.includes(it.slot) : it.slot === tab);
-  const swatch = it => it.slot === 'hairStyle'
+function itemSwatch(it){
+  return it.slot === 'hairStyle'
       ? `<span class="sw-svg">${guideSVG(Object.assign({}, S.look, { hairStyle:it.id, head:null, face:null }))}</span>`
     : it.svg ? `<span class="sw-svg">${it.svg}</span>`
     : it.icon ? `<span class="sw-ico">${it.icon}</span>`
     : `<span class="sw" style="background:linear-gradient(135deg,${it.c.join(',')})"></span>`;
+}
+const closetTab = slot => OPTIONAL.includes(slot) ? 'extras' : slot;
+
+/* ---------- Treasure chests ---------- */
+const CHEST_SVG = `<svg viewBox="0 0 120 104">
+  <ellipse class="glow" cx="60" cy="48" rx="56" ry="40" fill="#fff6b0" opacity=".9"/>
+  <rect x="12" y="46" width="96" height="52" rx="8" fill="#b8692e"/><rect x="12" y="46" width="96" height="10" fill="#8f4c1c"/>
+  <rect x="22" y="46" width="10" height="52" fill="#ffc93a"/><rect x="88" y="46" width="10" height="52" fill="#ffc93a"/>
+  <rect x="12" y="88" width="96" height="10" rx="4" fill="#ffc93a"/>
+  <g class="lid"><path d="M10 48 Q10 14 60 14 Q110 14 110 48z" fill="#d07f3c"/>
+    <path d="M22 48 Q22 20 32 17 V48z M88 17 Q98 20 98 48 H88z" fill="#ffc93a"/>
+    <path d="M10 48 H110" stroke="#ffc93a" stroke-width="5"/></g>
+  <rect x="49" y="40" width="22" height="24" rx="5" fill="#ffe27a" stroke="#c98a00" stroke-width="2"/>
+  <path d="M60 46l6 7-6 7-6-7z" fill="#ff5fae"/>
+  <path class="crack k1" d="M40 60l6 8-4 6 6 8" stroke="#3a1d08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path class="crack" d="M80 58l-5 9 5 5-6 10" stroke="#3a1d08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path class="crack" d="M58 70l3 6-3 6 3 8" stroke="#3a1d08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>`;
+function rollPrize(){
+  const free = ITEMS.filter(it => it.cost > 0 && !S.owned.includes(it.id));
+  if (free.length && Math.random() < .7) return { item: pick(free) };
+  return { gems: pick([['blue','blue'], ['gold'], ['blue','blue','blue'], ['gold','blue'], ['gold','gold']]) };
+}
+// Shows a chest next to Bella on a "you did it" screen. Tap it 3 times to crack it open.
+function offerChest(chance, after){
+  const spot = $('#chestSpot');
+  if (!spot || (S.chests > 0 && Math.random() >= chance)) return false;
+  const my = nav;
+  spot.innerHTML = `<button class="chest" id="chest" aria-label="Treasure chest">${CHEST_SVG}</button><div class="chest-tap" id="chestTap">Tap it! 👆</div>`;
+  const ch = $('#chest'); let taps = 0;
+  const tell = () => { if (my === nav) say('Ooh! A treasure chest! Tap it three times to open it!'); };
+  if (after) after.then(tell); else tell();
+  ch.onclick = () => {
+    if (taps >= 3) return;
+    taps++;
+    ch.classList.remove('shake'); void ch.offsetWidth; ch.classList.add('shake');
+    if (taps < 3){ sfx.knock(); ch.classList.add('c' + taps); return; }
+    ch.classList.add('open'); $('#chestTap').remove();
+    sfx.tada(); sfx.sparkle(); confetti(60);
+    S.chests = (S.chests || 0) + 1;
+    const p = rollPrize();
+    const ov = document.createElement('div'); ov.className = 'prize-ov';
+    const box = document.createElement('div'); box.className = 'prize'; ov.appendChild(box);
+    const close = '<button class="big-btn" id="prizeOk">Yay! ✨</button>';
+    if (p.item){
+      S.owned.push(p.item.id); save();
+      box.innerHTML = `${itemSwatch(p.item)}<b>You found ${esc(p.item.name)}!</b><div class="row"><button class="soft-btn" id="tryOn">👗 Try it on</button>${close}</div>`;
+      say(`You found ${p.item.name}! It's yours to keep!`);
+    } else {
+      const v = p.gems.reduce((t, k) => t + GEM[k].v, 0);
+      box.innerHTML = `<div class="gemrow">${p.gems.map(gemSVG).join('')}</div><b>+${v} gems!</b><div class="row">${close}</div>`;
+      addGems(v); p.gems.forEach((k, j) => setTimeout(() => flyGem(k), 300 + j * 250));
+      const nm = { blue:'blue gem', gold:'gold gem' }, cnt = {};
+      p.gems.forEach(k => cnt[k] = (cnt[k] || 0) + 1);
+      const parts = Object.entries(cnt).map(([k, n]) => `${n === 1 ? 'a' : n} ${nm[k]}${n > 1 ? 's' : ''}`);
+      say(`You found ${parts.join(' and ')}! That's ${v} gems!`);
+    }
+    setTimeout(() => {
+      if (my !== nav) return;
+      document.body.appendChild(ov);
+      $('#prizeOk').onclick = () => { sfx.pop(); ov.remove(); };
+      const t = $('#tryOn');
+      if (t) t.onclick = () => { ov.remove(); sfx.pop(); S.look[p.item.slot] = p.item.id; save(); closetScreen(closetTab(p.item.slot)); say(`Ooh, ${p.item.name}!`); };
+    }, 450);
+  };
+  return true;
+}
+
+function closetScreen(tab){
+  setTop(true, true);
+  const TABS = [['hairStyle','💇 Style'],['hairColor','🎨 Color'],['top','👚 Top'],['bottom','👗 Bottom'],['shoes','👟 Shoes'],['extras','✨ Extras']];
+  const list = ITEMS.filter(it => tab === 'extras' ? OPTIONAL.includes(it.slot) : it.slot === tab);
+  const swatch = itemSwatch;
   screen.innerHTML = `<div class="closet">
     <div class="uni preview" id="preview">${guideSVG(null, 'full')}</div>
     <div class="tabs">${TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
@@ -1712,7 +1843,7 @@ function storyLevel(k, i){
   $('#hear').onclick = () => speakIt && speakIt();
   const ctx = {
     my, qa, setPrompt: (t, spoken) => { prompt.textContent = t; speakIt = () => say(spoken || t); speakIt(); },
-    gem: () => { earned++; addGems(1); }
+    gem: () => { earned += lucky(); }
   };
   const intro = boss && c.final ? c.levels[7]
     : boss && c.cage === 'tower' ? `${friendName(k)} is locked in the ${c.cageName}! Answer to open the locks!`
@@ -1757,13 +1888,13 @@ function storyLevel(k, i){
     setTop(true, true);
     screen.innerHTML = `<div class="center">
       <div class="big-stars">${[1, 2, 3].map(n => `<span class="${n <= stars ? 'on' : ''}">⭐</span>`).join('')}</div>
-      <div class="uni full bounce">${guideSVG(null, 'full')}</div>
+      <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="chest-box" id="chestSpot"></div></div>
       <div class="bubble">Level ${i + 1} done! You earned <b>${earned}</b> 💎</div>
       <div class="row">
         <button class="big-btn" id="goOn">${firstClear ? 'Keep going ➜' : 'Back to map'}</button>
         <button class="soft-btn" id="redo">↻ Play again</button>
       </div></div>`;
-    say(`${stars === 3 ? 'Three stars! Amazing!' : 'Great job!'} You earned ${earned} gems!`);
+    offerChest(.35, say(`${stars === 3 ? 'Three stars! Amazing!' : 'Great job!'} You earned ${earned} gems!`));
     $('#goOn').onclick = () => chapterMap(k);
     $('#redo').onclick = () => storyLevel(k, i);
   }
@@ -1776,8 +1907,9 @@ function rescueScene(k, earned){
     <div class="duo"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="uni full bounce" style="animation-delay:-.8s">${guideSVG(FRIEND_LOOKS[k], 'full')}</div></div>
     <div class="bubble gold">You rescued ${esc(nm)}! 🎉<br>She's back in the band!</div>
     <div class="bubble">You earned <b>${earned}</b> 💎</div>
+    <div class="chest-box" id="chestSpot"></div>
     <button class="big-btn" id="goOn">Yay! ➜</button></div>`;
-  say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.final ? "Now it's time for the big concert!" : nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`);
+  offerChest(1, say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.final ? "Now it's time for the big concert!" : nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`));
   $('#goOn').onclick = () => worldScreen();
 }
 function finaleScene(earned){
@@ -1790,8 +1922,9 @@ function finaleScene(earned){
     <div class="band big">${[null, ...FRIEND_LOOKS].map((l, j) => `<span style="animation-delay:-${j * .4}s">${guideSVG(l, 'full')}<small>${esc(names[j])}</small></span>`).join('')}</div>
     <div class="bubble gold">The concert was amazing! 🎤🎉<br>The band is back together!</div>
     <div class="bubble">Grumble loved the music so much, he's not grumpy anymore! You earned <b>${earned}</b> 💎</div>
+    <div class="chest-box" id="chestSpot"></div>
     <button class="big-btn" id="goOn">🏠 Home</button></div>`;
-  say(`The concert was amazing! ${names.slice(1).join(', ')} and Bella are back together! And Grumble loved the music so much, he isn't grumpy anymore! You are a super star, Bella!`);
+  offerChest(1, say(`The concert was amazing! ${names.slice(1).join(', ')} and Bella are back together! And Grumble loved the music so much, he isn't grumpy anymore! You are a super star, Bella!`));
   $('#goOn').onclick = () => mapScreen();
 }
 function storyKinds(){
@@ -1935,7 +2068,7 @@ function roundDone(earned, unlock, again){
   setTop(true, true);
   sfx.tada(); sfx.cheer(); confetti(70);
   screen.innerHTML = `<div class="center">
-    <div class="uni full bounce">${guideSVG(null, 'full')}</div>
+    <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="chest-box" id="chestSpot"></div></div>
     <div class="bubble">You did it, Bella! 🎉<br>You earned <b>${earned}</b> 💎</div>
     ${unlock ? `<div class="bubble gold">Unlocked: ${esc(unlock)}! 🌈</div>` : ''}
     <div class="row">
@@ -1943,7 +2076,7 @@ function roundDone(earned, unlock, again){
       <button class="soft-btn" id="toMap">🏠 Home</button>
     </div>
   </div>`;
-  say(`You did it, Bella! You earned ${earned} gems!` + (unlock ? ` And you unlocked ${unlock}!` : ''));
+  offerChest(.35, say(`You did it, Bella! You earned ${earned} gems!` + (unlock ? ` And you unlocked ${unlock}!` : '')));
   $('#playAgain').onclick = () => { sfx.pop(); again(); };
   $('#toMap').onclick = () => mapScreen();
 }
@@ -1995,7 +2128,7 @@ function balloonGame(){
       if (c === w){
         solved = true;
         b.classList.add('popped'); sfx.pop(); setTimeout(sfx.chime, 120); confetti(14);
-        if (firstTry && !again){ earned++; addGems(1); }
+        if (firstTry && !again){ earned += lucky(); }
         setTimeout(() => { if (my === nav) sayIt(w, firstTry, again); }, 650);
       } else {
         if (firstTry && !again){ scoreWord(w, false); scored.add(w); save(); comeBack(w); dots(); }
@@ -2037,7 +2170,7 @@ function balloonGame(){
       bindHonor();
     };
     const bindHonor = () => {
-      $('#saidIt').onclick = () => { settle(true); earned++; addGems(1); sfx.chime(); advance(); };
+      $('#saidIt').onclick = () => { settle(true); earned++; addGems(1); flyGem('pink'); sfx.chime(); advance(); };
     };
     if (!canMic){ bindHonor(); return; }
 
@@ -2057,7 +2190,7 @@ function balloonGame(){
       }
       if (heard(w, r.alts || [])){
         settle(true);
-        earned += 2; addGems(2); sfx.tada(); confetti(30);
+        earned += 2; addGems(2); flyGem('pink', '+2'); sfx.tada(); confetti(30);
         msg.textContent = 'Perfect! ⭐⭐';
         await say(pick(['Perfect!','You said it!','Amazing!','Super star!']));
         advance();
