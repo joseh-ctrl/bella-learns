@@ -155,6 +155,30 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .ans:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(74,59,107,.18)}
 .ans:disabled{opacity:.35}
 .ans.right{background:#8be0a0;transform:scale(1.15);transition:transform .2s}
+/* shapes */
+.shape-area{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+.shape-big{width:clamp(180px,55vw,300px);background:rgba(255,255,255,.92);border-radius:28px;padding:14px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.shape-big svg,.shape-btn svg{width:100%;height:auto;display:block}
+.shape-row{display:flex;gap:clamp(10px,3vw,28px);justify-content:center;flex-wrap:wrap}
+.shape-btn{width:clamp(100px,28vw,200px);aspect-ratio:1;border:0;border-radius:24px;background:#fff;padding:10px;cursor:pointer;
+  box-shadow:0 6px 0 #e0d3f7;transition:transform .2s}
+.shape-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #e0d3f7}
+.shape-btn:disabled{opacity:.35}
+.shape-btn.right{outline:6px solid #8be0a0;transform:scale(1.08)}
+/* dressing room */
+.closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
+.uni.preview{width:clamp(130px,36vw,200px);cursor:default}
+.tabs{display:flex;gap:8px;background:rgba(255,255,255,.18);border-radius:999px;padding:6px}
+.tab{font:inherit;font-size:clamp(1rem,4.2vw,1.2rem);font-weight:600;border:0;border-radius:999px;padding:10px 16px;background:transparent;color:#fff;cursor:pointer}
+.tab.on{background:#fff;color:var(--ink)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;width:100%}
+.item{font:inherit;color:var(--ink);border:3px solid transparent;border-radius:20px;background:#fff;padding:12px 6px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 5px 0 #e0d3f7}
+.item b{font-size:1rem}.item small{font-size:.95rem;color:var(--ink-soft);font-weight:600}
+.item.on{border-color:#8be0a0}
+.item.locked-item small{color:#b07800}
+.sw{width:46px;height:46px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.6)}
+.sw-ico{font-size:2.3rem;line-height:46px;height:46px}
 /* counting */
 .stones{flex:1;display:flex;align-items:center;justify-content:center;gap:clamp(6px,2.5vw,18px);width:100%;max-width:760px}
 .stone{--c:#fff;width:clamp(60px,16.5vw,110px);aspect-ratio:1;border-radius:50%;background:var(--c);display:flex;align-items:center;justify-content:center;
@@ -198,7 +222,8 @@ const SOUNDS_LIKE = {
 
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
-const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] } };
+const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] },
+  closet:{ owned:['h0','t0','a0'], hair:'h0', top:'t0', acc:'a0' } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
   catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
@@ -322,20 +347,61 @@ function confetti(n = 30){
   }
 }
 
-/* ---------- Singer drawing (original character) ---------- */
-function guideSVG(){
+/* ---------- Singer drawing (original character, dressable) ---------- */
+const HAIR = [
+  { id:'h0', name:'Pink Pop',  cost:0,  c:['#ff6fae','#a95cf0'] },
+  { id:'h1', name:'Sky Blue',  cost:10, c:['#7fd8ff','#4a7cf0'] },
+  { id:'h2', name:'Sunshine',  cost:10, c:['#ffe066','#ff9a3c'] },
+  { id:'h3', name:'Mint',      cost:10, c:['#9ff5d2','#2bbfa0'] },
+  { id:'h4', name:'Midnight',  cost:12, c:['#6a5ab0','#21183f'] },
+  { id:'h5', name:'Rainbow',   cost:20, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] }
+];
+const TOPS = [
+  { id:'t0', name:'Teal Star',      cost:0,  c:['#4fd8e8','#7c6cf5'], badge:'star' },
+  { id:'t1', name:'Pink Heart',     cost:8,  c:['#ff8ac6','#ff4f9a'], badge:'heart' },
+  { id:'t2', name:'Gold Note',      cost:8,  c:['#ffe27a','#f5a623'], badge:'note' },
+  { id:'t3', name:'Purple Sparkle', cost:10, c:['#c9a0ff','#7a3cf0'], badge:'star' },
+  { id:'t4', name:'Mint Heart',     cost:10, c:['#a8f0d0','#33b98c'], badge:'heart' }
+];
+const ACCS = [
+  { id:'a0', name:'Star Clip',  cost:0,  icon:'⭐' },
+  { id:'a1', name:'Bow',        cost:12, icon:'🎀' },
+  { id:'a2', name:'Heart Clip', cost:12, icon:'💗' },
+  { id:'a3', name:'Flower',     cost:15, icon:'🌼' },
+  { id:'a4', name:'Sunglasses', cost:18, icon:'🕶️' },
+  { id:'a5', name:'Crown',      cost:25, icon:'👑' }
+];
+let svgN = 0;
+function guideSVG(look){
+  const L = look || S.closet, n = ++svgN;
+  const hair = HAIR.find(h => h.id === L.hair) || HAIR[0];
+  const top = TOPS.find(t => t.id === L.top) || TOPS[0];
+  const stops = arr => arr.map((c, k) => `<stop offset="${arr.length > 1 ? k / (arr.length - 1) : 0}" stop-color="${c}"/>`).join('');
+  const badge = {
+    star: `<path d="M100 172 l6 12 13 2 -9 9 2 13 -12 -6 -12 6 2 -13 -9 -9 13 -2z" fill="#ffe36b"/>`,
+    heart: `<path d="M100 206 C84 196 80 184 88 178 C94 174 100 180 100 184 C100 180 106 174 112 178 C120 184 116 196 100 206Z" fill="#fff"/>`,
+    note: `<g fill="#fff"><ellipse cx="94" cy="200" rx="8" ry="6"/><rect x="99" y="170" width="4" height="30"/><path d="M103 170 q14 4 10 16 q0 -8 -10 -8z"/></g>`
+  }[top.badge];
+  const acc = {
+    a0: `<path d="M140 56 l4 8 9 1 -6 6 1.5 9 -8.5 -4.5 -8.5 4.5 1.5 -9 -6 -6 9 -1z" fill="#ffe36b" stroke="#f0b400" stroke-width="1.5"/>`,
+    a1: `<path d="M140 54 L124 43 L124 65Z M140 54 L156 43 L156 65Z" fill="#ff5fa2" stroke="#d63c80" stroke-width="2" stroke-linejoin="round"/><circle cx="140" cy="54" r="5" fill="#ff8ac6" stroke="#d63c80" stroke-width="2"/>`,
+    a2: `<path d="M140 68 C128 60 126 50 132 46 C136 43 140 47 140 50 C140 47 144 43 148 46 C154 50 152 60 140 68Z" fill="#ff4f9a" stroke="#c22d6e" stroke-width="1.5"/>`,
+    a3: `<g fill="#fff" stroke="#ff8ac6" stroke-width="1.5"><circle cx="140" cy="47" r="6"/><circle cx="148.5" cy="53" r="6"/><circle cx="145" cy="63" r="6"/><circle cx="135" cy="63" r="6"/><circle cx="131.5" cy="53" r="6"/></g><circle cx="140" cy="56" r="4.5" fill="#ffd34d"/>`,
+    a4: `<g><rect x="64" y="89" width="31" height="22" rx="9" fill="#2a2140"/><rect x="105" y="89" width="31" height="22" rx="9" fill="#2a2140"/><path d="M95 98 H105" stroke="#2a2140" stroke-width="4"/><path d="M70 95 h7 M111 95 h7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/></g>`,
+    a5: `<path d="M74 46 L76 18 L88 32 L100 12 L112 32 L124 18 L126 46Z" fill="#ffd34d" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="26" r="3.5" fill="#ff5fa2"/>`
+  }[L.acc] || '';
   return `<svg viewBox="0 0 200 230" aria-hidden="true">
   <defs>
-    <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6fae"/><stop offset="1" stop-color="#a95cf0"/></linearGradient>
-    <linearGradient id="topG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd8e8"/><stop offset="1" stop-color="#7c6cf5"/></linearGradient>
+    <linearGradient id="hg${n}" x1="0" y1="0" x2="${hair.c.length > 2 ? 1 : 0}" y2="1">${stops(hair.c)}</linearGradient>
+    <linearGradient id="tg${n}" x1="0" y1="0" x2="1" y2="1">${stops(top.c)}</linearGradient>
   </defs>
-  <circle cx="52" cy="42" r="24" fill="url(#hairG)"/><circle cx="148" cy="42" r="24" fill="url(#hairG)"/>
-  <path d="M40 92 C40 40 160 40 160 92 L164 140 C150 150 140 146 134 140 L66 140 C60 146 50 150 36 140Z" fill="url(#hairG)"/>
-  <path d="M62 168 C62 150 80 142 100 142 C120 142 138 150 138 168 L146 228 L54 228Z" fill="url(#topG)"/>
-  <path d="M100 172 l6 12 13 2 -9 9 2 13 -12 -6 -12 6 2 -13 -9 -9 13 -2z" fill="#ffe36b"/>
+  <circle cx="52" cy="42" r="24" fill="url(#hg${n})"/><circle cx="148" cy="42" r="24" fill="url(#hg${n})"/>
+  <path d="M40 92 C40 40 160 40 160 92 L164 140 C150 150 140 146 134 140 L66 140 C60 146 50 150 36 140Z" fill="url(#hg${n})"/>
+  <path d="M62 168 C62 150 80 142 100 142 C120 142 138 150 138 168 L146 228 L54 228Z" fill="url(#tg${n})"/>
+  ${badge}
   <rect x="90" y="132" width="20" height="16" rx="6" fill="#f5c4a8"/>
   <circle cx="100" cy="92" r="50" fill="#ffdcc6"/>
-  <path d="M50 88 C48 52 76 38 100 38 C124 38 152 52 150 88 C140 74 126 66 112 64 C116 72 112 78 108 80 C100 70 84 64 66 72 C60 76 54 82 50 88Z" fill="url(#hairG)"/>
+  <path d="M50 88 C48 52 76 38 100 38 C124 38 152 52 150 88 C140 74 126 66 112 64 C116 72 112 78 108 80 C100 70 84 64 66 72 C60 76 54 82 50 88Z" fill="url(#hg${n})"/>
   <ellipse cx="80" cy="100" rx="7" ry="9" fill="#3b2a55"/><ellipse cx="120" cy="100" rx="7" ry="9" fill="#3b2a55"/>
   <circle cx="82.5" cy="96" r="2.6" fill="#fff"/><circle cx="122.5" cy="96" r="2.6" fill="#fff"/>
   <ellipse cx="68" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/><ellipse cx="132" cy="116" rx="8" ry="4.5" fill="#ff9cc4" opacity=".7"/>
@@ -343,7 +409,7 @@ function guideSVG(){
   <circle cx="50" cy="104" r="8" fill="#3b2a55"/>
   <path d="M50 110 Q58 130 82 126" stroke="#3b2a55" stroke-width="3" fill="none" stroke-linecap="round"/>
   <circle cx="85" cy="125" r="4.5" fill="#3b2a55"/>
-  <path d="M140 56 l4 8 9 1 -6 6 1.5 9 -8.5 -4.5 -8.5 4.5 1.5 -9 -6 -6 9 -1z" fill="#ffe36b" stroke="#f0b400" stroke-width="1.5"/>
+  ${acc}
   </svg>`;
 }
 
@@ -475,6 +541,67 @@ function checkCountUp(){
 }
 const countPct = () => Math.round(S.count.stage / (COUNT_STAGES.length - 1) * 100);
 
+/* ---------- Shapes ---------- */
+const SHAPE_STAGES = [
+  { name:'Circle, square, triangle, rectangle', mode:'find',  set:['circle','square','triangle','rectangle'] },
+  { name:'More shapes',             mode:'find',  set:['circle','square','triangle','rectangle','oval','hexagon','trapezoid','rhombus','pentagon','half circle'] },
+  { name:'Count sides and corners', mode:'sides', set:['triangle','square','rectangle','trapezoid','rhombus','pentagon','hexagon'] },
+  { name:'3D shapes',               mode:'find',  set:['cube','sphere','cone','cylinder','box'] }
+];
+const SHAPE_LABEL = { box:'rectangular prism' };
+const shapeLabel = n => SHAPE_LABEL[n] || n;
+const withA = w => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
+const PTS = {
+  triangle:[[50,10],[92,86],[8,86]],
+  square:[[14,14],[86,14],[86,86],[14,86]],
+  rectangle:[[4,26],[96,26],[96,74],[4,74]],
+  rhombus:[[50,4],[86,50],[50,96],[14,50]],
+  trapezoid:[[28,22],[72,22],[96,80],[4,80]],
+  pentagon:[[50,8],[90,37],[75,84],[25,84],[10,37]],
+  hexagon:[[94,50],[72,88],[28,88],[6,50],[28,12],[72,12]]
+};
+const SHAPE_COLORS = ['#ff8ac6','#c9a0ff','#7fd8ff','#9ff5d2','#ffe066','#ffb38a'];
+function shade(hex, amt){
+  const v = parseInt(hex.slice(1), 16), t = amt < 0 ? 0 : 255, p = Math.abs(amt);
+  const ch = x => Math.round(x + (t - x) * p);
+  return `rgb(${ch(v >> 16)},${ch(v >> 8 & 255)},${ch(v & 255)})`;
+}
+function shapeSVG(name, color, rot = 0, marks = 0){
+  const A = c => `fill="${c}" stroke="#3b2a55" stroke-width="3" stroke-linejoin="round"`;
+  const n = ++svgN;
+  let body;
+  if (PTS[name]) body = `<polygon points="${PTS[name].map(q => q.join(',')).join(' ')}" ${A(color)}/>`;
+  else body = {
+    'circle': `<circle cx="50" cy="50" r="42" ${A(color)}/>`,
+    'oval': `<ellipse cx="50" cy="50" rx="46" ry="28" ${A(color)}/>`,
+    'half circle': `<path d="M6 70 A44 44 0 0 1 94 70 Z" ${A(color)}/>`,
+    'cube': `<polygon points="12,36 34,14 88,14 66,36" ${A(shade(color,.35))}/><polygon points="66,36 88,14 88,66 66,88" ${A(shade(color,-.2))}/><rect x="12" y="36" width="54" height="52" ${A(color)}/>`,
+    'box': `<polygon points="4,44 24,24 96,24 76,44" ${A(shade(color,.35))}/><polygon points="76,44 96,24 96,64 76,84" ${A(shade(color,-.2))}/><rect x="4" y="44" width="72" height="40" ${A(color)}/>`,
+    'sphere': `<defs><radialGradient id="sp${n}" cx=".35" cy=".32" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="${color}"/><stop offset="1" stop-color="${shade(color,-.35)}"/></radialGradient></defs><circle cx="50" cy="50" r="42" fill="url(#sp${n})" stroke="#3b2a55" stroke-width="3"/>`,
+    'cone': `<path d="M16 80 L50 6 L84 80 Z" ${A(color)}/><ellipse cx="50" cy="80" rx="34" ry="11" ${A(shade(color,-.18))}/>`,
+    'cylinder': `<path d="M16 22 V78 A34 11 0 0 0 84 78 V22" ${A(color)}/><ellipse cx="50" cy="22" rx="34" ry="11" ${A(shade(color,.35))}/>`
+  }[name];
+  let dots = '';
+  if (marks && PTS[name]) dots = PTS[name].slice(0, marks).map(([x, y], k) =>
+    `<circle cx="${x}" cy="${y}" r="10" fill="#ffd34d" stroke="#3b2a55" stroke-width="2.5"/><text x="${x}" y="${y + 4.5}" text-anchor="middle" font-size="13" font-weight="700" fill="#3b2a55" font-family="Fredoka,sans-serif">${k + 1}</text>`).join('');
+  return `<svg viewBox="-8 -8 116 116" aria-hidden="true"><g transform="rotate(${rot} 50 50)">${body}</g>${dots}</svg>`;
+}
+function shapeRot(name){
+  if (['cube','box','sphere','cone','cylinder','circle'].includes(name)) return 0;
+  if (['square','rhombus','rectangle'].includes(name)) return pick([0, 0, 12, -12, 90]);
+  return pick([0, 0, 20, -20, 180]);
+}
+function trackUp(track, stages, label){
+  if (track.stage >= stages.length - 1) return null;
+  const last = track.recent.slice(-8);
+  if (last.length >= 8 && last.reduce((x, y) => x + y, 0) >= 7){
+    track.stage++; track.recent = [];
+    return `${label} level ${track.stage + 1}: ${stages[track.stage].name}`;
+  }
+  return null;
+}
+const shapePct = () => Math.round(S.shape.stage / (SHAPE_STAGES.length - 1) * 100);
+
 /* ---------- Top bar ---------- */
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
@@ -568,11 +695,12 @@ function mapScreen(){
         <small>${LEVEL_NAMES[S.level]}</small><span class="bar"><i style="width:${levelPct()}%"></i></span></button>
       <button class="place open" id="garden"><span class="ico">🎧</span><b>Number Studio</b>
         <small>Math · Level ${S.math.stage + 1}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">👗</span><b>Dressing Room</b><small>Coming soon!</small></button>
+      <button class="place open" id="closetTile"><span class="ico">👗</span><b>Dressing Room</b><small>Spend your 💎</small></button>
       <button class="place locked"><span class="ico">🌟</span><b>New Stages</b><small>Coming soon!</small></button>
     </div>`;
   $('#tower').onclick = () => { sfx.pop(); balloonGame(); };
   $('#garden').onclick = () => { sfx.pop(); gardenScreen(); say('Welcome to the Number Studio! Pick a game!'); };
+  $('#closetTile').onclick = () => { sfx.pop(); closetScreen('hair'); say('Welcome to the dressing room! Pick something to wear!'); };
   bindLocked();
   const u = $('#uniTap');
   u.onclick = () => {
@@ -599,12 +727,14 @@ function gardenScreen(){
         <small>Level ${S.math.stage + 1}: ${MATH_STAGES[S.math.stage].name}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
       <button class="place open" id="countTile"><span class="ico">💯</span><b>Count to 100</b>
         <small>Level ${S.count.stage + 1}: ${COUNT_STAGES[S.count.stage].name}</small><span class="bar"><i style="width:${countPct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">🔷</span><b>Shapes</b><small>Coming soon!</small></button>
+      <button class="place open" id="shapesTile"><span class="ico">🔷</span><b>Shapes</b>
+        <small>Level ${S.shape.stage + 1}: ${SHAPE_STAGES[S.shape.stage].name}</small><span class="bar"><i style="width:${shapePct()}%"></i></span></button>
       <button class="place locked"><span class="ico">🕐</span><b>Clocks</b><small>Coming soon!</small></button>
       <button class="place locked"><span class="ico">🪙</span><b>Coins</b><small>Coming soon!</small></button>
     </div>`;
   $('#flowerMath').onclick = () => { sfx.pop(); mathGame(); };
   $('#countTile').onclick = () => { sfx.pop(); countGame(); };
+  $('#shapesTile').onclick = () => { sfx.pop(); shapeGame(); };
   bindLocked();
 }
 
@@ -749,6 +879,130 @@ function mathGame(){
     });
   }
   next();
+}
+
+function shapeGame(){
+  setTop(true, true);
+  const my = nav, N = 8, st = SHAPE_STAGES[S.shape.stage];
+  let i = 0, earned = 0, speakIt = null, lastTarget = null;
+  screen.innerHTML = `
+    <div class="game-head">
+      <div class="uni xs">${guideSVG()}</div>
+      <div class="bubble" id="prompt"></div>
+      <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
+    </div>
+    <div class="dots" id="dots">${'<span></span>'.repeat(N)}</div>
+    <div class="shape-area" id="area"></div>
+    <div class="answers" id="answers"></div>`;
+  const area = $('#area'), answers = $('#answers'), prompt = $('#prompt');
+  $('#hear').onclick = () => speakIt && speakIt();
+
+  function record(firstTry){
+    S.shape.recent.push(firstTry ? 1 : 0); S.shape.recent = S.shape.recent.slice(-10);
+    if (firstTry){ earned++; addGems(1); }
+    save();
+  }
+  function next(){
+    if (my !== nav) return;
+    if (i >= N) return roundDone(earned, trackUp(S.shape, SHAPE_STAGES, 'Shapes'), shapeGame);
+    screen.querySelectorAll('#dots span').forEach((d, k) => { d.className = k < i ? 'done' : k === i ? 'now' : ''; });
+    let target; do { target = pick(st.set); } while (target === lastTarget && st.set.length > 1);
+    lastTarget = target;
+    let firstTry = true, solved = false, busy = false;
+    const colors = shuffle(SHAPE_COLORS);
+
+    if (st.mode === 'find'){
+      const others = shuffle(st.set.filter(x => x !== target)).slice(0, 2);
+      const opts = shuffle([target, ...others]);
+      prompt.textContent = `Find the ${shapeLabel(target)}!`;
+      speakIt = () => say(`Find the ${shapeLabel(target)}!`);
+      answers.innerHTML = '';
+      area.innerHTML = `<div class="shape-row">${opts.map((o, k) => `<button class="shape-btn" data-s="${o}">${shapeSVG(o, colors[k], shapeRot(o))}</button>`).join('')}</div>`;
+      speakIt();
+      area.querySelectorAll('.shape-btn').forEach(b => b.onclick = async () => {
+        if (solved || busy) return;
+        const o = b.dataset.s;
+        if (o === target){
+          solved = true; b.classList.add('right'); sfx.tada(); confetti(20); record(firstTry);
+          await say(`Yes! That's ${withA(shapeLabel(target))}!`);
+          i++; setTimeout(next, 300);
+        } else {
+          firstTry = false; busy = true;
+          b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+          await say(`That's ${withA(shapeLabel(o))}. Find the ${shapeLabel(target)}!`);
+          busy = false;
+        }
+      });
+    } else {
+      const sides = PTS[target].length;
+      const word = Math.random() < .5 ? 'sides' : 'corners';
+      const color = colors[0];
+      prompt.textContent = `How many ${word}?`;
+      speakIt = () => say(`How many ${word} does the ${shapeLabel(target)} have?`);
+      area.innerHTML = `<div class="shape-big">${shapeSVG(target, color)}</div>`;
+      const choices = shuffle([sides, ...shuffle([3, 4, 5, 6].filter(x => x !== sides)).slice(0, 2)]);
+      const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
+      answers.innerHTML = choices.map((c, k) => `<button class="ans" data-n="${c}" style="--c:${COLORS[(i * 2 + k) % COLORS.length]}">${c}</button>`).join('');
+      speakIt();
+      answers.querySelectorAll('.ans').forEach(b => b.onclick = async () => {
+        if (solved || busy) return;
+        if (+b.dataset.n === sides){
+          solved = true; b.classList.add('right'); sfx.tada(); confetti(20); record(firstTry);
+          area.innerHTML = `<div class="shape-big">${shapeSVG(target, color, 0, sides)}</div>`;
+          await say(`Yes! ${cap(withA(shapeLabel(target)))} has ${sides} ${word}!`);
+          i++; setTimeout(next, 400);
+        } else {
+          firstTry = false; busy = true;
+          b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+          await say(`Let's count the corners together!`);
+          for (let k = 1; k <= sides; k++){
+            if (my !== nav) return;
+            area.innerHTML = `<div class="shape-big">${shapeSVG(target, color, 0, k)}</div>`;
+            await say(String(k), { rate:1.05 });
+          }
+          if (my !== nav) return;
+          await say('Now you try!');
+          area.innerHTML = `<div class="shape-big">${shapeSVG(target, color)}</div>`;
+          busy = false;
+        }
+      });
+    }
+  }
+  next();
+}
+
+function closetScreen(tab){
+  setTop(true, true);
+  const lists = { hair:HAIR, top:TOPS, acc:ACCS };
+  const swatch = it => it.icon ? `<span class="sw-ico">${it.icon}</span>`
+    : `<span class="sw" style="background:linear-gradient(135deg,${it.c.join(',')})"></span>`;
+  screen.innerHTML = `<div class="closet">
+    <div class="uni preview" id="preview">${guideSVG()}</div>
+    <div class="tabs">${[['hair','💇 Hair'],['top','👚 Outfit'],['acc','✨ Extras']].map(([k, l]) =>
+      `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="items">${lists[tab].map(it => {
+      const own = S.closet.owned.includes(it.id), wearing = S.closet[tab] === it.id;
+      return `<button class="item${wearing ? ' on' : ''}${own ? '' : ' locked-item'}" data-id="${it.id}">
+        ${swatch(it)}<b>${it.name}</b><small>${wearing ? 'Wearing ✓' : own ? 'Wear' : '💎 ' + it.cost}</small></button>`;
+    }).join('')}</div>
+  </div>`;
+  screen.querySelectorAll('.tab').forEach(b => b.onclick = () => { sfx.pop(); closetScreen(b.dataset.t); });
+  screen.querySelectorAll('.item').forEach(b => b.onclick = () => {
+    const it = lists[tab].find(x => x.id === b.dataset.id);
+    const own = S.closet.owned.includes(it.id);
+    if (own){
+      S.closet[tab] = it.id; save(); sfx.chime();
+      closetScreen(tab); say(`Ooh, ${it.name}!`);
+    } else if (S.gems >= it.cost){
+      S.gems -= it.cost; S.closet.owned.push(it.id); S.closet[tab] = it.id; save();
+      sfx.tada(); sfx.cheer(); confetti(40);
+      closetScreen(tab); say(`You got ${it.name}! It looks amazing!`);
+    } else {
+      b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
+      const need = it.cost - S.gems;
+      say(`You need ${need} more ${need === 1 ? 'gem' : 'gems'}. Play a game to earn more!`);
+    }
+  });
 }
 
 function roundDone(earned, unlock, again){
