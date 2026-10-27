@@ -85,7 +85,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .guide .bubble{flex:1;text-align:left}
 .map{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%;max-width:760px}
 .place{font:inherit;color:var(--ink);border:0;border-radius:26px;background:#fff;padding:16px 12px;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 0 #e0d3f7;min-height:150px;justify-content:center}
+  display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 0 #e0d3f7;min-height:128px;justify-content:center}
 .place:active{transform:translateY(4px);box-shadow:0 2px 0 #e0d3f7}
 .place .ico{font-size:clamp(2.6rem,12vw,3.6rem);line-height:1}
 .place b{font-size:clamp(1.15rem,4.8vw,1.5rem)}
@@ -308,6 +308,33 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .pet-item .goal{font-size:.8rem;line-height:1.15;color:var(--ink-soft)}
 .pet-item .bar{width:80%}
 .pet-locked{background:#f1ecfa}
+/* house */
+.home-room{position:relative;width:100%;max-width:760px;margin:2px 0 14px}
+.room{position:relative;width:100%;aspect-ratio:16/10;border-radius:22px;overflow:hidden;container-type:inline-size;
+  box-shadow:0 6px 0 rgba(0,0,0,.25),inset 0 0 0 4px rgba(255,255,255,.6);touch-action:manipulation}
+.room.edit{touch-action:none}
+.room .wall{position:absolute;inset:0 0 30% 0}
+.room .floor{position:absolute;inset:70% 0 0 0;box-shadow:inset 0 1.2cqw 0 rgba(0,0,0,.12)}
+.hitem{position:absolute;transform:translate(-50%,-100%);line-height:1;user-select:none;-webkit-user-select:none}
+.hitem .emo{display:block;transform:scaleX(var(--fx,1));filter:drop-shadow(0 .5cqw .3cqw rgba(0,0,0,.25))}
+.hitem.isrug{transform:translate(-50%,-50%)}
+.rug{display:block;border-radius:50%;box-shadow:0 .4cqw 0 rgba(0,0,0,.12)}
+.room.edit .hitem{cursor:grab}
+.hitem.drag{filter:drop-shadow(0 0 1.5cqw #fff);cursor:grabbing}
+.hitem.sel{outline:3px dashed #ff5fae;outline-offset:4px;border-radius:12px}
+.hitem.me .me-in{width:15cqw;position:relative}
+.hitem.me svg{width:100%;height:auto;display:block}
+.hitem.me .pet{font-size:7cqw;right:-55%;bottom:0}
+.room-bubble{position:absolute;top:8px;right:8px;max-width:58%;font-size:clamp(.95rem,3.8vw,1.3rem);padding:8px 14px;z-index:200}
+.room-bubble{animation:fadeAway .6s 5s forwards}
+@keyframes fadeAway{to{opacity:0;visibility:hidden}}
+.deco-btn{position:absolute;left:8px;top:8px;z-index:200;padding:8px 14px;font-size:clamp(.9rem,3.6vw,1.1rem)}
+.house{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:760px}
+.htools{display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;min-height:48px;text-align:center;flex-wrap:wrap}
+.htools .soft-btn{padding:8px 16px}
+.hsw{width:52px;height:40px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.08);display:block}
+.hsw.rugsw{border-radius:50%;height:30px;margin:5px 0}
+.hsw-e{font-size:2.4rem;line-height:46px;height:46px}
 .place.pets-tile{grid-column:1/-1;background:linear-gradient(160deg,#fff,#fff0f7);outline:4px solid #ffc2e1}
 /* grown-up page */
 .parent{width:100%;max-width:640px;display:flex;flex-direction:column;gap:12px;color:var(--ink)}
@@ -361,7 +388,7 @@ const SOUNDS_LIKE = {
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
 const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] }, coin:{ stage:0, recent:[] },
-  look:null, owned:null, chests:0, stats:{}, days:{}, played:0, pet:null, pets:[],
+  look:null, owned:null, chests:0, house:null, stats:{}, days:{}, played:0, pet:null, pets:[],
   story:{ chapter:0, level:0, stars:{}, friends:['', '', ''] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
@@ -1243,7 +1270,7 @@ function parentScreen(){
       <p><b>Tricky words:</b> ${tricky.length ? tricky.map(w => `<span class="tchip">${esc(w)} <small>missed ${st(w).miss}</small></span>`).join(' ') : 'none yet'}</p></div>
     <div class="pcard"><h3>Adventure & rewards</h3>
       <p>World ${Math.min(S.story.chapter + 1, CHAPTERS.length)} of ${CHAPTERS.length} · ${stars} stars</p>
-      <p>💎 ${S.gems} gems now · ${S.owned.filter(id => buyable.some(i => i.id === id)).length} of ${buyable.length} items · ${S.chests || 0} chests · ${(S.pets || []).length} of ${PETS.length} pets</p></div>
+      <p>💎 ${S.gems} gems now · ${S.owned.filter(id => buyable.some(i => i.id === id)).length} of ${buyable.length} items · ${S.chests || 0} chests · ${(S.pets || []).length} of ${PETS.length} pets · ${houseState().owned.length} of ${FURN.length + WALLS.length + FLOORS.length} house things</p></div>
     <div class="pcard"><h3>Backup</h3>
       <p>Progress is saved only on this device. Save a backup file now and then, so nothing is lost if the browser is cleared or she switches phones.</p>
       <p class="hint">Last backup: ${S.lastBackup ? new Date(S.lastBackup).toLocaleDateString() : 'never'}</p>
@@ -1315,10 +1342,9 @@ function splash(){
 function mapScreen(){
   setTop(true, false);
   screen.innerHTML = `
-    <div class="guide">
-      <div class="uni sm" id="uniTap">${guideSVG()}${petTag()}</div>
-      <div class="bubble">Hi Bella! Where do you want to play?</div>
-    </div>
+    <div class="home-room">${roomHTML(false)}
+      <div class="bubble room-bubble">Hi Bella! Where do you want to play?</div>
+      <button class="soft-btn deco-btn" id="decoBtn">🛠️ Decorate</button></div>
     <div class="map">
       <button class="place open" id="tower"><span class="ico">🎤</span><b>Word Stage</b>
         <small>${LEVEL_NAMES[wordFloor()]}</small><span class="bar"><i style="width:${levelPct()}%"></i></span></button>
@@ -1335,11 +1361,13 @@ function mapScreen(){
   $('#advTile').onclick = () => { sfx.pop(); worldScreen(); };
   $('#closetTile').onclick = () => { sfx.pop(); closetScreen('hairStyle'); say('Welcome to the dressing room! Pick something to wear!'); };
   bindLocked();
-  const u = $('#uniTap');
+  const u = screen.querySelector('.hitem.me .me-in');
   u.onclick = () => {
     u.classList.remove('hop'); void u.offsetWidth; u.classList.add('hop');
+    const bb = screen.querySelector('.room-bubble'); bb.style.animation = 'none'; void bb.offsetWidth; bb.style.animation = '';
     say('Hi Bella! You look amazing! Where do you want to play?');
   };
+  $('#decoBtn').onclick = () => { sfx.pop(); houseScreen(); say('Decorate your room! Buy new things and drag them around!'); };
 }
 function bindLocked(){
   screen.querySelectorAll('.place.locked').forEach(b => b.onclick = () => {
@@ -1997,6 +2025,173 @@ function closetScreen(tab){
   });
 }
 
+/* ================= HER HOUSE ================= */
+// Room coordinates are % of the room box: x = center, y = bottom of the item. Sizes are % of room width.
+const FURN = [
+  // furniture
+  { id:'bed',    cat:'furn', name:'Bed',          e:'🛏️', s:22, cost:0 },
+  { id:'plant',  cat:'furn', name:'Plant',        e:'🪴', s:11, cost:0 },
+  { id:'chair',  cat:'furn', name:'Chair',        e:'🪑', s:12, cost:30 },
+  { id:'sofa',   cat:'furn', name:'Sofa',         e:'🛋️', s:20, cost:55 },
+  { id:'tv',     cat:'furn', name:'TV',           e:'📺', s:13, cost:60 },
+  { id:'piano',  cat:'furn', name:'Piano',        e:'🎹', s:17, cost:80 },
+  { id:'tub',    cat:'furn', name:'Bubble Bath',  e:'🛁', s:18, cost:70 },
+  { id:'mirror', cat:'furn', name:'Mirror',       e:'🪞', s:12, cost:40 },
+  { id:'door',   cat:'furn', name:'Door',         e:'🚪', s:16, cost:35 },
+  // wall things
+  { id:'window', cat:'wall', name:'Window',       e:'🪟', s:15, cost:40, wall:1 },
+  { id:'pic',    cat:'wall', name:'Picture',      e:'🖼️', s:11, cost:35, wall:1 },
+  { id:'clock',  cat:'wall', name:'Clock',        e:'🕰️', s:8,  cost:30, wall:1 },
+  { id:'star',   cat:'wall', name:'Star',         e:'⭐', s:7,  cost:20, wall:1 },
+  { id:'moon',   cat:'wall', name:'Moon',         e:'🌙', s:8,  cost:25, wall:1 },
+  { id:'rainbow',cat:'wall', name:'Rainbow',      e:'🌈', s:16, cost:60, wall:1 },
+  { id:'disco',  cat:'wall', name:'Disco Ball',   e:'🪩', s:10, cost:70, wall:1 },
+  { id:'pinata', cat:'wall', name:'Piñata',       e:'🪅', s:10, cost:45, wall:1 },
+  // toys and fun
+  { id:'teddy',  cat:'toys', name:'Teddy Bear',   e:'🧸', s:9,  cost:30 },
+  { id:'unipl',  cat:'toys', name:'Unicorn Plush',e:'🦄', s:11, cost:50 },
+  { id:'guitar', cat:'toys', name:'Guitar',       e:'🎸', s:12, cost:50 },
+  { id:'mic',    cat:'toys', name:'Stage Mic',    e:'🎤', s:8,  cost:40 },
+  { id:'castle', cat:'toys', name:'Toy Castle',   e:'🏰', s:16, cost:90 },
+  { id:'dollh',  cat:'toys', name:'Dollhouse',    e:'🏠', s:14, cost:60 },
+  { id:'rocket', cat:'toys', name:'Toy Rocket',   e:'🚀', s:12, cost:50 },
+  { id:'books',  cat:'toys', name:'Books',        e:'📚', s:8,  cost:25 },
+  { id:'balloon',cat:'toys', name:'Balloons',     e:'🎈', s:9,  cost:20 },
+  { id:'gift',   cat:'toys', name:'Present',      e:'🎁', s:8,  cost:20 },
+  { id:'cake',   cat:'toys', name:'Cake',         e:'🎂', s:8,  cost:30 },
+  { id:'flowers',cat:'toys', name:'Flowers',      e:'💐', s:8,  cost:25 },
+  { id:'fish',   cat:'toys', name:'Goldfish',     e:'🐠', s:7,  cost:35 },
+  { id:'pumpkin',cat:'toys', name:'Pumpkin',      e:'🎃', s:9,  cost:20 },
+  { id:'tree',   cat:'toys', name:'Holiday Tree', e:'🎄', s:18, cost:50 },
+  { id:'snowman',cat:'toys', name:'Snowman',      e:'⛄', s:13, cost:30 },
+  // rugs (lie flat on the floor, always behind)
+  { id:'rug1',   cat:'rugs', name:'Pink Rug',     rug:'radial-gradient(ellipse,#ffd6ea 0 40%,#ff8ac6 41% 60%,#ffd6ea 61%)', s:30, cost:30 },
+  { id:'rug2',   cat:'rugs', name:'Rainbow Rug',  rug:'repeating-radial-gradient(ellipse,#ff8a8a 0 6%,#ffd36b 6% 12%,#8be0a0 12% 18%,#7fb8ff 18% 24%,#c69bff 24% 30%)', s:32, cost:45 },
+  { id:'rug3',   cat:'rugs', name:'Cloud Rug',    rug:'radial-gradient(ellipse,#ffffff 55%,#dfe9ff)', s:30, cost:35 },
+  { id:'rug4',   cat:'rugs', name:'Purple Rug',   rug:'repeating-radial-gradient(ellipse,#c9a0ff 0 10%,#e6d4ff 10% 20%)', s:28, cost:35 }
+];
+const WALLS = [
+  { id:'w0', name:'Lavender',    cost:0,  bg:'linear-gradient(#f3e9ff,#e3d3ff)' },
+  { id:'w1', name:'Pink Stripes',cost:40, bg:'repeating-linear-gradient(90deg,#ffd6ea 0 6cqw,#ffeaf5 6cqw 12cqw)' },
+  { id:'w2', name:'Sky Clouds',  cost:50, bg:'radial-gradient(ellipse 12cqw 4cqw at 22% 30%,#fff 60%,transparent 62%),radial-gradient(ellipse 15cqw 5cqw at 72% 20%,#fff 60%,transparent 62%),radial-gradient(ellipse 10cqw 3.5cqw at 55% 55%,#fff 60%,transparent 62%),linear-gradient(#a8dcff,#d6efff)' },
+  { id:'w3', name:'Starry Night',cost:60, bg:'radial-gradient(.5cqw .5cqw at 12% 20%,#fff 50%,transparent 60%),radial-gradient(.6cqw .6cqw at 38% 12%,#fff 50%,transparent 60%),radial-gradient(.5cqw .5cqw at 64% 34%,#fff 50%,transparent 60%),radial-gradient(.7cqw .7cqw at 86% 16%,#ffe36b 50%,transparent 60%),radial-gradient(.5cqw .5cqw at 26% 52%,#fff 50%,transparent 60%),radial-gradient(.5cqw .5cqw at 78% 58%,#fff 50%,transparent 60%),linear-gradient(#20175a,#4a2a8a)' },
+  { id:'w4', name:'Under the Sea',cost:50, bg:'radial-gradient(1.2cqw 1.2cqw at 20% 40%,rgba(255,255,255,.7) 40%,transparent 60%),radial-gradient(.8cqw .8cqw at 24% 26%,rgba(255,255,255,.7) 40%,transparent 60%),radial-gradient(1cqw 1cqw at 80% 50%,rgba(255,255,255,.7) 40%,transparent 60%),linear-gradient(#7fe0ff,#3f8fe0)' },
+  { id:'w5', name:'Forest',      cost:50, bg:'radial-gradient(ellipse 14cqw 22cqw at 10% 100%,#5cb86a 60%,transparent 62%),radial-gradient(ellipse 14cqw 26cqw at 90% 100%,#4aa85a 60%,transparent 62%),linear-gradient(#d8f7d0,#a6e3a0)' },
+  { id:'w6', name:'Rainbow',     cost:70, bg:'linear-gradient(#ffc9c9,#ffe9b0,#d3f5d3,#cfe6ff,#e6d4ff)' },
+  { id:'w7', name:'Castle Stone',cost:60, bg:'repeating-linear-gradient(0deg,transparent 0 5.6cqw,rgba(120,100,160,.25) 5.6cqw 6cqw),repeating-linear-gradient(90deg,transparent 0 11.6cqw,rgba(120,100,160,.25) 11.6cqw 12cqw),linear-gradient(#efe8f7,#ddd2ee)' }
+];
+const FLOORS = [
+  { id:'f0', name:'Wood',          cost:0,  bg:'repeating-linear-gradient(90deg,#dcab74 0 9cqw,#c9935a 9cqw 9.4cqw)' },
+  { id:'f1', name:'Pink Tiles',    cost:40, bg:'conic-gradient(#ffd6ea 25%,#ffb3d9 0 50%,#ffd6ea 0 75%,#ffb3d9 0) 0 0/8cqw 8cqw' },
+  { id:'f2', name:'Rainbow Carpet',cost:60, bg:'linear-gradient(90deg,#ffb3b3,#ffe08a,#b9f0b9,#b3d7ff,#d9c2ff)' },
+  { id:'f3', name:'Grass',         cost:40, bg:'linear-gradient(#8fdc7a,#5cb85c)' },
+  { id:'f4', name:'Beach Sand',    cost:40, bg:'radial-gradient(.4cqw .4cqw at 30% 40%,#c9a46a 50%,transparent 60%) 0 0/5cqw 5cqw,linear-gradient(#ffe6a8,#f5d088)' },
+  { id:'f5', name:'Fluffy Cloud',  cost:50, bg:'linear-gradient(#ffffff,#e3ecff)' }
+];
+const furn = id => FURN.find(f => f.id === id);
+function houseState(){
+  if (!S.house) S.house = { wall:'w0', floor:'f0', owned:['bed', 'plant', 'w0', 'f0'], items:[
+    { id:'bed', x:20, y:92, flip:false }, { id:'plant', x:88, y:86, flip:false } ], me:{ x:56, y:96 } };
+  return S.house;
+}
+const findBg = (arr, id) => (arr.find(x => x.id === id) || arr[0]).bg;
+// Draws the room. In edit mode items can be dragged.
+function roomHTML(edit){
+  const H = houseState();
+  const items = H.items.map((it, k) => {
+    const f = furn(it.id); if (!f) return '';
+    const z = f.rug ? 1 : 10 + Math.round(it.y);
+    const inner = f.rug ? `<span class="rug" style="background:${f.rug};width:${f.s}cqw;height:${(f.s * .3).toFixed(1)}cqw"></span>`
+      : `<span class="emo" style="font-size:${f.s}cqw">${f.e}</span>`;
+    return `<div class="hitem${f.rug ? ' isrug' : ''}" data-k="${k}" style="left:${it.x}%;top:${it.y}%;z-index:${z}${it.flip ? ';--fx:-1' : ''}">${inner}</div>`;
+  }).join('');
+  const me = `<div class="hitem me" data-k="me" style="left:${H.me.x}%;top:${H.me.y}%;z-index:${10 + Math.round(H.me.y)}"><div class="me-in">${guideSVG(null, 'full')}${petTag()}</div></div>`;
+  return `<div class="room${edit ? ' edit' : ''}" id="room">
+    <div class="wall" style="background:${findBg(WALLS, H.wall)}"></div><div class="floor" style="background:${findBg(FLOORS, H.floor)}"></div>
+    ${items}${me}</div>`;
+}
+function bindRoomDrag(onSelect){
+  const room = $('#room'), H = houseState();
+  room.querySelectorAll('.hitem').forEach(el => {
+    el.onpointerdown = e => {
+      e.preventDefault();
+      const r = room.getBoundingClientRect(), k = el.dataset.k;
+      const obj = k === 'me' ? H.me : H.items[+k];
+      const f = k === 'me' ? null : furn(obj.id);
+      const sx = e.clientX, sy = e.clientY, ox = obj.x, oy = obj.y; let moved = false;
+      try { el.setPointerCapture(e.pointerId); } catch(err){}
+      el.classList.add('drag');
+      el.onpointermove = ev => {
+        const dx = (ev.clientX - sx) / r.width * 100, dy = (ev.clientY - sy) / r.height * 100;
+        if (Math.abs(dx) + Math.abs(dy) > 1.5) moved = true;
+        obj.x = Math.max(4, Math.min(96, ox + dx));
+        obj.y = Math.max(f && f.rug ? 72 : 14, Math.min(99, oy + dy));
+        el.style.left = obj.x + '%'; el.style.top = obj.y + '%';
+        if (!(f && f.rug)) el.style.zIndex = 10 + Math.round(obj.y);
+      };
+      el.onpointerup = el.onpointercancel = () => {
+        el.onpointermove = el.onpointerup = el.onpointercancel = null; el.classList.remove('drag');
+        obj.x = Math.round(obj.x * 10) / 10; obj.y = Math.round(obj.y * 10) / 10; save();
+        if (moved) sfx.pop(); else onSelect && onSelect(k);
+      };
+    };
+  });
+}
+const HOUSE_TABS = [['furn','🛋️ Furniture'],['wall','🖼️ Wall'],['toys','🧸 Toys'],['rugs','🧶 Rugs'],['walls','🎨 Walls'],['floors','🪵 Floors']];
+function houseScreen(tab = 'furn', sel = null){
+  setTop(true, true);
+  const H = houseState();
+  const list = tab === 'walls' ? WALLS.map(w => ({ ...w, kind:'wall' })) : tab === 'floors' ? FLOORS.map(f => ({ ...f, kind:'floor' }))
+    : FURN.filter(f => f.cat === tab);
+  const placed = id => H.items.some(it => it.id === id);
+  const swatch = x => x.kind ? `<span class="hsw" style="background:${x.bg}"></span>`
+    : x.rug ? `<span class="hsw rugsw" style="background:${x.rug}"></span>` : `<span class="hsw-e">${x.e}</span>`;
+  const tag = x => {
+    const own = H.owned.includes(x.id);
+    if (x.kind) return (x.kind === 'wall' ? H.wall : H.floor) === x.id ? 'Using ✓' : own ? 'Use' : '💎 ' + x.cost;
+    return placed(x.id) ? 'In room ✓' : own ? 'Put in room' : '💎 ' + x.cost;
+  };
+  const selIt = sel !== null && sel !== 'me' ? H.items[sel] : null;
+  screen.innerHTML = `<div class="house">
+    ${roomHTML(true)}
+    <div class="htools" id="htools">${selIt ? `<b>${esc(furn(selIt.id).name)}</b>
+        <button class="soft-btn" id="hFlip">↔ Flip</button><button class="soft-btn" id="hAway">📦 Put away</button>`
+      : '<span>Drag things to move them. Tap one to flip it or put it away.</span>'}</div>
+    <div class="tabs">${HOUSE_TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="items">${list.map(x => `<button class="item${placed(x.id) || (x.kind && tag(x) === 'Using ✓') ? ' on' : ''}${H.owned.includes(x.id) ? '' : ' locked-item'}" data-id="${x.id}">
+      ${swatch(x)}<b>${esc(x.name)}</b><small>${tag(x)}</small></button>`).join('')}</div>
+  </div>`;
+  if (selIt){ const el = screen.querySelector(`.hitem[data-k="${sel}"]`); if (el) el.classList.add('sel'); }
+  const tabsEl = screen.querySelector('.tabs'), onTab = tabsEl.querySelector('.on');
+  if (onTab) tabsEl.scrollLeft = onTab.offsetLeft - 20;
+  bindRoomDrag(k => {
+    if (k === 'me'){ const m = screen.querySelector('.hitem.me .me-in'); m.classList.remove('hop'); void m.offsetWidth; m.classList.add('hop'); say('This is my room!'); return; }
+    sfx.pop(); houseScreen(tab, +k);
+  });
+  if (selIt){
+    $('#hFlip').onclick = () => { selIt.flip = !selIt.flip; save(); sfx.pop(); houseScreen(tab, sel); };
+    $('#hAway').onclick = () => { H.items.splice(sel, 1); save(); sfx.pop(); houseScreen(tab); };
+  }
+  screen.querySelectorAll('.tab').forEach(b => b.onclick = () => { sfx.pop(); houseScreen(b.dataset.t); });
+  screen.querySelectorAll('.item').forEach(b => b.onclick = () => {
+    const id = b.dataset.id, x = list.find(y => y.id === id), own = H.owned.includes(id);
+    const use = () => {
+      if (x.kind === 'wall') H.wall = id; else if (x.kind === 'floor') H.floor = id;
+      else if (!placed(id)) H.items.push({ id, x:Math.round(30 + Math.random() * 40), y:x.wall ? 40 : x.rug ? 90 : 94, flip:false });
+    };
+    if (own){
+      if (!x.kind && placed(id)){ sfx.pop(); return houseScreen(tab, H.items.findIndex(it => it.id === id)); }
+      use(); save(); sfx.chime(); houseScreen(tab); say(`Ooh, ${x.name}!`);
+    } else if (S.gems >= x.cost){
+      S.gems -= x.cost; H.owned.push(id); use(); save();
+      sfx.tada(); sfx.cheer(); confetti(40); houseScreen(tab); say(`You got the ${x.name}! Drag it where you want it!`);
+    } else {
+      b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
+      const need = x.cost - S.gems; say(`You need ${need} more ${need === 1 ? 'gem' : 'gems'}. Play a game to earn more!`);
+    }
+  });
+}
+
 /* ================= STORY MODE ================= */
 const FRIEND_LOOKS = [
   { hairStyle:'pony', hairColor:'h0', top:'t3', bottom:'b2', shoes:'s1', neck:null, skin:'#f1c9a8', skinD:'#d9ab88', mark:false },
@@ -2602,7 +2797,7 @@ if (!S.look){
 // Each screen saves its name; if the phone reloads the app, "Keep playing" brings her back there.
 if (!S.played && S.rounds) S.played = S.rounds; // count games played before this update
 const RESUME = ['mapScreen','gardenScreen','closetScreen','worldScreen','chapterMap','storyLevel',
-  'balloonGame','mathGame','countGame','shapeGame','clockGame','coinGame','petsScreen'];
+  'balloonGame','mathGame','countGame','shapeGame','clockGame','coinGame','petsScreen','houseScreen'];
 const SCREENS = {};
 RESUME.forEach(name => {
   const orig = window[name]; SCREENS[name] = orig;
@@ -2612,7 +2807,7 @@ RESUME.forEach(name => {
 mapScreen = window.mapScreen; gardenScreen = window.gardenScreen; closetScreen = window.closetScreen;
 worldScreen = window.worldScreen; chapterMap = window.chapterMap; storyLevel = window.storyLevel;
 balloonGame = window.balloonGame; mathGame = window.mathGame; countGame = window.countGame;
-shapeGame = window.shapeGame; clockGame = window.clockGame; coinGame = window.coinGame; petsScreen = window.petsScreen;
+shapeGame = window.shapeGame; clockGame = window.clockGame; coinGame = window.coinGame; petsScreen = window.petsScreen; houseScreen = window.houseScreen;
 const _parent = parentScreen; parentScreen = (...a) => { S.where = ['parentScreen']; save(); return _parent(...a); };
 const _gate = parentGate; parentGate = (...a) => { S.where = ['parentScreen']; save(); return _gate(...a); };
 const _rescue = rescueScene; rescueScene = (...a) => { S.where = ['worldScreen']; save(); return _rescue(...a); };
