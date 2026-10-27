@@ -322,7 +322,7 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .pbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
 .pbars span{width:70%;background:linear-gradient(180deg,#ff8fc8,#b794f6);border-radius:6px 6px 2px 2px;min-height:2px}
 .pbars b{font-size:.75rem}.pbars small{font-size:.8rem;color:var(--ink-soft)}
-.chip{display:inline-block;background:#fff0f7;border-radius:999px;padding:2px 10px;margin:2px}
+.tchip{display:inline-block;background:#fff0f7;border-radius:999px;padding:2px 10px;margin:2px}
 .prize-ov{position:fixed;inset:0;z-index:55;background:rgba(26,16,64,.72);display:flex;align-items:center;justify-content:center;padding:20px}
 .prize .row{margin-top:6px}
 </style>
@@ -1240,12 +1240,38 @@ function parentScreen(){
       <p class="hint">Based on her last 20 first-try answers in each area (needs 10+). Green 85%+, yellow 65–84%, red under 65%.</p></div>
     <div class="pcard"><h3>By area <small>(first-try right)</small></h3>${rows}</div>
     <div class="pcard"><h3>Sight words</h3>${lists}
-      <p><b>Tricky words:</b> ${tricky.length ? tricky.map(w => `<span class="chip">${esc(w)} <small>missed ${st(w).miss}</small></span>`).join(' ') : 'none yet'}</p></div>
+      <p><b>Tricky words:</b> ${tricky.length ? tricky.map(w => `<span class="tchip">${esc(w)} <small>missed ${st(w).miss}</small></span>`).join(' ') : 'none yet'}</p></div>
     <div class="pcard"><h3>Adventure & rewards</h3>
       <p>World ${Math.min(S.story.chapter + 1, CHAPTERS.length)} of ${CHAPTERS.length} · ${stars} stars</p>
       <p>💎 ${S.gems} gems now · ${S.owned.filter(id => buyable.some(i => i.id === id)).length} of ${buyable.length} items · ${S.chests || 0} chests · ${(S.pets || []).length} of ${PETS.length} pets</p></div>
+    <div class="pcard"><h3>Backup</h3>
+      <p>Progress is saved only on this device. Save a backup file now and then, so nothing is lost if the browser is cleared or she switches phones.</p>
+      <p class="hint">Last backup: ${S.lastBackup ? new Date(S.lastBackup).toLocaleDateString() : 'never'}</p>
+      <div class="row"><button class="soft-btn" id="pSave">💾 Save backup</button><button class="soft-btn" id="pLoad">📂 Restore backup</button></div>
+      <input type="file" id="pFile" accept=".json,application/json" hidden></div>
     <div class="row"><button class="soft-btn" id="pVoice">🔊 Voice</button><button class="big-btn" id="pDone">Done</button></div>
   </div>`;
+  $('#pSave').onclick = () => {
+    S.lastBackup = Date.now(); save();
+    const blob = new Blob([JSON.stringify({ app:'bella-learns', saved:new Date().toISOString(), data:S })], { type:'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `bella-progress-${today()}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    parentScreen();
+  };
+  $('#pLoad').onclick = () => $('#pFile').click();
+  $('#pFile').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      let d; try { d = JSON.parse(r.result); } catch(err){ alert('That file is not a Bella backup.'); return; }
+      const data = d && d.app === 'bella-learns' ? d.data : null;
+      if (!data || typeof data.gems !== 'number' || !data.words){ alert('That file is not a Bella backup.'); return; }
+      if (!confirm(`Replace the progress on this device with the backup from ${new Date(d.saved).toLocaleString()}? (${data.gems} gems, ${(data.owned || []).length} items)`)) return;
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(err){ alert('Could not restore on this device.'); return; }
+      location.reload();
+    };
+    r.readAsText(f);
+  };
   $('#pVoice').onclick = () => voiceScreen();
   $('#pDone').onclick = () => mapScreen();
 }
