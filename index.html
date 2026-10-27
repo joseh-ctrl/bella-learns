@@ -226,6 +226,22 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
   border:3px solid rgba(255,255,255,.7);opacity:calc(.35 + var(--left) * .13);transition:opacity .4s,transform .3s}
 .bubble-cage i{display:none}
 .bubble-cage.popped{transform:scale(1.6);opacity:0;transition:transform .35s,opacity .35s}
+.tower{position:absolute;inset:-8% -30% -6%;border-radius:12px 12px 0 0;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 16px),linear-gradient(#d9cdee,#a996cf);
+  box-shadow:inset 0 0 0 3px #8a77b8;transition:transform .7s ease,opacity .7s}
+.tower .door{position:absolute;left:50%;bottom:0;width:46%;height:56%;transform:translateX(-50%);border-radius:40px 40px 0 0;background:#7a4a2a;box-shadow:inset 0 0 0 3px #4e2d17}
+.tower .locks{position:absolute;left:0;right:0;top:6%;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;font-size:clamp(.8rem,3.4vw,1.1rem)}
+.tower .locks i{font-style:normal;transition:transform .3s}.tower .locks i.open{transform:scale(1.25)}
+.tower.opened{transform:translateY(105%);opacity:0}
+.lights{position:absolute;top:22px;left:0;right:0;display:flex;justify-content:space-evenly}
+.lights i{width:clamp(16px,4vw,22px);aspect-ratio:1;border-radius:50%;background:#4a3b6b;box-shadow:inset 0 0 0 3px rgba(255,255,255,.25);transition:.3s}
+.lights i.on{background:#ffe066;box-shadow:0 0 14px 6px rgba(255,224,102,.7)}
+.band{position:absolute;left:0;right:0;bottom:-4px;height:74%;display:flex;justify-content:center;gap:2%}
+.band span{height:100%;aspect-ratio:200/392}
+.band.big{position:static;height:auto;gap:4px;align-items:flex-end}
+.band.big span{width:clamp(66px,20vw,110px);height:auto;aspect-ratio:auto;display:flex;flex-direction:column;align-items:center;animation:bounce 1.6s ease-in-out infinite}
+.band.big small{color:#fff;font-weight:700;font-size:clamp(.85rem,3.6vw,1.05rem)}
+.band svg{width:100%;height:auto;display:block}
 /* dressing room */
 .closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
 .uni.preview{width:clamp(120px,34vw,180px);cursor:default}
@@ -1522,17 +1538,50 @@ const CHAPTERS = [
       'There she is! Grumble trapped your friend in a giant bubble!'
     ],
     names:['Pearl','Marina','Coral','Nova','Jade'] },
-  { id:'castle', name:'Crystal Castle', icon:'🏰', ready:false, bg:'linear-gradient(180deg,#5a3d8f,#a77fd6)', deco:['🏰','✨','🦄','👑','💎','🌙'] },
-  { id:'concert', name:'The Big Concert', icon:'🎤', ready:false, bg:'linear-gradient(180deg,#2a1350,#7a2d8f)', deco:['🎤','🎸','🥁','🎹','⭐','🎶'] }
+  { id:'castle', name:'Crystal Castle', icon:'🏰', ready:true,
+    bg:'linear-gradient(180deg,#4a2f7f 0%,#7b56c0 55%,#b796e6 100%)', deco:['🏰','✨','🦄','👑','💎','🌙','🗝️','✨','🐉','🌙'],
+    cage:'tower', cageName:'tall tower',
+    levels:[
+      'Wow! The Crystal Castle sparkles everywhere. Let\'s go in!',
+      'The castle gate is locked. Answer to open it!',
+      'A friendly dragon guards the stairs. He loves puzzles!',
+      'Shh! The royal cat is sleeping. Tiptoe and answer!',
+      'Look! A tiny guitar pick. It belongs to your friend!',
+      'The magic mirror asks you some questions!',
+      'I hear singing from the tower. Almost there!',
+      'There she is! Grumble locked your friend in the tall tower!'
+    ],
+    names:['Ivy','Stella','Daisy','Willow','Rosie'] },
+  { id:'concert', name:'The Big Concert', icon:'🎤', ready:true, final:true,
+    bg:'linear-gradient(180deg,#1d0c3f 0%,#4a1c78 55%,#8a2d8f 100%)', deco:['🎤','🎸','🥁','🎹','⭐','🎶','💡','🎵','🎟️','✨'],
+    cage:'lights', cageName:'stage lights',
+    levels:[
+      'The whole band is back! Let\'s get ready for the big concert!',
+      'Sound check! Answer to test the microphones.',
+      'Tune the guitars! Get it right to make them sound sweet.',
+      'Time to pick your concert outfits. Answer to unlock the dressing room!',
+      'Practice the dance moves! One, two, three!',
+      'The fans are lining up! Answer to open the doors.',
+      'Backstage! Your band is so excited!',
+      'It\'s showtime! Answer to turn on the stage lights!'
+    ] }
 ];
 const LEVEL_POS = [[18,88],[50,80],[80,70],[56,60],[24,50],[40,38],[74,28],[50,12]]; // % positions on the map
 function storyTileText(){
   const st = S.story;
-  if (st.chapter >= CHAPTERS.length || !CHAPTERS[st.chapter].ready) return 'More worlds coming soon!';
+  if (st.chapter >= CHAPTERS.length) return '⭐ Band saved! Replay any world';
+  if (!CHAPTERS[st.chapter].ready) return 'More worlds coming soon!';
   return `${CHAPTERS[st.chapter].name} · Level ${st.level + 1}`;
 }
-function grumbleSVG(){
-  return `<svg viewBox="0 0 120 80" aria-hidden="true"><g fill="#8d8fa8">
+function grumbleSVG(happy = S.story.chapter >= CHAPTERS.length){
+  return happy
+  ? `<svg viewBox="0 0 120 90" aria-hidden="true">
+    <path d="M10 86 A50 50 0 0 1 110 86" fill="none" stroke="#ff8fc8" stroke-width="5"/><path d="M17 86 A43 43 0 0 1 103 86" fill="none" stroke="#ffe066" stroke-width="5"/><path d="M24 86 A36 36 0 0 1 96 86" fill="none" stroke="#8be0a0" stroke-width="5"/>
+    <g fill="#fff"><circle cx="34" cy="50" r="22"/><circle cx="60" cy="38" r="28"/><circle cx="88" cy="50" r="22"/><rect x="20" y="50" width="82" height="22" rx="11"/></g>
+    <path d="M44 46 q6 -7 12 0 M66 46 q6 -7 12 0" stroke="#3b2a55" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M48 58 Q61 72 74 58" fill="#ff8fa8" stroke="#3b2a55" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="40" cy="58" rx="5" ry="3" fill="#ffb3c8"/><ellipse cx="82" cy="58" rx="5" ry="3" fill="#ffb3c8"/></svg>`
+  : `<svg viewBox="0 0 120 80" aria-hidden="true"><g fill="#8d8fa8">
     <circle cx="34" cy="44" r="22"/><circle cx="60" cy="32" r="28"/><circle cx="88" cy="44" r="22"/><rect x="20" y="44" width="82" height="22" rx="11"/></g>
     <path d="M44 34 l12 5 M78 34 l-12 5" stroke="#3b2a55" stroke-width="4" stroke-linecap="round"/>
     <circle cx="50" cy="44" r="4" fill="#3b2a55"/><circle cx="72" cy="44" r="4" fill="#3b2a55"/>
@@ -1549,13 +1598,14 @@ function worldScreen(){
     <div class="guide">
       <div class="uni sm grumble">${grumbleSVG()}</div>
       <div class="bubble">${st.chapter === 0 ? "Oh no! Grumble blew your band away before the big concert! Let's find them!"
+        : st.chapter >= CHAPTERS.length ? 'You did it! The band is back together, and Grumble is your biggest fan! 🌈'
         : `You've rescued ${Math.min(st.chapter, 3)} of 3 friends! ${st.chapter < 3 ? 'Keep going!' : 'Time for the big concert!'}`}</div>
     </div>
     <div class="map">${CHAPTERS.map((c, k) => {
       const open = c.ready && k <= st.chapter, done = k < st.chapter;
       return `<button class="place ${open ? 'open' : 'locked'} world" data-k="${k}" style="--wbg:${c.bg}">
         <span class="ico">${c.icon}</span><b>${c.name}</b>
-        <small>${done ? '⭐ Rescued ' + esc(friendName(k)) + '!' : open ? 'Level ' + (st.level + 1) + ' of 8' : !c.ready ? 'Coming soon!' : '🔒 Locked'}</small></button>`;
+        <small>${done ? (c.final ? '⭐ Concert done!' : '⭐ Rescued ' + esc(friendName(k)) + '!') : open ? 'Level ' + (st.level + 1) + ' of 8' : !c.ready ? 'Coming soon!' : '🔒 Locked'}</small></button>`;
     }).join('')}</div>`;
   if (!st.seenIntro){
     st.seenIntro = true; save();
@@ -1609,7 +1659,7 @@ function chapterMap(k){
   const deco = c.deco.map((e, i) => `<span class="deco" style="left:${(i * 37) % 92}%;top:${(i * 53 + 7) % 90}%">${e}</span>`).join('');
   const path = LEVEL_POS.map(([x, y]) => `${x},${y}`).join(' ');
   screen.innerHTML = `
-    <div class="chapter-head"><b>${c.icon} ${c.name}</b><small>Rescue ${esc(friendName(k))}!</small></div>
+    <div class="chapter-head"><b>${c.icon} ${c.name}</b><small>${c.final ? 'Put on the big show!' : 'Rescue ' + esc(friendName(k)) + '!'}</small></div>
     <div class="world-map" style="background:${c.bg}">
       ${deco}
       <svg class="trail" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${path}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6" stroke-dasharray="2 2.2" stroke-linecap="round"/></svg>
@@ -1619,7 +1669,7 @@ function chapterMap(k){
         return `<button class="node ${state}${last ? ' boss' : ''}" data-i="${i}" style="left:${x}%;top:${y}%">
           ${last ? (i < cur ? '🎉' : '🔒') : i + 1}${stars ? `<span class="nstars">${'⭐'.repeat(stars)}</span>` : ''}</button>`;
       }).join('')}
-      ${cur < 8 ? '' : `<div class="freed" style="left:${LEVEL_POS[7][0]}%;top:${LEVEL_POS[7][1]}%">${guideSVG(FRIEND_LOOKS[k], 'head')}</div>`}
+      ${cur < 8 || c.final ? '' : `<div class="freed" style="left:${LEVEL_POS[7][0]}%;top:${LEVEL_POS[7][1]}%">${guideSVG(FRIEND_LOOKS[k], 'head')}</div>`}
       <div class="walker" id="walker" style="left:${LEVEL_POS[at][0]}%;top:${LEVEL_POS[at][1]}%">${guideSVG(null, 'full')}</div>
     </div>`;
   screen.querySelectorAll('.node').forEach(b => b.onclick = () => {
@@ -1645,11 +1695,15 @@ function storyLevel(k, i){
       <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
     </div>
     <div class="scene" style="background:${c.bg}">
-      <div class="scene-me">${guideSVG(null, 'full')}</div>
-      ${boss ? `<div class="scene-friend">${guideSVG(FRIEND_LOOKS[k], 'full')}${c.cage === 'bubble'
-          ? `<div class="bubble-cage" id="cage">${'<i></i>'.repeat(N)}</div>`
+      ${boss && c.final
+        ? `<div class="lights" id="cage">${'<i></i>'.repeat(N)}</div>
+           <div class="band">${[null, ...FRIEND_LOOKS].map(l => `<span>${guideSVG(l, 'full')}</span>`).join('')}</div>`
+        : `<div class="scene-me">${guideSVG(null, 'full')}</div>
+      ${boss ? `<div class="scene-friend">${guideSVG(FRIEND_LOOKS[k], 'full')}${
+            c.cage === 'bubble' ? `<div class="bubble-cage" id="cage">${'<i></i>'.repeat(N)}</div>`
+          : c.cage === 'tower' ? `<div class="tower" id="cage"><b class="door"></b><div class="locks">${'<i>🔒</i>'.repeat(N)}</div></div>`
           : `<div class="cage" id="cage">${'<i></i>'.repeat(N)}</div>`}</div>`
-             : `<div class="scene-goal">${c.deco[i % c.deco.length]}</div>`}
+             : `<div class="scene-goal">${c.deco[i % c.deco.length]}</div>`}`}
       <div class="dots scene-dots" id="dots">${'<span></span>'.repeat(N)}</div>
     </div>
     <div class="qarea" id="qa"></div>`;
@@ -1660,7 +1714,9 @@ function storyLevel(k, i){
     my, qa, setPrompt: (t, spoken) => { prompt.textContent = t; speakIt = () => say(spoken || t); speakIt(); },
     gem: () => { earned++; addGems(1); }
   };
-  const intro = boss ? `${friendName(k)} is trapped in a ${c.cageName}! Answer to break it!` : c.levels[i].replace('your friend', friendName(k));
+  const intro = boss && c.final ? c.levels[7]
+    : boss && c.cage === 'tower' ? `${friendName(k)} is locked in the ${c.cageName}! Answer to open the locks!`
+    : boss ? `${friendName(k)} is trapped in a ${c.cageName}! Answer to break it!` : c.levels[i].replace('your friend', friendName(k));
   prompt.textContent = intro;
   say(intro).then(next);
 
@@ -1671,8 +1727,16 @@ function storyLevel(k, i){
     CHALLENGES[kinds[q]](ctx, ok => {
       if (ok) firstTries++;
       if (boss){
-        const cg = $('#cage'), bar = cg.children[q]; if (bar) bar.classList.add('broke');
-        if (c.cage === 'bubble'){ cg.style.setProperty('--left', N - q - 1); if (q === N - 1){ cg.classList.add('popped'); sfx.pop(); } }
+        const cg = $('#cage');
+        if (c.cage === 'tower'){
+          const lk = cg.querySelectorAll('.locks i')[q]; if (lk){ lk.textContent = '🔓'; lk.classList.add('open'); }
+          if (q === N - 1) cg.classList.add('opened');
+        } else if (c.cage === 'lights'){
+          const bulb = cg.children[q]; if (bulb) bulb.classList.add('on'); sfx.chime();
+        } else {
+          const bar = cg.children[q]; if (bar) bar.classList.add('broke');
+          if (c.cage === 'bubble'){ cg.style.setProperty('--left', N - q - 1); if (q === N - 1){ cg.classList.add('popped'); sfx.pop(); } }
+        }
       }
       q++; setTimeout(next, 350);
     });
@@ -1682,13 +1746,13 @@ function storyLevel(k, i){
     const key = c.id + '-' + i, st = S.story;
     st.stars[key] = Math.max(st.stars[key] || 0, stars);
     const firstClear = st.chapter === k && st.level === i;
-    let bonus = firstClear ? (boss ? 15 : 3) : 1;
+    let bonus = firstClear ? (boss ? (c.final ? 30 : 15) : 3) : 1;
     addGems(bonus); earned += bonus;
     if (firstClear){
       if (boss){ st.chapter = k + 1; st.level = 0; } else st.level = i + 1;
     }
     save();
-    if (boss) return rescueScene(k, earned);
+    if (boss) return c.final ? finaleScene(earned) : rescueScene(k, earned);
     sfx.tada(); sfx.cheer(); confetti(50);
     setTop(true, true);
     screen.innerHTML = `<div class="center">
@@ -1713,8 +1777,22 @@ function rescueScene(k, earned){
     <div class="bubble gold">You rescued ${esc(nm)}! 🎉<br>She's back in the band!</div>
     <div class="bubble">You earned <b>${earned}</b> 💎</div>
     <button class="big-btn" id="goOn">Yay! ➜</button></div>`;
-  say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`);
+  say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.final ? "Now it's time for the big concert!" : nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`);
   $('#goOn').onclick = () => worldScreen();
+}
+function finaleScene(earned){
+  setTop(true, true);
+  sfx.tada(); sfx.cheer(); confetti(140);
+  setTimeout(() => { sfx.cheer(); confetti(80); }, 1600);
+  const names = ['Bella', ...S.story.friends.map((n, j) => n || friendName(j))];
+  screen.innerHTML = `<div class="center finale">
+    <div class="uni sm">${grumbleSVG(true)}</div>
+    <div class="band big">${[null, ...FRIEND_LOOKS].map((l, j) => `<span style="animation-delay:-${j * .4}s">${guideSVG(l, 'full')}<small>${esc(names[j])}</small></span>`).join('')}</div>
+    <div class="bubble gold">The concert was amazing! 🎤🎉<br>The band is back together!</div>
+    <div class="bubble">Grumble loved the music so much, he's not grumpy anymore! You earned <b>${earned}</b> 💎</div>
+    <button class="big-btn" id="goOn">🏠 Home</button></div>`;
+  say(`The concert was amazing! ${names.slice(1).join(', ')} and Bella are back together! And Grumble loved the music so much, he isn't grumpy anymore! You are a super star, Bella!`);
+  $('#goOn').onclick = () => mapScreen();
 }
 function storyKinds(){
   const bag = ['word','word','math','count','shape','clock','coin','word','math'];
