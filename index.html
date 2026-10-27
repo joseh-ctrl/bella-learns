@@ -146,6 +146,12 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .ans:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(74,59,107,.18)}
 .ans:disabled{opacity:.35}
 .ans.right{background:#8be0a0;transform:scale(1.15);transition:transform .2s}
+/* counting */
+.stones{flex:1;display:flex;align-items:center;justify-content:center;gap:clamp(6px,2.5vw,18px);width:100%;max-width:760px}
+.stone{--c:#fff;width:clamp(60px,16.5vw,110px);aspect-ratio:1;border-radius:50%;background:var(--c);display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.5rem,6.6vw,2.6rem);font-weight:700;box-shadow:0 5px 0 rgba(74,59,107,.15);transition:transform .25s}
+.stone.miss{background:#fff;border:4px dashed var(--purple);color:var(--purple);animation:bob 2s ease-in-out infinite}
+.stone.lit{transform:scale(1.18);box-shadow:0 0 0 5px #ffd34d,0 5px 0 rgba(74,59,107,.15)}
 .conf{position:fixed;top:-14px;width:10px;height:14px;border-radius:3px;z-index:50;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(106vh) rotate(600deg)}}
 </style>
@@ -183,7 +189,7 @@ const SOUNDS_LIKE = {
 
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
-const DEFAULTS = { unicornName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] } };
+const DEFAULTS = { unicornName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
   catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
@@ -405,6 +411,51 @@ function checkMathUp(){
 }
 const mathPct = () => Math.round(S.math.stage / (MATH_STAGES.length - 1) * 100);
 
+/* ---------- Counting (Count to 100) ---------- */
+const COUNT_STAGES = [
+  { name:'Next number to 20',  step:1,  min:1,  max:20,  pos:'end' },
+  { name:'Next number to 50',  step:1,  min:15, max:50,  pos:'end' },
+  { name:'Next number to 100', step:1,  min:40, max:100, pos:'end' },
+  { name:'Missing number',     step:1,  min:1,  max:100, pos:'any' },
+  { name:'Count by 10s',       step:10, max:100, pos:'any' },
+  { name:'Count by 5s',        step:5,  max:100, pos:'any' },
+  { name:'Count by 2s',        step:2,  max:50,  pos:'any' }
+];
+function makeCount(seen){
+  const st = COUNT_STAGES[S.count.stage], s = st.step;
+  for (let t = 0; t < 80; t++){
+    let start;
+    if (s === 1){
+      start = rand(st.min, st.max - 4);
+      // half the time, cross a ten (like 27, 28, 29, 30) since that's the tricky part
+      if (Math.random() < .5) start = Math.min(st.max - 4, Math.max(st.min, start - (start % 10) + rand(6, 9)));
+    } else start = s * rand(0, st.max / s - 4);
+    const seq = [0, 1, 2, 3, 4].map(k => start + k * s);
+    const miss = st.pos === 'end' ? 4 : rand(1, 4);
+    const key = start + '-' + miss; if (seen.has(key)) continue; seen.add(key);
+    return { seq, miss, ans: seq[miss], step: s };
+  }
+  return { seq:[1,2,3,4,5], miss:4, ans:5, step:1 };
+}
+function countChoices(p){
+  const c = new Set([p.ans]);
+  const near = shuffle([p.ans + p.step, p.ans - p.step, p.ans + 1, p.ans - 1, p.ans + 10, p.ans - 10])
+    .filter(x => x >= 0 && x <= 120 && x !== p.ans);
+  for (const x of near){ if (c.size >= 3) break; c.add(x); }
+  return shuffle([...c]);
+}
+function checkCountUp(){
+  const m = S.count;
+  if (m.stage >= COUNT_STAGES.length - 1) return null;
+  const last = m.recent.slice(-8);
+  if (last.length >= 8 && last.reduce((x, y) => x + y, 0) >= 7){
+    m.stage++; m.recent = [];
+    return `Count to 100 level ${m.stage + 1}: ${COUNT_STAGES[m.stage].name}`;
+  }
+  return null;
+}
+const countPct = () => Math.round(S.count.stage / (COUNT_STAGES.length - 1) * 100);
+
 /* ---------- Top bar ---------- */
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
@@ -527,13 +578,83 @@ function gardenScreen(){
     <div class="map">
       <button class="place open" id="flowerMath"><span class="ico">🌸</span><b>Flower Math</b>
         <small>Level ${S.math.stage + 1}: ${MATH_STAGES[S.math.stage].name}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
-      <button class="place locked"><span class="ico">💯</span><b>Count to 100</b><small>Coming soon!</small></button>
+      <button class="place open" id="countTile"><span class="ico">💯</span><b>Count to 100</b>
+        <small>Level ${S.count.stage + 1}: ${COUNT_STAGES[S.count.stage].name}</small><span class="bar"><i style="width:${countPct()}%"></i></span></button>
       <button class="place locked"><span class="ico">🔷</span><b>Shapes</b><small>Coming soon!</small></button>
       <button class="place locked"><span class="ico">🕐</span><b>Clocks</b><small>Coming soon!</small></button>
       <button class="place locked"><span class="ico">🪙</span><b>Coins</b><small>Coming soon!</small></button>
     </div>`;
   $('#flowerMath').onclick = () => { sfx.pop(); mathGame(); };
+  $('#countTile').onclick = () => { sfx.pop(); countGame(); };
   bindLocked();
+}
+
+function countGame(){
+  setTop(true, true);
+  const my = nav, N = 8, seen = new Set();
+  let i = 0, earned = 0, speakIt = null;
+  screen.innerHTML = `
+    <div class="game-head">
+      <div class="uni xs">${unicornSVG()}</div>
+      <div class="bubble" id="prompt"></div>
+      <button class="icon-btn" id="hear" aria-label="Hear it again">🔊</button>
+    </div>
+    <div class="dots" id="dots">${'<span></span>'.repeat(N)}</div>
+    <div class="stones" id="stones"></div>
+    <div class="answers" id="answers"></div>`;
+  const stones = $('#stones'), answers = $('#answers'), prompt = $('#prompt');
+  $('#hear').onclick = () => speakIt && speakIt();
+  const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
+
+  function next(){
+    if (my !== nav) return;
+    if (i >= N) return roundDone(earned, checkCountUp(), countGame);
+    screen.querySelectorAll('#dots span').forEach((d, k) => { d.className = k < i ? 'done' : k === i ? 'now' : ''; });
+    const p = makeCount(seen);
+    let firstTry = true, solved = false, busy = false;
+    const atEnd = p.miss === p.seq.length - 1;
+    prompt.textContent = atEnd ? 'What comes next?' : 'What number is missing?';
+    stones.innerHTML = p.seq.map((n, k) => k === p.miss
+      ? `<span class="stone miss">?</span>`
+      : `<span class="stone" style="--c:${COLORS[k % COLORS.length]}">${n}</span>`).join('');
+    const spoken = p.seq.map((n, k) => k === p.miss ? 'hmm' : n).join(', ');
+    speakIt = () => say(atEnd ? `${p.seq.slice(0, -1).join(', ')}. What comes next?` : `${spoken}. What number is missing?`);
+    speakIt();
+    answers.innerHTML = countChoices(p).map((n, k) =>
+      `<button class="ans" data-n="${n}" style="--c:${COLORS[(i * 2 + k + 3) % COLORS.length]}">${n}</button>`).join('');
+
+    answers.querySelectorAll('.ans').forEach(b => b.onclick = async () => {
+      if (solved || busy) return;
+      const n = +b.dataset.n;
+      const missEl = stones.children[p.miss];
+      if (n === p.ans){
+        solved = true;
+        b.classList.add('right'); sfx.tada(); confetti(20);
+        missEl.classList.remove('miss'); missEl.style.setProperty('--c', '#8be0a0'); missEl.textContent = p.ans;
+        S.count.recent.push(firstTry ? 1 : 0); S.count.recent = S.count.recent.slice(-10);
+        if (firstTry){ earned++; addGems(1); }
+        save();
+        await say(`Yes! ${p.seq.join(', ')}!`);
+        i++; setTimeout(next, 300);
+      } else {
+        firstTry = false; busy = true;
+        b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); b.disabled = true; sfx.oops();
+        await say("Let's count together!");
+        const els = [...stones.children];
+        for (let k = 0; k < p.miss; k++){
+          if (my !== nav) return;
+          els[k].classList.add('lit');
+          await say(String(p.seq[k]), { rate:1.05 });
+        }
+        if (my !== nav) return;
+        els[p.miss].classList.add('lit');
+        await say('What comes after?');
+        els.forEach(x => x.classList.remove('lit'));
+        busy = false;
+      }
+    });
+  }
+  next();
 }
 
 function mathGame(){
