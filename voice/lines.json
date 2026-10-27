@@ -15125,6 +15125,21 @@
 "slow": false
 },
 {
+"k": "it belongs to kailyn!",
+"t": "It belongs to Kailyn!",
+"slow": false
+},
+{
+"k": "it belongs to kiana!",
+"t": "It belongs to Kiana!",
+"slow": false
+},
+{
+"k": "it belongs to scarlet!",
+"t": "It belongs to Scarlet!",
+"slow": false
+},
+{
 "k": "it belongs to luna!",
 "t": "It belongs to Luna!",
 "slow": false
@@ -15180,6 +15195,21 @@
 "slow": false
 },
 {
+"k": "grumble trapped kailyn in a vine cage!",
+"t": "Grumble trapped Kailyn in a vine cage!",
+"slow": false
+},
+{
+"k": "grumble trapped kiana in a vine cage!",
+"t": "Grumble trapped Kiana in a vine cage!",
+"slow": false
+},
+{
+"k": "grumble trapped scarlet in a vine cage!",
+"t": "Grumble trapped Scarlet in a vine cage!",
+"slow": false
+},
+{
 "k": "grumble trapped luna in a vine cage!",
 "t": "Grumble trapped Luna in a vine cage!",
 "slow": false
@@ -15232,6 +15262,66 @@
 {
 "k": "your friend",
 "t": "your friend",
+"slow": false
+},
+{
+"k": "let's go rescue kailyn!",
+"t": "Let's go rescue Kailyn!",
+"slow": false
+},
+{
+"k": "kailyn is trapped in a vine cage!",
+"t": "Kailyn is trapped in a vine cage!",
+"slow": false
+},
+{
+"k": "kailyn is locked in the vine cage!",
+"t": "Kailyn is locked in the vine cage!",
+"slow": false
+},
+{
+"k": "kailyn",
+"t": "Kailyn",
+"slow": false
+},
+{
+"k": "let's go rescue kiana!",
+"t": "Let's go rescue Kiana!",
+"slow": false
+},
+{
+"k": "kiana is trapped in a vine cage!",
+"t": "Kiana is trapped in a vine cage!",
+"slow": false
+},
+{
+"k": "kiana is locked in the vine cage!",
+"t": "Kiana is locked in the vine cage!",
+"slow": false
+},
+{
+"k": "kiana",
+"t": "Kiana",
+"slow": false
+},
+{
+"k": "let's go rescue scarlet!",
+"t": "Let's go rescue Scarlet!",
+"slow": false
+},
+{
+"k": "scarlet is trapped in a vine cage!",
+"t": "Scarlet is trapped in a vine cage!",
+"slow": false
+},
+{
+"k": "scarlet is locked in the vine cage!",
+"t": "Scarlet is locked in the vine cage!",
+"slow": false
+},
+{
+"k": "scarlet",
+"t": "Scarlet",
 "slow": false
 },
 {
@@ -15435,6 +15525,21 @@
 "slow": false
 },
 {
+"k": "grumble trapped kailyn in a giant bubble!",
+"t": "Grumble trapped Kailyn in a giant bubble!",
+"slow": false
+},
+{
+"k": "grumble trapped kiana in a giant bubble!",
+"t": "Grumble trapped Kiana in a giant bubble!",
+"slow": false
+},
+{
+"k": "grumble trapped scarlet in a giant bubble!",
+"t": "Grumble trapped Scarlet in a giant bubble!",
+"slow": false
+},
+{
 "k": "grumble trapped pearl in a giant bubble!",
 "t": "Grumble trapped Pearl in a giant bubble!",
 "slow": false
@@ -15467,6 +15572,36 @@
 {
 "k": "your friend is locked in the giant bubble!",
 "t": "your friend is locked in the giant bubble!",
+"slow": false
+},
+{
+"k": "kailyn is trapped in a giant bubble!",
+"t": "Kailyn is trapped in a giant bubble!",
+"slow": false
+},
+{
+"k": "kailyn is locked in the giant bubble!",
+"t": "Kailyn is locked in the giant bubble!",
+"slow": false
+},
+{
+"k": "kiana is trapped in a giant bubble!",
+"t": "Kiana is trapped in a giant bubble!",
+"slow": false
+},
+{
+"k": "kiana is locked in the giant bubble!",
+"t": "Kiana is locked in the giant bubble!",
+"slow": false
+},
+{
+"k": "scarlet is trapped in a giant bubble!",
+"t": "Scarlet is trapped in a giant bubble!",
+"slow": false
+},
+{
+"k": "scarlet is locked in the giant bubble!",
+"t": "Scarlet is locked in the giant bubble!",
 "slow": false
 },
 {
@@ -15665,6 +15800,21 @@
 "slow": false
 },
 {
+"k": "grumble locked kailyn in the tall tower!",
+"t": "Grumble locked Kailyn in the tall tower!",
+"slow": false
+},
+{
+"k": "grumble locked kiana in the tall tower!",
+"t": "Grumble locked Kiana in the tall tower!",
+"slow": false
+},
+{
+"k": "grumble locked scarlet in the tall tower!",
+"t": "Grumble locked Scarlet in the tall tower!",
+"slow": false
+},
+{
 "k": "grumble locked ivy in the tall tower!",
 "t": "Grumble locked Ivy in the tall tower!",
 "slow": false
@@ -15697,6 +15847,36 @@
 {
 "k": "your friend is locked in the tall tower!",
 "t": "your friend is locked in the tall tower!",
+"slow": false
+},
+{
+"k": "kailyn is trapped in a tall tower!",
+"t": "Kailyn is trapped in a tall tower!",
+"slow": false
+},
+{
+"k": "kailyn is locked in the tall tower!",
+"t": "Kailyn is locked in the tall tower!",
+"slow": false
+},
+{
+"k": "kiana is trapped in a tall tower!",
+"t": "Kiana is trapped in a tall tower!",
+"slow": false
+},
+{
+"k": "kiana is locked in the tall tower!",
+"t": "Kiana is locked in the tall tower!",
+"slow": false
+},
+{
+"k": "scarlet is trapped in a tall tower!",
+"t": "Scarlet is trapped in a tall tower!",
+"slow": false
+},
+{
+"k": "scarlet is locked in the tall tower!",
+"t": "Scarlet is locked in the tall tower!",
 "slow": false
 },
 {
@@ -15895,6 +16075,36 @@
 "slow": false
 },
 {
+"k": "kailyn is trapped in a stage lights!",
+"t": "Kailyn is trapped in a stage lights!",
+"slow": false
+},
+{
+"k": "kailyn is locked in the stage lights!",
+"t": "Kailyn is locked in the stage lights!",
+"slow": false
+},
+{
+"k": "kiana is trapped in a stage lights!",
+"t": "Kiana is trapped in a stage lights!",
+"slow": false
+},
+{
+"k": "kiana is locked in the stage lights!",
+"t": "Kiana is locked in the stage lights!",
+"slow": false
+},
+{
+"k": "scarlet is trapped in a stage lights!",
+"t": "Scarlet is trapped in a stage lights!",
+"slow": false
+},
+{
+"k": "scarlet is locked in the stage lights!",
+"t": "Scarlet is locked in the stage lights!",
+"slow": false
+},
+{
 "k": "thank you bella!",
 "t": "Thank you Bella!",
 "slow": false
@@ -16022,6 +16232,36 @@
 {
 "k": "that one is coming soon!",
 "t": "That one is coming soon!",
+"slow": false
+},
+{
+"k": "kailyn, kiana, scarlet and bella are back together!",
+"t": "Kailyn, Kiana, Scarlet and Bella are back together!",
+"slow": false
+},
+{
+"k": "kailyn, scarlet, kiana and bella are back together!",
+"t": "Kailyn, Scarlet, Kiana and Bella are back together!",
+"slow": false
+},
+{
+"k": "kiana, kailyn, scarlet and bella are back together!",
+"t": "Kiana, Kailyn, Scarlet and Bella are back together!",
+"slow": false
+},
+{
+"k": "kiana, scarlet, kailyn and bella are back together!",
+"t": "Kiana, Scarlet, Kailyn and Bella are back together!",
+"slow": false
+},
+{
+"k": "scarlet, kailyn, kiana and bella are back together!",
+"t": "Scarlet, Kailyn, Kiana and Bella are back together!",
+"slow": false
+},
+{
+"k": "scarlet, kiana, kailyn and bella are back together!",
+"t": "Scarlet, Kiana, Kailyn and Bella are back together!",
 "slow": false
 }
 ]

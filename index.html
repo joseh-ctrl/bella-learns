@@ -2323,6 +2323,7 @@ function grumbleSVG(happy = S.story.chapter >= CHAPTERS.length){
     <path d="M52 58 Q61 52 70 58" stroke="#3b2a55" stroke-width="3.5" fill="none" stroke-linecap="round"/>
     <path d="M40 70 l-6 9 M62 70 l-6 9 M84 70 l-6 9" stroke="#7fd1ff" stroke-width="3" stroke-linecap="round"/></svg>`;
 }
+const BAND_FRIENDS = ['Kailyn', 'Kiana', 'Scarlet'];   // Bella's real friends, shown first when she names a bandmate
 const friendName = k => S.story.friends[k] || 'your friend';
 
 /* ---- world picker ---- */
@@ -2360,7 +2361,8 @@ function worldScreen(){
 function nameFriend(k){
   setTop(true, true);
   const c = CHAPTERS[k];
-  const chips = [...new Set([S.guideName, ...c.names].filter(Boolean))].slice(0, 6);
+  const taken = S.story.friends.filter((n, j) => n && j !== k);
+  const chips = [...new Set([...BAND_FRIENDS.filter(n => !taken.includes(n)), S.guideName, ...c.names].filter(Boolean))].slice(0, 6);
   screen.innerHTML = `<div class="center">
     <div class="bubble">One of your bandmates is lost in the ${c.name}!<br>What's her name?</div>
     <div class="uni full friend-shadow">${guideSVG(FRIEND_LOOKS[k], 'full')}</div>
