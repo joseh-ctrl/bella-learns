@@ -296,6 +296,33 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .prize .sw{width:58px;height:58px}
 .prize .gemrow{display:flex;gap:4px}.prize .gemrow svg{width:46px;height:46px}
 @keyframes prizePop{from{transform:scale(.2);opacity:0}}
+/* pets */
+.uni,.walker{position:relative}
+.pet{position:absolute;right:-24%;bottom:0;font-size:clamp(30px,9vw,52px);line-height:1;animation:petHop 1.4s ease-in-out infinite;pointer-events:none;
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.3))}
+.uni.sm .pet{font-size:clamp(24px,7vw,38px);right:-26%}
+.walker .pet{font-size:clamp(20px,6vw,30px);right:-60%;bottom:-2%}
+@keyframes petHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px) rotate(-6deg)}}
+.pet-big{font-size:4rem;line-height:1.1;animation:petHop 1.4s infinite}
+.pet-ico{font-size:2.6rem;line-height:52px;height:52px}
+.pet-item .goal{font-size:.8rem;line-height:1.15;color:var(--ink-soft)}
+.pet-item .bar{width:80%}
+.pet-locked{background:#f1ecfa}
+.place.pets-tile{grid-column:1/-1;background:linear-gradient(160deg,#fff,#fff0f7);outline:4px solid #ffc2e1}
+/* grown-up page */
+.parent{width:100%;max-width:640px;display:flex;flex-direction:column;gap:12px;color:var(--ink)}
+.parent h2{color:#fff;margin:0;text-align:center}
+.pcard{background:#fff;border-radius:18px;padding:12px 16px}
+.pcard h3{margin:0 0 8px;font-size:1.1rem}.pcard h3 small{font-weight:400;color:var(--ink-soft)}
+.pcard p{margin:6px 0}.pcard .hint{font-size:.85rem;color:var(--ink-soft)}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #f0eaf8}
+.prow small{display:block;font-size:.8rem;color:var(--ink-soft);font-weight:400}
+.pnum{text-align:right;font-weight:700;font-size:1.25rem}
+.pbars{display:flex;gap:6px;height:110px;align-items:flex-end}
+.pbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.pbars span{width:70%;background:linear-gradient(180deg,#ff8fc8,#b794f6);border-radius:6px 6px 2px 2px;min-height:2px}
+.pbars b{font-size:.75rem}.pbars small{font-size:.8rem;color:var(--ink-soft)}
+.chip{display:inline-block;background:#fff0f7;border-radius:999px;padding:2px 10px;margin:2px}
 .prize-ov{position:fixed;inset:0;z-index:55;background:rgba(26,16,64,.72);display:flex;align-items:center;justify-content:center;padding:20px}
 .prize .row{margin-top:6px}
 </style>
@@ -334,7 +361,7 @@ const SOUNDS_LIKE = {
 /* ---------- Saved progress (on this device) ---------- */
 const KEY = 'bella-learns-v1';
 const DEFAULTS = { guideName:'', gems:0, level:0, rounds:0, words:{}, voiceName:'', math:{ stage:0, recent:[] }, count:{ stage:0, recent:[] }, shape:{ stage:0, recent:[] }, clock:{ stage:0, recent:[] }, coin:{ stage:0, recent:[] },
-  look:null, owned:null, chests:0,
+  look:null, owned:null, chests:0, stats:{}, days:{}, played:0, pet:null, pets:[],
   story:{ chapter:0, level:0, stars:{}, friends:['', '', ''] } };
 function load(){
   try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); }
@@ -466,94 +493,94 @@ function confetti(n = 30){
 const ITEMS = [
   // hair styles
   { id:'bun',  slot:'hairStyle', name:"Bella's Puffs", cost:0 },
-  { id:'long', slot:'hairStyle', name:'Long & Loose',  cost:10 },
-  { id:'pony', slot:'hairStyle', name:'High Ponytail', cost:12 },
-  { id:'pig',  slot:'hairStyle', name:'Pigtails',      cost:12 },
-  { id:'brd',  slot:'hairStyle', name:'Braids',        cost:15 },
-  { id:'bob',  slot:'hairStyle', name:'Short Bob',     cost:12 },
-  { id:'mer',  slot:'hairStyle', name:'Mermaid Waves', cost:18 },
+  { id:'long', slot:'hairStyle', name:'Long & Loose',  cost:30 },
+  { id:'pony', slot:'hairStyle', name:'High Ponytail', cost:35 },
+  { id:'pig',  slot:'hairStyle', name:'Pigtails',      cost:35 },
+  { id:'brd',  slot:'hairStyle', name:'Braids',        cost:45 },
+  { id:'bob',  slot:'hairStyle', name:'Short Bob',     cost:35 },
+  { id:'mer',  slot:'hairStyle', name:'Mermaid Waves', cost:55 },
   // hair colors
   { id:'hn', slot:'hairColor', name:'Natural',   cost:0,  c:['#3b2a24','#1c1310'] },
-  { id:'hb', slot:'hairColor', name:'Brown',     cost:8,  c:['#8a5a3b','#4e301e'] },
-  { id:'h0', slot:'hairColor', name:'Pink Pop',  cost:10, c:['#ff6fae','#a95cf0'] },
-  { id:'h1', slot:'hairColor', name:'Sky Blue',  cost:10, c:['#7fd8ff','#4a7cf0'] },
-  { id:'h2', slot:'hairColor', name:'Sunshine',  cost:10, c:['#ffe066','#ff9a3c'] },
-  { id:'h3', slot:'hairColor', name:'Mint',      cost:10, c:['#9ff5d2','#2bbfa0'] },
-  { id:'h4', slot:'hairColor', name:'Midnight',  cost:12, c:['#6a5ab0','#21183f'] },
-  { id:'h5', slot:'hairColor', name:'Rainbow',   cost:20, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] },
-  { id:'h6', slot:'hairColor', name:'Lavender',  cost:10, c:['#dcc0ff','#9b6be0'] },
-  { id:'h7', slot:'hairColor', name:'Cotton Candy', cost:14, c:['#ffb3e6','#9fd8ff'] },
-  { id:'h9', slot:'hairColor', name:'Silver',    cost:12, c:['#f2f3fa','#a9aec4'] },
+  { id:'hb', slot:'hairColor', name:'Brown',     cost:25,  c:['#8a5a3b','#4e301e'] },
+  { id:'h0', slot:'hairColor', name:'Pink Pop',  cost:30, c:['#ff6fae','#a95cf0'] },
+  { id:'h1', slot:'hairColor', name:'Sky Blue',  cost:30, c:['#7fd8ff','#4a7cf0'] },
+  { id:'h2', slot:'hairColor', name:'Sunshine',  cost:30, c:['#ffe066','#ff9a3c'] },
+  { id:'h3', slot:'hairColor', name:'Mint',      cost:30, c:['#9ff5d2','#2bbfa0'] },
+  { id:'h4', slot:'hairColor', name:'Midnight',  cost:35, c:['#6a5ab0','#21183f'] },
+  { id:'h5', slot:'hairColor', name:'Rainbow',   cost:65, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] },
+  { id:'h6', slot:'hairColor', name:'Lavender',  cost:30, c:['#dcc0ff','#9b6be0'] },
+  { id:'h7', slot:'hairColor', name:'Cotton Candy', cost:40, c:['#ffb3e6','#9fd8ff'] },
+  { id:'h9', slot:'hairColor', name:'Silver',    cost:35, c:['#f2f3fa','#a9aec4'] },
   { id:'h8', slot:'hairColor', name:'Galaxy',    cost:0, chest:true, c:['#2a1a6e','#7a3cf0','#ff5fd0'] },
   // tops
   { id:'t1', slot:'top', name:'Pink Heart',     cost:0,  c:['#ff8ac6','#ff4f9a'], badge:'heart' },
   { id:'t0', slot:'top', name:'Teal Star',      cost:0,  c:['#4fd8e8','#7c6cf5'], badge:'star' },
-  { id:'t2', slot:'top', name:'Gold Note',      cost:8,  c:['#ffe27a','#f5a623'], badge:'note' },
-  { id:'t3', slot:'top', name:'Purple Sparkle', cost:10, c:['#c9a0ff','#7a3cf0'], badge:'star' },
-  { id:'t4', slot:'top', name:'Mint Heart',     cost:10, c:['#a8f0d0','#33b98c'], badge:'heart' },
-  { id:'t5', slot:'top', name:'Rainbow Tee',    cost:12, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
-  { id:'t6', slot:'top', name:'Unicorn Top',    cost:14, c:['#ffffff','#eadcff'], badge:'unicorn' },
-  { id:'t7', slot:'top', name:'Ocean Shell',    cost:12, c:['#8fe6ff','#3f9ee8'], badge:'shell' },
-  { id:'t8', slot:'top', name:'Flower Fairy',   cost:12, c:['#ffe1f0','#ffa6d2'], badge:'flower' },
+  { id:'t2', slot:'top', name:'Gold Note',      cost:25,  c:['#ffe27a','#f5a623'], badge:'note' },
+  { id:'t3', slot:'top', name:'Purple Sparkle', cost:30, c:['#c9a0ff','#7a3cf0'], badge:'star' },
+  { id:'t4', slot:'top', name:'Mint Heart',     cost:30, c:['#a8f0d0','#33b98c'], badge:'heart' },
+  { id:'t5', slot:'top', name:'Rainbow Tee',    cost:35, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'t6', slot:'top', name:'Unicorn Top',    cost:40, c:['#ffffff','#eadcff'], badge:'unicorn' },
+  { id:'t7', slot:'top', name:'Ocean Shell',    cost:35, c:['#8fe6ff','#3f9ee8'], badge:'shell' },
+  { id:'t8', slot:'top', name:'Flower Fairy',   cost:35, c:['#ffe1f0','#ffa6d2'], badge:'flower' },
   // bottoms
   { id:'b0', slot:'bottom', name:'Pink Skirt',    cost:0,  c:['#ffb3d9','#ff6fae'] },
-  { id:'b1', slot:'bottom', name:'Denim Shorts',  cost:8,  c:['#7fa8e8','#4a72c0'] },
-  { id:'b2', slot:'bottom', name:'Purple Tutu',   cost:12, c:['#e2c6ff','#a876f0'] },
-  { id:'b3', slot:'bottom', name:'Jeans',         cost:10, c:['#5f86cf','#34539a'] },
-  { id:'b4', slot:'bottom', name:'Pink Leggings', cost:10, c:['#ffb3d9','#f06aa8'] },
-  { id:'b5', slot:'bottom', name:'Rainbow Skirt', cost:14, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
-  { id:'b6', slot:'bottom', name:'Ballet Tutu',   cost:12, c:['#ffe8f4','#ff9ccf'] },
+  { id:'b1', slot:'bottom', name:'Denim Shorts',  cost:25,  c:['#7fa8e8','#4a72c0'] },
+  { id:'b2', slot:'bottom', name:'Purple Tutu',   cost:35, c:['#e2c6ff','#a876f0'] },
+  { id:'b3', slot:'bottom', name:'Jeans',         cost:30, c:['#5f86cf','#34539a'] },
+  { id:'b4', slot:'bottom', name:'Pink Leggings', cost:30, c:['#ffb3d9','#f06aa8'] },
+  { id:'b5', slot:'bottom', name:'Rainbow Skirt', cost:40, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'b6', slot:'bottom', name:'Ballet Tutu',   cost:35, c:['#ffe8f4','#ff9ccf'] },
   // dresses (cover top + bottom)
-  { id:'d1', slot:'dress', name:'Princess Gown', cost:30, c:['#ffd6ec','#ff7fbf'] },
-  { id:'d2', slot:'dress', name:'Mermaid Dress', cost:28, c:['#8ff0e6','#3a7fd6'] },
-  { id:'d3', slot:'dress', name:'Rainbow Dress', cost:25, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
-  { id:'d4', slot:'dress', name:'Fairy Dress',   cost:22, c:['#d2ffe6','#a98af5'] },
+  { id:'d1', slot:'dress', name:'Princess Gown', cost:100, c:['#ffd6ec','#ff7fbf'] },
+  { id:'d2', slot:'dress', name:'Mermaid Dress', cost:90, c:['#8ff0e6','#3a7fd6'] },
+  { id:'d3', slot:'dress', name:'Rainbow Dress', cost:80, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'d4', slot:'dress', name:'Fairy Dress',   cost:70, c:['#d2ffe6','#a98af5'] },
   // shoes
   { id:'s0', slot:'shoes', name:'White Sneakers', cost:0,  c:['#ffffff','#e7e2f2'] },
-  { id:'s1', slot:'shoes', name:'Pink Sneakers',  cost:8,  c:['#ffb3d9','#ff5fa2'] },
-  { id:'s2', slot:'shoes', name:'Sparkle Boots',  cost:15, c:['#c9a0ff','#7a3cf0'] },
-  { id:'s3', slot:'shoes', name:'Gold Shoes',     cost:12, c:['#ffe27a','#e0a800'] },
-  { id:'s4', slot:'shoes', name:'Rain Boots',     cost:10, c:['#ffe36b','#f5b400'] },
-  { id:'s5', slot:'shoes', name:'Ballet Slippers',cost:12, c:['#ffd6ea','#ff8ac6'] },
-  { id:'s6', slot:'shoes', name:'Roller Skates',  cost:18, c:['#ffffff','#c9a0ff'] },
+  { id:'s1', slot:'shoes', name:'Pink Sneakers',  cost:25,  c:['#ffb3d9','#ff5fa2'] },
+  { id:'s2', slot:'shoes', name:'Sparkle Boots',  cost:45, c:['#c9a0ff','#7a3cf0'] },
+  { id:'s3', slot:'shoes', name:'Gold Shoes',     cost:35, c:['#ffe27a','#e0a800'] },
+  { id:'s4', slot:'shoes', name:'Rain Boots',     cost:30, c:['#ffe36b','#f5b400'] },
+  { id:'s5', slot:'shoes', name:'Ballet Slippers',cost:35, c:['#ffd6ea','#ff8ac6'] },
+  { id:'s6', slot:'shoes', name:'Roller Skates',  cost:55, c:['#ffffff','#c9a0ff'] },
   { id:'s7', slot:'shoes', name:'Glass Slippers', cost:0, chest:true, c:['#eaf8ff','#9fd8ff'] },
   // extras
   { id:'n1', slot:'neck', name:'Silver Necklace', cost:0,  svg:'<svg viewBox="0 0 40 44"><path d="M8 4 Q12 24 20 28 Q28 24 32 4" stroke="#aeb4bf" stroke-width="2" fill="none"/><ellipse cx="20" cy="33" rx="6" ry="8.5" fill="#eef0f5" stroke="#8d939c" stroke-width="2"/></svg>' },
   { id:'a0', slot:'head', name:'Star Clip',  cost:0,  icon:'⭐' },
-  { id:'a1', slot:'head', name:'Bow',        cost:12, icon:'🎀' },
-  { id:'a2', slot:'head', name:'Heart Clip', cost:12, icon:'💗' },
-  { id:'a3', slot:'head', name:'Flower',     cost:15, icon:'🌼' },
-  { id:'a5', slot:'head', name:'Crown',      cost:25, icon:'👑' },
-  { id:'a6', slot:'head', name:'Tiara',        cost:20 },
-  { id:'a8', slot:'head', name:'Cat Ears',     cost:14 },
-  { id:'a9', slot:'head', name:'Flower Crown', cost:18 },
-  { id:'a10', slot:'head', name:'Seashell Clip', cost:12 },
+  { id:'a1', slot:'head', name:'Bow',        cost:35, icon:'🎀' },
+  { id:'a2', slot:'head', name:'Heart Clip', cost:35, icon:'💗' },
+  { id:'a3', slot:'head', name:'Flower',     cost:45, icon:'🌼' },
+  { id:'a5', slot:'head', name:'Crown',      cost:80, icon:'👑' },
+  { id:'a6', slot:'head', name:'Tiara',        cost:65 },
+  { id:'a8', slot:'head', name:'Cat Ears',     cost:40 },
+  { id:'a9', slot:'head', name:'Flower Crown', cost:55 },
+  { id:'a10', slot:'head', name:'Seashell Clip', cost:35 },
   { id:'a7', slot:'head', name:'Unicorn Horn', cost:0, chest:true },
-  { id:'a4', slot:'face', name:'Sunglasses', cost:18, icon:'🕶️' },
-  { id:'f1', slot:'face', name:'Heart Glasses', cost:16 },
-  { id:'f2', slot:'face', name:'Star Glitter',  cost:10 },
+  { id:'a4', slot:'face', name:'Sunglasses', cost:55, icon:'🕶️' },
+  { id:'f1', slot:'face', name:'Heart Glasses', cost:50 },
+  { id:'f2', slot:'face', name:'Star Glitter',  cost:30 },
   // jewelry
-  { id:'e1', slot:'ears', name:'Pearl Earrings', cost:10 },
-  { id:'e2', slot:'ears', name:'Heart Earrings', cost:12 },
-  { id:'e3', slot:'ears', name:'Star Earrings',  cost:12 },
-  { id:'e4', slot:'ears', name:'Gold Hoops',     cost:14 },
-  { id:'n2', slot:'neck', name:'Pearl Necklace', cost:14 },
-  { id:'n3', slot:'neck', name:'Heart Locket',   cost:16 },
-  { id:'r1', slot:'ring', name:'Diamond Ring',   cost:12, icon:'💍' },
-  { id:'r2', slot:'ring', name:'Heart Ring',     cost:12, icon:'💗' },
+  { id:'e1', slot:'ears', name:'Pearl Earrings', cost:30 },
+  { id:'e2', slot:'ears', name:'Heart Earrings', cost:35 },
+  { id:'e3', slot:'ears', name:'Star Earrings',  cost:35 },
+  { id:'e4', slot:'ears', name:'Gold Hoops',     cost:40 },
+  { id:'n2', slot:'neck', name:'Pearl Necklace', cost:40 },
+  { id:'n3', slot:'neck', name:'Heart Locket',   cost:50 },
+  { id:'r1', slot:'ring', name:'Diamond Ring',   cost:35, icon:'💍' },
+  { id:'r2', slot:'ring', name:'Heart Ring',     cost:35, icon:'💗' },
   // wings and capes
-  { id:'w1', slot:'back', name:'Fairy Wings',     cost:25 },
-  { id:'w2', slot:'back', name:'Butterfly Wings', cost:22 },
-  { id:'w3', slot:'back', name:'Royal Cape',      cost:20 },
+  { id:'w1', slot:'back', name:'Fairy Wings',     cost:80 },
+  { id:'w2', slot:'back', name:'Butterfly Wings', cost:70 },
+  { id:'w3', slot:'back', name:'Royal Cape',      cost:65 },
   { id:'w4', slot:'back', name:'Rainbow Wings',   cost:0, chest:true },
   // things to hold
-  { id:'m1', slot:'hand', name:'Magic Wand',   cost:15, icon:'🪄' },
-  { id:'m2', slot:'hand', name:'Toy Sword',    cost:15, icon:'⚔️' },
-  { id:'m3', slot:'hand', name:'Heart Balloon',cost:12, icon:'🎈' },
-  { id:'m4', slot:'hand', name:'Ice Cream',    cost:10, icon:'🍦' },
-  { id:'m6', slot:'hand', name:'Flowers',      cost:12, icon:'💐' },
+  { id:'m1', slot:'hand', name:'Magic Wand',   cost:45, icon:'🪄' },
+  { id:'m2', slot:'hand', name:'Toy Sword',    cost:45, icon:'⚔️' },
+  { id:'m3', slot:'hand', name:'Heart Balloon',cost:35, icon:'🎈' },
+  { id:'m4', slot:'hand', name:'Ice Cream',    cost:30, icon:'🍦' },
+  { id:'m6', slot:'hand', name:'Flowers',      cost:35, icon:'💐' },
   // rides
-  { id:'k1', slot:'ride', name:'Skateboard',   cost:20, icon:'🛹' },
+  { id:'k1', slot:'ride', name:'Skateboard',   cost:65, icon:'🛹' },
   { id:'k2', slot:'ride', name:'Hoverboard',   cost:0, chest:true, icon:'✨' }
 ];
 const OPTIONAL = ['head', 'face', 'neck', 'ears', 'ring', 'back', 'hand', 'ride', 'dress'];
@@ -845,7 +872,7 @@ function distractors(w, n){
 }
 // Called once per word per round, the first time she sees it.
 function scoreWord(w, firstTry, saidOk){
-  const o = st(w), R = S.rounds;
+  const o = st(w), R = S.rounds; logAns('word', firstTry);
   o.seen++;
   if (firstTry){
     o.right++;
@@ -1109,6 +1136,24 @@ function setTop(show, home = true){
   $('#setBtn').hidden = home; // settings only on the castle map
   $('#gemCount').textContent = S.gems;
 }
+/* ---------- Grown-up stats ---------- */
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const TRACK_AREA = t => t === S.math ? 'math' : t === S.count ? 'count' : t === S.shape ? 'shape' : t === S.clock ? 'clock' : 'coin';
+function logAns(area, ok){
+  S.stats = S.stats || {}; S.days = S.days || {};
+  const a = S.stats[area] || (S.stats[area] = { n:0, ok:0, last:[] });
+  a.n++; if (ok) a.ok++; a.last.push(ok ? 1 : 0); a.last = a.last.slice(-30);
+  const d = S.days[today()] || (S.days[today()] = { n:0, ok:0, games:0 });
+  d.n++; if (ok) d.ok++;
+}
+function logGame(){ S.played = (S.played || 0) + 1; const d = S.days[today()] || (S.days[today()] = { n:0, ok:0, games:0 }); d.games++; }
+function bestStreak(){
+  const ds = Object.keys(S.days || {}).sort(); let best = 0, run = 0, prev = null;
+  ds.forEach(k => { const t = new Date(k + 'T12:00').getTime(); run = prev && t - prev < 1.5 * 864e5 ? run + 1 : 1; best = Math.max(best, run); prev = t; });
+  return best;
+}
+const totalOk = () => Object.values(S.stats || {}).reduce((t, a) => t + a.ok, 0);
+
 function addGems(n){
   S.gems += n; save();
   $('#gemCount').textContent = S.gems;
@@ -1140,13 +1185,70 @@ function flyGem(kind, label){ // a gem pops up and flies to the counter
   } catch(e){}
 }
 function lucky(){ // a right answer: usually a pink gem, sometimes a lucky blue or gold one
-  const r = Math.random(), kind = r < .04 ? 'gold' : r < .16 ? 'blue' : 'pink', v = GEM[kind].v;
+  const r = Math.random(), kind = r < .02 ? 'gold' : r < .09 ? 'blue' : 'pink', v = GEM[kind].v;
   addGems(v); flyGem(kind, kind === 'pink' ? '' : '+' + v);
   if (kind !== 'pink') sfx.sparkle();
   return v;
 }
 $('#homeBtn').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); mapScreen(); };
-$('#setBtn').onclick = () => voiceScreen();
+$('#setBtn').onclick = () => parentGate();
+function parentGate(){
+  setTop(true, true);
+  const a = rand(6, 9), b = rand(6, 9), ans = a * b;
+  const ch = shuffle([ans, ans + rand(1, 5), ans - rand(1, 5), ans + 10]);
+  screen.innerHTML = `<div class="center"><div class="bubble">Grown-ups only 🔒<br>What is ${a} × ${b}?</div>
+    <div class="row">${ch.map(c => `<button class="soft-btn gate" data-v="${c}">${c}</button>`).join('')}</div></div>`;
+  screen.querySelectorAll('.gate').forEach(btn => btn.onclick = () => +btn.dataset.v === ans ? parentScreen() : mapScreen());
+}
+function parentScreen(){
+  setTop(true, true);
+  const areas = [
+    ['word', '🎤 Sight words', `${LEVEL_NAMES[wordFloor()]} list`],
+    ['math', '⭐ Star Math', `Level ${S.math.stage + 1}/${MATH_STAGES.length}: ${MATH_STAGES[S.math.stage].name}`],
+    ['count', '💯 Count to 100', `Level ${S.count.stage + 1}/${COUNT_STAGES.length}: ${COUNT_STAGES[S.count.stage].name}`],
+    ['shape', '🔷 Shapes', `Level ${S.shape.stage + 1}/${SHAPE_STAGES.length}: ${SHAPE_STAGES[S.shape.stage].name}`],
+    ['clock', '🕐 Clocks', `Level ${S.clock.stage + 1}/${CLOCK_STAGES.length}: ${CLOCK_STAGES[S.clock.stage].name}`],
+    ['coin', '🪙 Coins', `Level ${S.coin.stage + 1}/${COIN_STAGES.length}: ${COIN_STAGES[S.coin.stage].name}`]
+  ];
+  const st_ = k => (S.stats || {})[k] || { n:0, ok:0, last:[] };
+  const pct = arr => arr.length ? Math.round(arr.reduce((x, y) => x + y, 0) / arr.length * 100) : null;
+  const strong = [], weak = [];
+  const rows = areas.map(([k, label, lvl]) => {
+    const a = st_(k), recent = pct(a.last.slice(-20)), all = a.n ? Math.round(a.ok / a.n * 100) : null;
+    if (a.last.length >= 10){ if (recent >= 85) strong.push(label); else if (recent < 65) weak.push(label); }
+    const col = recent === null ? '#bbb' : recent >= 85 ? '#33b98c' : recent >= 65 ? '#f0a800' : '#ff5f7a';
+    return `<div class="prow"><div><b>${label}</b><small>${lvl}</small></div>
+      <div class="pnum" style="color:${col}">${recent === null ? '—' : recent + '%'}<small>${a.n ? `last ${Math.min(20, a.last.length)} · ${a.n} total, ${all}% overall` : 'not played yet'}</small></div></div>`;
+  }).join('');
+  const lists = WORDS.map((ws, j) => `<div class="prow"><div><b>${LEVEL_NAMES[j]}</b><small>${ws.length} words</small></div>
+    <div class="pnum">${ws.filter(mastered).length}<small>known · ${ws.filter(w => met(w) && !mastered(w)).length} learning · ${ws.filter(w => !met(w)).length} new</small></div></div>`).join('');
+  const tricky = ALL_WORDS.filter(w => S.words[w] && st(w).miss >= 2).sort((x, y) => st(y).miss / st(y).seen - st(x).miss / st(x).seen).slice(0, 12);
+  const days = [...Array(7)].map((_, j) => { const d = new Date(Date.now() - (6 - j) * 864e5);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { lbl:'SMTWTFS'[d.getDay()], v:(S.days || {})[key] || { n:0, ok:0, games:0 } }; });
+  const mx = Math.max(10, ...days.map(d => d.v.n));
+  const stars = Object.values(S.story.stars).reduce((t, v) => t + v, 0);
+  const buyable = ITEMS.filter(i => i.cost > 0 || i.chest);
+  screen.innerHTML = `<div class="parent">
+    <h2>Bella's progress</h2>
+    <div class="pcard"><h3>Last 7 days <small>(questions answered)</small></h3>
+      <div class="pbars">${days.map(d => `<div><span style="height:${Math.round(d.v.n / mx * 100)}%"></span><b>${d.v.n || ''}</b><small>${d.lbl}</small></div>`).join('')}</div>
+      <p>${Object.keys(S.days || {}).length} days played · best streak ${bestStreak()} days · ${S.played || 0} games finished</p></div>
+    <div class="pcard"><h3>At a glance</h3>
+      <p>⭐ <b>Doing great:</b> ${strong.length ? strong.join(', ') : 'not enough answers yet'}</p>
+      <p>🌱 <b>Needs practice:</b> ${weak.length ? weak.join(', ') : 'nothing below 65% right now'}</p>
+      <p class="hint">Based on her last 20 first-try answers in each area (needs 10+). Green 85%+, yellow 65–84%, red under 65%.</p></div>
+    <div class="pcard"><h3>By area <small>(first-try right)</small></h3>${rows}</div>
+    <div class="pcard"><h3>Sight words</h3>${lists}
+      <p><b>Tricky words:</b> ${tricky.length ? tricky.map(w => `<span class="chip">${esc(w)} <small>missed ${st(w).miss}</small></span>`).join(' ') : 'none yet'}</p></div>
+    <div class="pcard"><h3>Adventure & rewards</h3>
+      <p>World ${Math.min(S.story.chapter + 1, CHAPTERS.length)} of ${CHAPTERS.length} · ${stars} stars</p>
+      <p>💎 ${S.gems} gems now · ${S.owned.filter(id => buyable.some(i => i.id === id)).length} of ${buyable.length} items · ${S.chests || 0} chests · ${(S.pets || []).length} of ${PETS.length} pets</p></div>
+    <div class="row"><button class="soft-btn" id="pVoice">🔊 Voice</button><button class="big-btn" id="pDone">Done</button></div>
+  </div>`;
+  $('#pVoice').onclick = () => voiceScreen();
+  $('#pDone').onclick = () => mapScreen();
+}
 
 function voiceScreen(){
   setTop(true, true);
@@ -1188,7 +1290,7 @@ function mapScreen(){
   setTop(true, false);
   screen.innerHTML = `
     <div class="guide">
-      <div class="uni sm" id="uniTap">${guideSVG()}</div>
+      <div class="uni sm" id="uniTap">${guideSVG()}${petTag()}</div>
       <div class="bubble">Hi Bella! Where do you want to play?</div>
     </div>
     <div class="map">
@@ -1198,7 +1300,10 @@ function mapScreen(){
         <small>Math · Level ${S.math.stage + 1}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
       <button class="place open" id="closetTile"><span class="ico">👗</span><b>Dressing Room</b><small>Spend your 💎</small></button>
       <button class="place open adventure" id="advTile"><span class="ico">🗺️</span><b>Adventure</b><small>${storyTileText()}</small></button>
+      <button class="place open pets-tile" id="petsTile"><span class="ico">🐾</span><b>Pet Friends</b><small>${(S.pets || []).length} of ${PETS.length} found</small></button>
     </div>`;
+  $('#petsTile').onclick = () => { sfx.pop(); petsScreen(); say(pet() ? 'Here are your pet friends!' : 'Reach a goal to earn a pet friend! Here are the goals.'); };
+  checkPets();
   $('#tower').onclick = () => { sfx.pop(); balloonGame(); };
   $('#garden').onclick = () => { sfx.pop(); gardenScreen(); say('Welcome to the Number Studio! Pick a game!'); };
   $('#advTile').onclick = () => { sfx.pop(); worldScreen(); };
@@ -1286,7 +1391,7 @@ function countGame(){
         solved = true;
         b.classList.add('right'); sfx.tada(); confetti(20);
         missEl.classList.remove('miss'); missEl.style.setProperty('--c', '#8be0a0'); missEl.textContent = p.ans;
-        S.count.recent.push(firstTry ? 1 : 0); S.count.recent = S.count.recent.slice(-10);
+        logAns('count', firstTry); S.count.recent.push(firstTry ? 1 : 0); S.count.recent = S.count.recent.slice(-10);
         if (firstTry){ earned += lucky(); }
         save();
         await say(`Yes! ${p.seq.join(', ')}!`);
@@ -1361,7 +1466,7 @@ function mathGame(){
       if (n === p.ans){
         solved = true;
         b.classList.add('right'); sfx.tada(); confetti(20);
-        S.math.recent.push(firstTry ? 1 : 0); S.math.recent = S.math.recent.slice(-10);
+        logAns('math', firstTry); S.math.recent.push(firstTry ? 1 : 0); S.math.recent = S.math.recent.slice(-10);
         if (firstTry){ earned += lucky(); }
         save();
         eq.textContent = `${p.a} ${sym} ${p.b} = ${p.ans}`;
@@ -1404,7 +1509,7 @@ function shapeGame(){
   $('#hear').onclick = () => speakIt && speakIt();
 
   function record(firstTry){
-    S.shape.recent.push(firstTry ? 1 : 0); S.shape.recent = S.shape.recent.slice(-10);
+    logAns('shape', firstTry); S.shape.recent.push(firstTry ? 1 : 0); S.shape.recent = S.shape.recent.slice(-10);
     if (firstTry){ earned += lucky(); }
     save();
   }
@@ -1495,7 +1600,7 @@ function clockGame(){
   const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
 
   function record(firstTry){
-    S.clock.recent.push(firstTry ? 1 : 0); S.clock.recent = S.clock.recent.slice(-10);
+    logAns('clock', firstTry); S.clock.recent.push(firstTry ? 1 : 0); S.clock.recent = S.clock.recent.slice(-10);
     if (firstTry){ earned += lucky(); }
     save();
   }
@@ -1585,7 +1690,7 @@ function coinGame(){
   const COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
 
   function record(firstTry){
-    S.coin.recent.push(firstTry ? 1 : 0); S.coin.recent = S.coin.recent.slice(-10);
+    logAns('coin', firstTry); S.coin.recent.push(firstTry ? 1 : 0); S.coin.recent = S.coin.recent.slice(-10);
     if (firstTry){ earned += lucky(); }
     save();
   }
@@ -1687,6 +1792,70 @@ function itemSwatch(it){
 }
 const closetTab = slot => (CLOSET_TABS.find(t => t[2].includes(slot)) || CLOSET_TABS[0])[0];
 
+/* ---------- Pet sidekicks (earned by reaching goals) ---------- */
+const PETS = [
+  { id:'kitten',  e:'🐱', name:'Kitten',        goal:'Finish 5 games',                        need:5,   have:() => S.played || 0 },
+  { id:'chick',   e:'🐥', name:'Chick',         goal:'Open 3 treasure chests',                need:3,   have:() => S.chests || 0 },
+  { id:'puppy',   e:'🐶', name:'Puppy',         goal:'Learn 15 sight words',                  need:15,  have:() => ALL_WORDS.filter(mastered).length },
+  { id:'bunny',   e:'🐰', name:'Bunny',         goal:'Get 100 answers right',                 need:100, have:() => totalOk() },
+  { id:'unicorn', e:'🦄', name:'Baby Unicorn',  goal:'Rescue your friend in the Whispering Forest', need:1, have:() => S.story.chapter >= 1 ? 1 : 0 },
+  { id:'panda',   e:'🐼', name:'Panda',         goal:'Play 3 days in a row',                  need:3,   have:() => bestStreak() },
+  { id:'dolphin', e:'🐬', name:'Dolphin',       goal:'Rescue your friend in the Coral Ocean', need:1,   have:() => S.story.chapter >= 2 ? 1 : 0 },
+  { id:'fox',     e:'🦊', name:'Fox',           goal:'Reach level 3 in three Number Studio games', need:3, have:() => [S.math, S.count, S.shape, S.clock, S.coin].filter(t => t.stage >= 2).length },
+  { id:'dragon',  e:'🐲', name:'Little Dragon', goal:'Rescue your friend in the Crystal Castle', need:1, have:() => S.story.chapter >= 3 ? 1 : 0 },
+  { id:'butterfly', e:'🦋', name:'Butterfly',   goal:'Get 3 stars on 10 Adventure levels',    need:10,  have:() => Object.values(S.story.stars).filter(v => v >= 3).length },
+  { id:'penguin', e:'🐧', name:'Penguin',       goal:'Learn 50 sight words',                  need:50,  have:() => ALL_WORDS.filter(mastered).length },
+  { id:'owl',     e:'🦉', name:'Owl',           goal:'Play on 10 different days',             need:10,  have:() => Object.keys(S.days || {}).length },
+  { id:'turtle',  e:'🐢', name:'Sea Turtle',    goal:'Get 500 answers right',                 need:500, have:() => totalOk() },
+  { id:'lion',    e:'🦁', name:'Lion Cub',      goal:'Learn all 133 sight words',             need:133, have:() => ALL_WORDS.filter(mastered).length }
+];
+const pet = () => PETS.find(p => p.id === S.pet);
+const petTag = (cls = '') => pet() ? `<span class="pet ${cls}">${pet().e}</span>` : '';
+// Call after anything that might finish a goal; shows a "new pet!" card for the first new one.
+function checkPets(){
+  S.pets = S.pets || [];
+  const fresh = PETS.filter(p => !S.pets.includes(p.id) && p.have() >= p.need);
+  if (!fresh.length) return;
+  fresh.forEach(p => S.pets.push(p.id));
+  const p = fresh[0];
+  if (!S.pet) S.pet = p.id;
+  save();
+  const my = nav;
+  const show = () => {
+    if (my !== nav) return;
+    if (document.querySelector('.prize-ov')) return setTimeout(show, 800); // wait for the chest card to close
+    const ov = document.createElement('div'); ov.className = 'prize-ov';
+    ov.innerHTML = `<div class="prize"><span class="pet-big">${fresh.map(f => f.e).join('')}</span><b>${fresh.length > 1 ? `${fresh.length} new pet friends!` : 'A new pet friend!'}</b><span>${esc(fresh.map(f => f.name).join(', '))} ${fresh.length > 1 ? 'want' : 'wants'} to follow you!</span>
+      <div class="row">${S.pet !== p.id ? '<button class="soft-btn" id="petTake">Take it with me</button>' : ''}<button class="big-btn" id="prizeOk">Yay! ✨</button></div></div>`;
+    document.body.appendChild(ov); sfx.tada(); confetti(40);
+    say(fresh.length > 1 ? `Wow! You earned ${fresh.length} new pet friends! Go to Pet Friends to see them!` : `Wow! You earned a new pet friend! ${p.name} wants to follow you everywhere!`);
+    $('#prizeOk').onclick = () => { sfx.pop(); ov.remove(); };
+    const t = $('#petTake'); if (t) t.onclick = () => { S.pet = p.id; save(); ov.remove(); sfx.chime(); petsScreen(); };
+  };
+  setTimeout(show, 2600);
+}
+function petsScreen(){
+  setTop(true, true);
+  S.pets = S.pets || [];
+  screen.innerHTML = `<div class="closet">
+    <div class="uni preview">${guideSVG(null, 'full')}${petTag()}</div>
+    <div class="bubble">${pet() ? `${esc(pet().name)} is following you! Tap a pet to swap.` : 'Reach goals to earn pet friends!'}</div>
+    <div class="items">${PETS.map(p => {
+      const got = S.pets.includes(p.id), on = S.pet === p.id, h = Math.min(p.have(), p.need);
+      return `<button class="item pet-item${on ? ' on' : ''}${got ? '' : ' pet-locked'}" data-id="${p.id}">
+        <span class="pet-ico">${got ? p.e : '❔'}</span><b>${got ? esc(p.name) : '???'}</b>
+        ${got ? `<small>${on ? 'Following ✓' : 'Tap to bring'}</small>`
+          : `<small class="goal">${esc(p.goal)}</small><span class="bar"><i style="width:${Math.round(h / p.need * 100)}%"></i></span><small>${h} / ${p.need}</small>`}
+      </button>`;
+    }).join('')}</div></div>`;
+  screen.querySelectorAll('.pet-item').forEach(b => b.onclick = () => {
+    const p = PETS.find(x => x.id === b.dataset.id);
+    if (!S.pets.includes(p.id)){ b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops(); say(`To get this pet: ${p.goal}!`); return; }
+    if (S.pet === p.id){ S.pet = null; save(); sfx.pop(); petsScreen(); return; }
+    S.pet = p.id; save(); sfx.chime(); petsScreen(); say(`${p.name} is following you now!`);
+  });
+}
+
 /* ---------- Treasure chests ---------- */
 const CHEST_SVG = `<svg viewBox="0 0 120 104">
   <ellipse class="glow" cx="60" cy="48" rx="56" ry="40" fill="#fff6b0" opacity=".9"/>
@@ -1706,8 +1875,8 @@ function rollPrize(){
   const free = ITEMS.filter(it => (it.cost > 0 || it.chest) && !S.owned.includes(it.id));
   const secret = free.filter(it => it.chest);
   if (secret.length && Math.random() < .2) return { item: pick(secret) };
-  if (free.length && Math.random() < .7) return { item: pick(free) };
-  return { gems: pick([['blue','blue'], ['gold'], ['blue','blue','blue'], ['gold','blue'], ['gold','gold']]) };
+  if (free.length && Math.random() < .5) return { item: pick(free) };
+  return { gems: pick([['blue'], ['blue','blue'], ['gold'], ['blue','blue','blue'], ['gold','blue']]) };
 }
 // Shows a chest next to Bella on a "you did it" screen. Tap it 3 times to crack it open.
 function offerChest(chance, after){
@@ -1766,7 +1935,7 @@ function closetScreen(tab){
   const swatch = itemSwatch;
   const isOn = it => S.look[it.slot] === it.id && !(S.look.dress && (it.slot === 'top' || it.slot === 'bottom'));
   screen.innerHTML = `<div class="closet">
-    <div class="uni preview" id="preview">${guideSVG(null, 'full')}</div>
+    <div class="uni preview" id="preview">${guideSVG(null, 'full')}${petTag()}</div>
     <div class="tabs">${CLOSET_TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="items">${list.map(it => {
       const own = S.owned.includes(it.id), wearing = isOn(it);
@@ -1969,7 +2138,7 @@ function chapterMap(k){
           ${last ? (i < cur ? '🎉' : '🔒') : i + 1}${stars ? `<span class="nstars">${'⭐'.repeat(stars)}</span>` : ''}</button>`;
       }).join('')}
       ${cur < 8 || c.final ? '' : `<div class="freed" style="left:${LEVEL_POS[7][0]}%;top:${LEVEL_POS[7][1]}%">${guideSVG(FRIEND_LOOKS[k], 'head')}</div>`}
-      <div class="walker" id="walker" style="left:${LEVEL_POS[at][0]}%;top:${LEVEL_POS[at][1]}%">${guideSVG(null, 'full')}</div>
+      <div class="walker" id="walker" style="left:${LEVEL_POS[at][0]}%;top:${LEVEL_POS[at][1]}%">${guideSVG(null, 'full')}${petTag()}</div>
     </div>`;
   screen.querySelectorAll('.node').forEach(b => b.onclick = () => {
     const i = +b.dataset.i;
@@ -2051,19 +2220,20 @@ function storyLevel(k, i){
       if (boss){ st.chapter = k + 1; st.level = 0; } else st.level = i + 1;
     }
     S.where = boss ? ['worldScreen'] : ['chapterMap', k];
-    save();
+    logGame(); save();
     if (boss) return c.final ? finaleScene(earned) : rescueScene(k, earned);
     sfx.tada(); sfx.cheer(); confetti(50);
     setTop(true, true);
     screen.innerHTML = `<div class="center">
       <div class="big-stars">${[1, 2, 3].map(n => `<span class="${n <= stars ? 'on' : ''}">⭐</span>`).join('')}</div>
-      <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="chest-box" id="chestSpot"></div></div>
+      <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}${petTag()}</div><div class="chest-box" id="chestSpot"></div></div>
       <div class="bubble">Level ${i + 1} done! You earned <b>${earned}</b> 💎</div>
       <div class="row">
         <button class="big-btn" id="goOn">${firstClear ? 'Keep going ➜' : 'Back to map'}</button>
         <button class="soft-btn" id="redo">↻ Play again</button>
       </div></div>`;
-    offerChest(.35, say(`${stars === 3 ? 'Three stars! Amazing!' : 'Great job!'} You earned ${earned} gems!`));
+    offerChest(.25, say(`${stars === 3 ? 'Three stars! Amazing!' : 'Great job!'} You earned ${earned} gems!`));
+    checkPets();
     $('#goOn').onclick = () => chapterMap(k);
     $('#redo').onclick = () => storyLevel(k, i);
   }
@@ -2073,12 +2243,13 @@ function rescueScene(k, earned){
   sfx.tada(); sfx.cheer(); confetti(90);
   const nm = friendName(k), nextC = CHAPTERS[k + 1];
   screen.innerHTML = `<div class="center">
-    <div class="duo"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="uni full bounce" style="animation-delay:-.8s">${guideSVG(FRIEND_LOOKS[k], 'full')}</div></div>
+    <div class="duo"><div class="uni full bounce">${guideSVG(null, 'full')}${petTag()}</div><div class="uni full bounce" style="animation-delay:-.8s">${guideSVG(FRIEND_LOOKS[k], 'full')}</div></div>
     <div class="bubble gold">You rescued ${esc(nm)}! 🎉<br>She's back in the band!</div>
     <div class="bubble">You earned <b>${earned}</b> 💎</div>
     <div class="chest-box" id="chestSpot"></div>
     <button class="big-btn" id="goOn">Yay! ➜</button></div>`;
   offerChest(1, say(`Thank you Bella! You saved me! I'm back in the band! ${nextC && nextC.final ? "Now it's time for the big concert!" : nextC && nextC.ready ? '' : 'More adventures are coming soon!'}`));
+  checkPets();
   $('#goOn').onclick = () => worldScreen();
 }
 function finaleScene(earned){
@@ -2105,7 +2276,7 @@ function storyKinds(){
 
 /* ---- the challenges (one question each) ---- */
 const SC_COLORS = ['#ffb3d9','#d4b8ff','#a8e0ff','#b8f0c0','#ffe58a','#ffc79a'];
-function trackResult(track, ok){ track.recent.push(ok ? 1 : 0); track.recent = track.recent.slice(-10); save(); }
+function trackResult(track, ok){ logAns(TRACK_AREA(track), ok); track.recent.push(ok ? 1 : 0); track.recent = track.recent.slice(-10); save(); }
 function choiceRound(ctx, html, isRight, onWrong, done){
   ctx.qa.innerHTML = html;
   let first = true, solved = false, busy = false;
@@ -2233,11 +2404,11 @@ const CHALLENGES = {
 };
 
 function roundDone(earned, unlock, again){
-  save();
+  logGame(); save();
   setTop(true, true);
   sfx.tada(); sfx.cheer(); confetti(70);
   screen.innerHTML = `<div class="center">
-    <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}</div><div class="chest-box" id="chestSpot"></div></div>
+    <div class="chest-row"><div class="uni full bounce">${guideSVG(null, 'full')}${petTag()}</div><div class="chest-box" id="chestSpot"></div></div>
     <div class="bubble">You did it, Bella! 🎉<br>You earned <b>${earned}</b> 💎</div>
     ${unlock ? `<div class="bubble gold">Unlocked: ${esc(unlock)}! 🌈</div>` : ''}
     <div class="row">
@@ -2245,7 +2416,8 @@ function roundDone(earned, unlock, again){
       <button class="soft-btn" id="toMap">🏠 Home</button>
     </div>
   </div>`;
-  offerChest(.35, say(`You did it, Bella! You earned ${earned} gems!` + (unlock ? ` And you unlocked ${unlock}!` : '')));
+  offerChest(.25, say(`You did it, Bella! You earned ${earned} gems!` + (unlock ? ` And you unlocked ${unlock}!` : '')));
+  checkPets();
   $('#playAgain').onclick = () => { sfx.pop(); again(); };
   $('#toMap').onclick = () => mapScreen();
 }
@@ -2402,8 +2574,9 @@ if (!S.look){
 
 /* ---------- Remember where she is (so a reload or Home button doesn't start over) ---------- */
 // Each screen saves its name; if the phone reloads the app, "Keep playing" brings her back there.
+if (!S.played && S.rounds) S.played = S.rounds; // count games played before this update
 const RESUME = ['mapScreen','gardenScreen','closetScreen','worldScreen','chapterMap','storyLevel',
-  'balloonGame','mathGame','countGame','shapeGame','clockGame','coinGame'];
+  'balloonGame','mathGame','countGame','shapeGame','clockGame','coinGame','petsScreen'];
 const SCREENS = {};
 RESUME.forEach(name => {
   const orig = window[name]; SCREENS[name] = orig;
@@ -2413,7 +2586,9 @@ RESUME.forEach(name => {
 mapScreen = window.mapScreen; gardenScreen = window.gardenScreen; closetScreen = window.closetScreen;
 worldScreen = window.worldScreen; chapterMap = window.chapterMap; storyLevel = window.storyLevel;
 balloonGame = window.balloonGame; mathGame = window.mathGame; countGame = window.countGame;
-shapeGame = window.shapeGame; clockGame = window.clockGame; coinGame = window.coinGame;
+shapeGame = window.shapeGame; clockGame = window.clockGame; coinGame = window.coinGame; petsScreen = window.petsScreen;
+const _parent = parentScreen; parentScreen = (...a) => { S.where = ['parentScreen']; save(); return _parent(...a); };
+const _gate = parentGate; parentGate = (...a) => { S.where = ['parentScreen']; save(); return _gate(...a); };
 const _rescue = rescueScene; rescueScene = (...a) => { S.where = ['worldScreen']; save(); return _rescue(...a); };
 const _voice = voiceScreen; voiceScreen = (...a) => { S.where = ['voiceScreen']; save(); return _voice(...a); };
 const _finale = finaleScene; finaleScene = (...a) => { S.where = ['mapScreen']; save(); return _finale(...a); };
