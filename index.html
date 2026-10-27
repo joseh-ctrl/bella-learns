@@ -250,6 +250,8 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .tabs::-webkit-scrollbar{display:none}
 .tab{white-space:nowrap;flex:none}
 .sw-svg{width:54px;height:60px;display:block}.sw-svg svg{width:100%;height:100%}
+.sw-svg.sw-full{width:44px;height:86px}
+.item.chest-item{background:linear-gradient(160deg,#fff,#fff3c4)}.item.chest-item small{color:#a86a00}
 .tabs{display:flex;gap:8px;background:rgba(255,255,255,.18);border-radius:999px;padding:6px}
 .tab{font:inherit;font-size:clamp(1rem,4.2vw,1.2rem);font-weight:600;border:0;border-radius:999px;padding:10px 16px;background:transparent;color:#fff;cursor:pointer}
 .tab.on{background:#fff;color:var(--ink)}
@@ -467,6 +469,9 @@ const ITEMS = [
   { id:'long', slot:'hairStyle', name:'Long & Loose',  cost:10 },
   { id:'pony', slot:'hairStyle', name:'High Ponytail', cost:12 },
   { id:'pig',  slot:'hairStyle', name:'Pigtails',      cost:12 },
+  { id:'brd',  slot:'hairStyle', name:'Braids',        cost:15 },
+  { id:'bob',  slot:'hairStyle', name:'Short Bob',     cost:12 },
+  { id:'mer',  slot:'hairStyle', name:'Mermaid Waves', cost:18 },
   // hair colors
   { id:'hn', slot:'hairColor', name:'Natural',   cost:0,  c:['#3b2a24','#1c1310'] },
   { id:'hb', slot:'hairColor', name:'Brown',     cost:8,  c:['#8a5a3b','#4e301e'] },
@@ -476,22 +481,42 @@ const ITEMS = [
   { id:'h3', slot:'hairColor', name:'Mint',      cost:10, c:['#9ff5d2','#2bbfa0'] },
   { id:'h4', slot:'hairColor', name:'Midnight',  cost:12, c:['#6a5ab0','#21183f'] },
   { id:'h5', slot:'hairColor', name:'Rainbow',   cost:20, c:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'] },
+  { id:'h6', slot:'hairColor', name:'Lavender',  cost:10, c:['#dcc0ff','#9b6be0'] },
+  { id:'h7', slot:'hairColor', name:'Cotton Candy', cost:14, c:['#ffb3e6','#9fd8ff'] },
+  { id:'h9', slot:'hairColor', name:'Silver',    cost:12, c:['#f2f3fa','#a9aec4'] },
+  { id:'h8', slot:'hairColor', name:'Galaxy',    cost:0, chest:true, c:['#2a1a6e','#7a3cf0','#ff5fd0'] },
   // tops
   { id:'t1', slot:'top', name:'Pink Heart',     cost:0,  c:['#ff8ac6','#ff4f9a'], badge:'heart' },
   { id:'t0', slot:'top', name:'Teal Star',      cost:0,  c:['#4fd8e8','#7c6cf5'], badge:'star' },
   { id:'t2', slot:'top', name:'Gold Note',      cost:8,  c:['#ffe27a','#f5a623'], badge:'note' },
   { id:'t3', slot:'top', name:'Purple Sparkle', cost:10, c:['#c9a0ff','#7a3cf0'], badge:'star' },
   { id:'t4', slot:'top', name:'Mint Heart',     cost:10, c:['#a8f0d0','#33b98c'], badge:'heart' },
+  { id:'t5', slot:'top', name:'Rainbow Tee',    cost:12, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'t6', slot:'top', name:'Unicorn Top',    cost:14, c:['#ffffff','#eadcff'], badge:'unicorn' },
+  { id:'t7', slot:'top', name:'Ocean Shell',    cost:12, c:['#8fe6ff','#3f9ee8'], badge:'shell' },
+  { id:'t8', slot:'top', name:'Flower Fairy',   cost:12, c:['#ffe1f0','#ffa6d2'], badge:'flower' },
   // bottoms
   { id:'b0', slot:'bottom', name:'Pink Skirt',    cost:0,  c:['#ffb3d9','#ff6fae'] },
   { id:'b1', slot:'bottom', name:'Denim Shorts',  cost:8,  c:['#7fa8e8','#4a72c0'] },
   { id:'b2', slot:'bottom', name:'Purple Tutu',   cost:12, c:['#e2c6ff','#a876f0'] },
   { id:'b3', slot:'bottom', name:'Jeans',         cost:10, c:['#5f86cf','#34539a'] },
+  { id:'b4', slot:'bottom', name:'Pink Leggings', cost:10, c:['#ffb3d9','#f06aa8'] },
+  { id:'b5', slot:'bottom', name:'Rainbow Skirt', cost:14, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'b6', slot:'bottom', name:'Ballet Tutu',   cost:12, c:['#ffe8f4','#ff9ccf'] },
+  // dresses (cover top + bottom)
+  { id:'d1', slot:'dress', name:'Princess Gown', cost:30, c:['#ffd6ec','#ff7fbf'] },
+  { id:'d2', slot:'dress', name:'Mermaid Dress', cost:28, c:['#8ff0e6','#3a7fd6'] },
+  { id:'d3', slot:'dress', name:'Rainbow Dress', cost:25, c:['#ff8a8a','#ffd36b','#8be0a0','#7fb8ff','#c69bff'] },
+  { id:'d4', slot:'dress', name:'Fairy Dress',   cost:22, c:['#d2ffe6','#a98af5'] },
   // shoes
   { id:'s0', slot:'shoes', name:'White Sneakers', cost:0,  c:['#ffffff','#e7e2f2'] },
   { id:'s1', slot:'shoes', name:'Pink Sneakers',  cost:8,  c:['#ffb3d9','#ff5fa2'] },
   { id:'s2', slot:'shoes', name:'Sparkle Boots',  cost:15, c:['#c9a0ff','#7a3cf0'] },
   { id:'s3', slot:'shoes', name:'Gold Shoes',     cost:12, c:['#ffe27a','#e0a800'] },
+  { id:'s4', slot:'shoes', name:'Rain Boots',     cost:10, c:['#ffe36b','#f5b400'] },
+  { id:'s5', slot:'shoes', name:'Ballet Slippers',cost:12, c:['#ffd6ea','#ff8ac6'] },
+  { id:'s6', slot:'shoes', name:'Roller Skates',  cost:18, c:['#ffffff','#c9a0ff'] },
+  { id:'s7', slot:'shoes', name:'Glass Slippers', cost:0, chest:true, c:['#eaf8ff','#9fd8ff'] },
   // extras
   { id:'n1', slot:'neck', name:'Silver Necklace', cost:0,  svg:'<svg viewBox="0 0 40 44"><path d="M8 4 Q12 24 20 28 Q28 24 32 4" stroke="#aeb4bf" stroke-width="2" fill="none"/><ellipse cx="20" cy="33" rx="6" ry="8.5" fill="#eef0f5" stroke="#8d939c" stroke-width="2"/></svg>' },
   { id:'a0', slot:'head', name:'Star Clip',  cost:0,  icon:'⭐' },
@@ -499,11 +524,42 @@ const ITEMS = [
   { id:'a2', slot:'head', name:'Heart Clip', cost:12, icon:'💗' },
   { id:'a3', slot:'head', name:'Flower',     cost:15, icon:'🌼' },
   { id:'a5', slot:'head', name:'Crown',      cost:25, icon:'👑' },
-  { id:'a4', slot:'face', name:'Sunglasses', cost:18, icon:'🕶️' }
+  { id:'a6', slot:'head', name:'Tiara',        cost:20 },
+  { id:'a8', slot:'head', name:'Cat Ears',     cost:14 },
+  { id:'a9', slot:'head', name:'Flower Crown', cost:18 },
+  { id:'a10', slot:'head', name:'Seashell Clip', cost:12 },
+  { id:'a7', slot:'head', name:'Unicorn Horn', cost:0, chest:true },
+  { id:'a4', slot:'face', name:'Sunglasses', cost:18, icon:'🕶️' },
+  { id:'f1', slot:'face', name:'Heart Glasses', cost:16 },
+  { id:'f2', slot:'face', name:'Star Glitter',  cost:10 },
+  // jewelry
+  { id:'e1', slot:'ears', name:'Pearl Earrings', cost:10 },
+  { id:'e2', slot:'ears', name:'Heart Earrings', cost:12 },
+  { id:'e3', slot:'ears', name:'Star Earrings',  cost:12 },
+  { id:'e4', slot:'ears', name:'Gold Hoops',     cost:14 },
+  { id:'n2', slot:'neck', name:'Pearl Necklace', cost:14 },
+  { id:'n3', slot:'neck', name:'Heart Locket',   cost:16 },
+  { id:'r1', slot:'ring', name:'Diamond Ring',   cost:12, icon:'💍' },
+  { id:'r2', slot:'ring', name:'Heart Ring',     cost:12, icon:'💗' },
+  // wings and capes
+  { id:'w1', slot:'back', name:'Fairy Wings',     cost:25 },
+  { id:'w2', slot:'back', name:'Butterfly Wings', cost:22 },
+  { id:'w3', slot:'back', name:'Royal Cape',      cost:20 },
+  { id:'w4', slot:'back', name:'Rainbow Wings',   cost:0, chest:true },
+  // things to hold
+  { id:'m1', slot:'hand', name:'Magic Wand',   cost:15, icon:'🪄' },
+  { id:'m2', slot:'hand', name:'Toy Sword',    cost:15, icon:'⚔️' },
+  { id:'m3', slot:'hand', name:'Heart Balloon',cost:12, icon:'🎈' },
+  { id:'m4', slot:'hand', name:'Ice Cream',    cost:10, icon:'🍦' },
+  { id:'m6', slot:'hand', name:'Flowers',      cost:12, icon:'💐' },
+  // rides
+  { id:'k1', slot:'ride', name:'Skateboard',   cost:20, icon:'🛹' },
+  { id:'k2', slot:'ride', name:'Hoverboard',   cost:0, chest:true, icon:'✨' }
 ];
-const OPTIONAL = ['head', 'face', 'neck'];
+const OPTIONAL = ['head', 'face', 'neck', 'ears', 'ring', 'back', 'hand', 'ride', 'dress'];
 const START_OWNED = ['bun','hn','t1','t0','b0','s0','n1','a0'];
-const BELLA_LOOK = { hairStyle:'bun', hairColor:'hn', top:'t1', bottom:'b0', shoes:'s0', neck:'n1', head:null, face:null };
+const BELLA_LOOK = { hairStyle:'bun', hairColor:'hn', top:'t1', bottom:'b0', shoes:'s0', neck:'n1', head:null, face:null,
+  ears:null, ring:null, back:null, hand:null, ride:null, dress:null };
 const item = id => ITEMS.find(x => x.id === id);
 const SKIN = '#dba27c', SKIN_D = '#c48760';
 let svgN = 0;
@@ -511,8 +567,9 @@ let svgN = 0;
 function guideSVG(look, view = 'head'){
   const L = Object.assign({}, BELLA_LOOK, look || S.look), n = ++svgN;
   const SK = L.skin || SKIN, SKD = L.skinD || SKIN_D;
-  const hc = (item(L.hairColor) || item('hn')).c, top = item(L.top) || item('t1');
-  const bot = item(L.bottom) || item('b0'), sh = item(L.shoes) || item('s0');
+  const hc = (item(L.hairColor) || item('hn')).c, dr = L.dress && item(L.dress);
+  const top = dr ? { c:dr.c } : item(L.top) || item('t1');
+  const bot = dr ? { id:dr.id, c:dr.c } : item(L.bottom) || item('b0'), sh = item(L.shoes) || item('s0');
   const stops = arr => arr.map((c, k) => `<stop offset="${arr.length > 1 ? k / (arr.length - 1) : 0}" stop-color="${c}"/>`).join('');
   const H = `url(#hg${n})`, ties = '#ffc83d';
 
@@ -541,6 +598,20 @@ function guideSVG(look, view = 'head'){
         <path d="M54 90 Q20 112 26 172 Q30 204 46 212 Q38 160 60 112Z" fill="${H}"/>
         <path d="M146 90 Q180 112 174 172 Q170 204 154 212 Q162 160 140 112Z" fill="${H}"/>`,
       front: `${capCenterPart}<circle cx="52" cy="96" r="6" fill="${ties}"/><circle cx="148" cy="96" r="6" fill="${ties}"/>`
+    },
+    brd: {
+      back: `<ellipse cx="100" cy="98" rx="55" ry="57" fill="${H}"/>`,
+      over: [52, 148].map(x => [0, 1, 2, 3, 4, 5, 6].map(j => `<ellipse cx="${x + (x < 100 ? 1 : -1) * j}" cy="${124 + j * 17}" rx="${10 - j * .4}" ry="11" fill="${H}" stroke="rgba(0,0,0,.18)" stroke-width="1.2"/>`).join('')
+        + `<circle cx="${x + (x < 100 ? 7 : -7)}" cy="${124 + 7 * 17 - 4}" r="5" fill="${ties}"/><path d="M${x + (x < 100 ? 2 : -12)} ${124 + 7 * 17} l5 12 l5 -12z" fill="${H}"/>`).join(''),
+      front: capCenterPart
+    },
+    bob: {
+      back: `<path d="M42 104 Q40 48 100 42 Q160 48 158 104 L160 152 Q132 162 120 150 H80 Q68 162 40 152Z" fill="${H}"/>`,
+      front: `<path d="M46 108 Q42 46 100 42 Q158 46 154 108 Q150 82 140 74 L136 86 L126 72 L116 85 L106 70 L96 85 L86 72 L76 86 L66 74 Q52 82 46 108Z" fill="${H}"/>`
+    },
+    mer: {
+      back: `<path d="M44 100 Q42 52 100 44 Q158 52 156 100 Q172 150 156 192 Q174 232 158 272 Q172 304 148 314 Q100 322 52 314 Q28 304 42 272 Q26 232 44 192 Q28 150 44 100Z" fill="${H}"/>`,
+      front: capCenterPart
     }
   }[L.hairStyle] || null;
   const hs = hair || { back:'', front:capCenterPart };
@@ -549,21 +620,42 @@ function guideSVG(look, view = 'head'){
   const badge = {
     star: `<path d="M100 202 l5 10 11 2 -8 8 2 11 -10 -5 -10 5 2 -11 -8 -8 11 -2z" fill="#ffe36b"/>`,
     heart: `<path d="M100 226 C86 217 82 206 89 201 C94 197 100 202 100 206 C100 202 106 197 111 201 C118 206 114 217 100 226Z" fill="#fff"/>`,
-    note: `<g fill="#fff"><ellipse cx="95" cy="222" rx="7" ry="5"/><rect x="99" y="196" width="4" height="26"/><path d="M103 196 q12 4 9 14 q0 -7 -9 -7z"/></g>`
+    note: `<g fill="#fff"><ellipse cx="95" cy="222" rx="7" ry="5"/><rect x="99" y="196" width="4" height="26"/><path d="M103 196 q12 4 9 14 q0 -7 -9 -7z"/></g>`,
+    unicorn: `<path d="M100 194 L93 228 H107Z" fill="#ffd34d" stroke="#e0a800" stroke-width="1.5" stroke-linejoin="round"/><path d="M95 220 h10 M96 212 h8 M97 204 h6" stroke="#e0a800" stroke-width="1.3"/><circle cx="86" cy="204" r="2.5" fill="#ff8ac6"/><circle cx="114" cy="210" r="2.5" fill="#7fd1ff"/><circle cx="112" cy="198" r="1.8" fill="#c69bff"/>`,
+    shell: `<path d="M100 198 Q82 204 85 222 Q100 230 115 222 Q118 204 100 198Z" fill="#fff6f0"/><path d="M100 201 V226 M93 203 L90 224 M107 203 L110 224" stroke="#f0a8b8" stroke-width="1.6"/>`,
+    flower: `<g fill="#fff">${[0, 72, 144, 216, 288].map(a => `<circle cx="${100 + 8 * Math.sin(a * Math.PI / 180)}" cy="${212 - 8 * Math.cos(a * Math.PI / 180)}" r="6"/>`).join('')}</g><circle cx="100" cy="212" r="5" fill="#ffd34d"/>`
   }[top.badge] || '';
   const B = `url(#bg${n})`;
   const bottomSVG = {
     b0: `<path d="M60 244 H140 L156 292 Q100 304 44 292Z" fill="${B}"/><path d="M48 288 Q100 300 152 288" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`,
     b1: `<path d="M60 244 H140 L146 282 H105 L100 266 L95 282 H54Z" fill="${B}"/><path d="M60 252 H140" stroke="#fff" stroke-width="2" opacity=".35"/>`,
     b2: `<path d="M60 244 H140 L162 286 L150 280 L140 292 L128 282 L116 294 L104 283 L92 294 L80 282 L68 292 L56 280 L38 286Z" fill="${B}" opacity=".95"/>`,
-    b3: `<path d="M60 244 H140 L132 352 H106 L100 272 L94 352 H68Z" fill="${B}"/>`
+    b3: `<path d="M60 244 H140 L132 352 H106 L100 272 L94 352 H68Z" fill="${B}"/>`,
+    b4: `<path d="M62 244 H138 L124 354 H106 L100 272 L94 354 H76Z" fill="${B}"/>`,
+    b5: `<path d="M60 244 H140 L156 292 Q100 304 44 292Z" fill="${B}"/><path d="M48 288 Q100 300 152 288" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>`,
+    b6: `<path d="M60 244 H140 L162 286 L150 280 L140 292 L128 282 L116 294 L104 283 L92 294 L80 282 L68 292 L56 280 L38 286Z" fill="${B}" opacity=".95"/><path d="M60 244 H140 L150 270 L50 270Z" fill="#fff" opacity=".35"/>`,
+    d1: `<path d="M60 240 H140 L172 364 Q100 380 28 364Z" fill="${B}"/><path d="M34 360 Q100 376 166 360" stroke="#fff" stroke-width="4" fill="none" opacity=".7"/>
+      <g fill="#fff">${[[80, 280], [118, 300], [70, 330], [130, 340], [100, 320], [96, 352]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2"/>`).join('')}</g>
+      <path d="M58 240 Q100 254 142 240" stroke="#ffd34d" stroke-width="5" fill="none"/>`,
+    d2: `<path d="M62 240 H138 L128 324 L156 366 Q100 376 44 366 L72 324Z" fill="${B}"/>
+      <g fill="none" stroke="#fff" stroke-width="1.6" opacity=".55">${[256, 276, 296, 316].map(y => `<path d="M${74 + (y - 256) / 10} ${y} q6 6 12 0 q6 6 12 0 q6 6 12 0 q6 6 12 0"/>`).join('')}</g>
+      <path d="M48 362 Q100 374 152 362" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`,
+    d3: `<path d="M60 240 H140 L160 300 Q100 314 40 300Z" fill="${B}"/><path d="M44 296 Q100 310 156 296" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>`,
+    d4: `<path d="M60 240 H140 L160 296 L146 288 L138 306 L124 292 L112 310 L100 294 L88 310 L76 292 L62 306 L54 288 L40 296Z" fill="${B}"/>
+      <path d="M60 240 H140" stroke="#fff" stroke-width="3" opacity=".6"/>`
   }[bot.id] || '';
-  const tallBoot = sh.id === 's2';
+  const tallBoot = sh.id === 's2' || sh.id === 's4';
   const shoe = x => tallBoot
     ? `<path d="M${x - 10} 326 H${x + 10} V362 Q${x + 20} 364 ${x + 18} 378 H${x - 14} Q${x - 16} 362 ${x - 10} 360Z" fill="url(#sg${n})" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>
-       <path d="M${x - 4} 336 l2 4 4 .5 -3 3 .8 4 -3.8 -2 -3.8 2 .8 -4 -3 -3 4 -.5z" fill="#fff"/>`
-    : `<path d="M${x - 15} 378 Q${x - 17} 360 ${x - 4} 356 H${x + 8} Q${x + 20} 362 ${x + 17} 378Z" fill="url(#sg${n})" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
-       <rect x="${x - 15}" y="372" width="32" height="6" rx="3" fill="${sh.id === 's0' ? '#ff8ac6' : '#fff'}" opacity=".9"/>`;
+       ${sh.id === 's2' ? `<path d="M${x - 4} 336 l2 4 4 .5 -3 3 .8 4 -3.8 -2 -3.8 2 .8 -4 -3 -3 4 -.5z" fill="#fff"/>` : `<path d="M${x - 10} 330 H${x + 10}" stroke="#fff" stroke-width="3" opacity=".6"/>`}`
+    : sh.id === 's5'
+    ? `<path d="M${x - 7} 356 L${x + 7} 334 M${x + 7} 356 L${x - 7} 334 M${x - 7} 340 L${x + 7} 340" stroke="#ff8ac6" stroke-width="2.2" stroke-linecap="round"/>
+       <path d="M${x - 15} 378 Q${x - 16} 364 ${x - 4} 362 H${x + 8} Q${x + 19} 366 ${x + 17} 378Z" fill="url(#sg${n})" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+       <circle cx="${x + 1}" cy="366" r="3" fill="#ff5fa2"/>`
+    : `<path d="M${x - 15} 378 Q${x - 17} 360 ${x - 4} 356 H${x + 8} Q${x + 20} 362 ${x + 17} 378Z" fill="url(#sg${n})"${sh.id === 's7' ? ' fill-opacity=".8"' : ''} stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+       <rect x="${x - 15}" y="372" width="32" height="6" rx="3" fill="${sh.id === 's0' ? '#ff8ac6' : '#fff'}" opacity=".9"/>
+       ${sh.id === 's6' ? `<rect x="${x - 16}" y="378" width="34" height="4" rx="2" fill="#9a9ab0"/><circle cx="${x - 9}" cy="387" r="5.5" fill="#ff5fae" stroke="#c2187a" stroke-width="1.5"/><circle cx="${x + 11}" cy="387" r="5.5" fill="#ff5fae" stroke="#c2187a" stroke-width="1.5"/>` : ''}
+       ${sh.id === 's7' ? `<path d="M${x - 2} 362 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5z" fill="#fff"/>` : ''}`;
 
   // ----- extras -----
   const head = {
@@ -571,13 +663,66 @@ function guideSVG(look, view = 'head'){
     a1: `<path d="M140 62 L124 51 L124 73Z M140 62 L156 51 L156 73Z" fill="#ff5fa2" stroke="#d63c80" stroke-width="2" stroke-linejoin="round"/><circle cx="140" cy="62" r="5" fill="#ff8ac6" stroke="#d63c80" stroke-width="2"/>`,
     a2: `<path d="M140 76 C128 68 126 58 132 54 C136 51 140 55 140 58 C140 55 144 51 148 54 C154 58 152 68 140 76Z" fill="#ff4f9a" stroke="#c22d6e" stroke-width="1.5"/>`,
     a3: `<g fill="#fff" stroke="#ff8ac6" stroke-width="1.5"><circle cx="140" cy="55" r="6"/><circle cx="148.5" cy="61" r="6"/><circle cx="145" cy="71" r="6"/><circle cx="135" cy="71" r="6"/><circle cx="131.5" cy="61" r="6"/></g><circle cx="140" cy="64" r="4.5" fill="#ffd34d"/>`,
-    a5: `<path d="M72 40 L74 10 L87 26 L100 4 L113 26 L126 10 L128 40Z" fill="#ffd34d" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="20" r="3.5" fill="#ff5fa2"/>`
+    a5: `<path d="M72 40 L74 10 L87 26 L100 4 L113 26 L126 10 L128 40Z" fill="#ffd34d" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="20" r="3.5" fill="#ff5fa2"/>`,
+    a6: `<path d="M74 52 Q100 42 126 52 L123 38 L112 45 L100 28 L88 45 L77 38Z" fill="#eef1fa" stroke="#aeb4c8" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="40" r="4" fill="#7fd1ff"/><circle cx="84" cy="46" r="2.2" fill="#ff8ac6"/><circle cx="116" cy="46" r="2.2" fill="#ff8ac6"/>`,
+    a7: `<path d="M100 0 L89 46 H111Z" fill="#ffe27a" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/><path d="M92 34 L109 28 M94 22 L107 17 M96 11 L104 8" stroke="#e0a800" stroke-width="2"/><circle cx="82" cy="40" r="3" fill="#ff8ac6"/><circle cx="118" cy="38" r="3" fill="#c69bff"/>`,
+    a8: `<path d="M58 64 L54 18 L88 46Z M142 64 L146 18 L112 46Z" fill="#3b2a24" stroke="#1c1310" stroke-width="2" stroke-linejoin="round"/><path d="M63 54 L60 30 L79 46Z M137 54 L140 30 L121 46Z" fill="#ff9ccf"/>`,
+    a9: `${[[62, 66, '#ff8ac6'], [78, 52, '#c69bff'], [100, 46, '#ffd34d'], [122, 52, '#7fd1ff'], [138, 66, '#ff8ac6']].map(([x, y, c]) =>
+      `<g fill="${c}"><circle cx="${x - 5}" cy="${y}" r="5"/><circle cx="${x + 5}" cy="${y}" r="5"/><circle cx="${x}" cy="${y - 5}" r="5"/><circle cx="${x}" cy="${y + 5}" r="5"/></g><circle cx="${x}" cy="${y}" r="3.4" fill="#fff"/>`).join('')}
+      <path d="M68 60 l-6 -6 M90 48 l-4 -7 M110 48 l4 -7 M132 60 l6 -6" stroke="#5cc47a" stroke-width="3" stroke-linecap="round"/>`,
+    a10: `<path d="M140 52 Q126 56 128 70 Q140 76 152 70 Q154 56 140 52Z" fill="#ffe6ee" stroke="#f08fae" stroke-width="1.5"/><path d="M140 54 V73 M134 56 L132 71 M146 56 L148 71" stroke="#f08fae" stroke-width="1.5"/>`
   }[L.head] || '';
-  const face = L.face === 'a4'
-    ? `<g><rect x="68" y="97" width="29" height="21" rx="9" fill="#2a2140"/><rect x="103" y="97" width="29" height="21" rx="9" fill="#2a2140"/><path d="M97 105 H103" stroke="#2a2140" stroke-width="4"/><path d="M74 103 h7 M109 103 h7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/></g>` : '';
-  const neck = L.neck === 'n1'
-    ? `<path d="M88 164 Q91 177 100 181 Q109 177 112 164" stroke="#cfd3dc" stroke-width="1.6" fill="none"/>
-       <ellipse cx="100" cy="187" rx="5" ry="7" fill="#eef0f5" stroke="#9aa1ab" stroke-width="1.5"/>` : '';
+  const heartAt = (x, y, r) => `M${x} ${y + r} C${x - r * 1.3} ${y + r * .2} ${x - r * 1.2} ${y - r} ${x - r * .5} ${y - r} C${x - r * .2} ${y - r} ${x} ${y - r * .7} ${x} ${y - r * .5} C${x} ${y - r * .7} ${x + r * .2} ${y - r} ${x + r * .5} ${y - r} C${x + r * 1.2} ${y - r} ${x + r * 1.3} ${y + r * .2} ${x} ${y + r}Z`;
+  const starAt = (x, y, r) => `M${x} ${y - r} L${x + r * .3} ${y - r * .3} L${x + r} ${y} L${x + r * .3} ${y + r * .3} L${x} ${y + r} L${x - r * .3} ${y + r * .3} L${x - r} ${y} L${x - r * .3} ${y - r * .3}Z`;
+  const face = {
+    a4: `<g><rect x="68" y="97" width="29" height="21" rx="9" fill="#2a2140"/><rect x="103" y="97" width="29" height="21" rx="9" fill="#2a2140"/><path d="M97 105 H103" stroke="#2a2140" stroke-width="4"/><path d="M74 103 h7 M109 103 h7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".75"/></g>`,
+    f1: `<g><path d="${heartAt(81, 107, 14)}" fill="#ff8ac6" fill-opacity=".45" stroke="#ff3f96" stroke-width="3"/><path d="${heartAt(119, 107, 14)}" fill="#ff8ac6" fill-opacity=".45" stroke="#ff3f96" stroke-width="3"/><path d="M95 102 Q100 98 105 102" stroke="#ff3f96" stroke-width="3" fill="none"/></g>`,
+    f2: `<g fill="#ffd34d"><path d="${starAt(60, 124, 5)}"/><path d="${starAt(140, 124, 5)}"/></g><g fill="#ff8ac6"><circle cx="66" cy="134" r="1.6"/><circle cx="56" cy="132" r="1.3"/><circle cx="134" cy="134" r="1.6"/><circle cx="144" cy="132" r="1.3"/></g><circle cx="74" cy="118" r="1.3" fill="#c69bff"/>`
+  }[L.face] || '';
+  const ears = {
+    e1: [48, 152].map(x => `<circle cx="${x}" cy="124" r="4.2" fill="#fff" stroke="#c9cdd8" stroke-width="1.2"/><circle cx="${x - 1.2}" cy="122.8" r="1.2" fill="#fff" opacity=".9"/>`).join(''),
+    e2: [48, 152].map(x => `<path d="${heartAt(x, 126, 5)}" fill="#ff4f9a"/>`).join(''),
+    e3: [48, 152].map(x => `<path d="${starAt(x, 127, 6)}" fill="#ffd34d" stroke="#e0a800" stroke-width="1"/>`).join(''),
+    e4: [48, 152].map(x => `<circle cx="${x}" cy="129" r="7" fill="none" stroke="#ffc93a" stroke-width="2.6"/>`).join('')
+  }[L.ears] || '';
+  const neck = {
+    n1: `<path d="M88 164 Q91 177 100 181 Q109 177 112 164" stroke="#cfd3dc" stroke-width="1.6" fill="none"/>
+       <ellipse cx="100" cy="187" rx="5" ry="7" fill="#eef0f5" stroke="#9aa1ab" stroke-width="1.5"/>`,
+    n2: [0, 1, 2, 3, 4, 5, 6, 7, 8].map(j => { const t = j / 8, x = 87 + 26 * t, y = 164 + 18 * Math.sin(Math.PI * t);
+       return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.8" fill="#fffaf2" stroke="#d8cfc0" stroke-width=".8"/>`; }).join(''),
+    n3: `<path d="M88 164 Q91 177 100 181 Q109 177 112 164" stroke="#ffc93a" stroke-width="1.8" fill="none"/>
+       <path d="${heartAt(100, 188, 7)}" fill="#ff4f9a" stroke="#ffc93a" stroke-width="1.6"/>`
+  }[L.neck] || '';
+  const ring = {
+    r1: `<circle cx="146" cy="223" r="4" fill="none" stroke="#ffd34d" stroke-width="2.2"/><path d="M146 212 l3.5 4 -3.5 4 -3.5 -4z" fill="#a6ecff" stroke="#5bb8e0" stroke-width="1"/>`,
+    r2: `<circle cx="146" cy="223" r="4" fill="none" stroke="#ffd34d" stroke-width="2.2"/><path d="${heartAt(146, 216, 4.5)}" fill="#ff4f9a"/>`
+  }[L.ring] || '';
+  const mirror = g => `${g}<g transform="translate(200 0) scale(-1 1)">${g}</g>`;
+  const back = {
+    w1: mirror(`<path d="M98 196 Q24 60 2 132 Q-2 210 98 210Z" fill="#cdf3ff" fill-opacity=".9" stroke="#86cdee" stroke-width="2.5"/>
+      <path d="M98 214 Q30 218 14 282 Q50 304 100 222Z" fill="#e6d4ff" fill-opacity=".9" stroke="#b49be8" stroke-width="2.5"/>
+      <circle cx="18" cy="134" r="3.5" fill="#fff"/><circle cx="30" cy="160" r="2.5" fill="#fff"/><circle cx="28" cy="270" r="2.5" fill="#fff"/>`),
+    w2: mirror(`<path d="M98 198 Q20 54 0 128 Q-2 208 98 210Z" fill="#ff8ac6" stroke="#c2187a" stroke-width="3"/>
+      <path d="M98 214 Q28 218 12 284 Q50 306 100 222Z" fill="#ffb34d" stroke="#c96a00" stroke-width="3"/>
+      <circle cx="20" cy="134" r="10" fill="#fff6a8"/><circle cx="34" cy="170" r="6" fill="#fff"/><circle cx="30" cy="268" r="7" fill="#fff"/>`),
+    w3: `<path d="M66 166 Q100 178 134 166 L176 360 Q100 376 24 360Z" fill="#c2185b"/><path d="M70 166 Q100 178 130 166 L134 186 Q100 196 66 186Z" fill="#ffd34d"/>
+      <g fill="#fff">${[52, 68, 84, 100, 116, 132, 148].map(x => `<circle cx="${x}" cy="${360 + (x === 100 ? 6 : 4)}" r="3"/>`).join('')}</g>`,
+    w4: mirror(`<path d="M98 196 Q22 56 0 130 Q-2 210 98 210Z" fill="url(#rw${n})" stroke="#fff" stroke-width="3"/>
+      <path d="M98 214 Q28 218 12 284 Q50 306 100 222Z" fill="url(#rw${n})" stroke="#fff" stroke-width="3" opacity=".9"/>
+      <circle cx="24" cy="140" r="3" fill="#fff"/><circle cx="36" cy="270" r="2.5" fill="#fff"/>`)
+  }[L.back] || '';
+  const hand = {
+    m1: `<path d="M52 262 L32 212" stroke="#6b4bb0" stroke-width="4.5" stroke-linecap="round"/><path d="${starAt(30, 205, 13)}" fill="#ffd34d" stroke="#e0a800" stroke-width="1.5"/><circle cx="18" cy="194" r="2" fill="#fff"/><circle cx="42" cy="192" r="1.6" fill="#fff"/>`,
+    m2: `<path d="M50 250 L26 186 L32 182 L56 246Z" fill="#e9edf7" stroke="#9aa1b5" stroke-width="1.5" stroke-linejoin="round"/><path d="M41 254 L63 244" stroke="#ffd34d" stroke-width="5.5" stroke-linecap="round"/><path d="M54 252 L60 268" stroke="#8a4fd0" stroke-width="5" stroke-linecap="round"/>`,
+    m3: `<path d="M50 252 Q38 210 28 166" stroke="#fff" stroke-width="1.6" fill="none"/><path d="${heartAt(26, 148, 18)}" fill="#ff5fa2" stroke="#c2187a" stroke-width="1.5"/><ellipse cx="18" cy="140" rx="3" ry="5" fill="#fff" opacity=".6"/>`,
+    m4: `<path d="M43 250 L51 274 L59 250Z" fill="#e8b46a" stroke="#b97f35" stroke-width="1.2"/><path d="M45 254 L57 254 M47 260 L55 260" stroke="#b97f35" stroke-width="1"/><circle cx="51" cy="243" r="9" fill="#ff9ccf"/><circle cx="51" cy="230" r="8" fill="#9ff5d2"/><circle cx="51" cy="221" r="2.6" fill="#ff3f5a"/>`,
+    m6: `<path d="M51 262 L40 226 M51 262 L52 222 M51 262 L64 228" stroke="#5cc47a" stroke-width="3" stroke-linecap="round"/>${[[40, 222, '#ff8ac6'], [52, 216, '#ffd34d'], [64, 224, '#c69bff']].map(([x, y, c]) =>
+      `<g fill="${c}"><circle cx="${x - 4}" cy="${y}" r="4.5"/><circle cx="${x + 4}" cy="${y}" r="4.5"/><circle cx="${x}" cy="${y - 4}" r="4.5"/><circle cx="${x}" cy="${y + 4}" r="4.5"/></g><circle cx="${x}" cy="${y}" r="2.6" fill="#fff"/>`).join('')}`
+  }[L.hand] || '';
+  const ride = {
+    k1: `<rect x="54" y="380" width="92" height="9" rx="4.5" fill="#ff5fae" stroke="#c2187a" stroke-width="1.5"/><path d="M66 384 h14 M90 384 h20 M120 384 h14" stroke="#fff" stroke-width="2" opacity=".6"/><circle cx="72" cy="395" r="6" fill="#4a3b6b"/><circle cx="128" cy="395" r="6" fill="#4a3b6b"/>`,
+    k2: `<ellipse cx="100" cy="400" rx="46" ry="5" fill="#7fe3ff" opacity=".45"/><rect x="52" y="380" width="96" height="10" rx="5" fill="#9fe8ff" stroke="#3fa6f5" stroke-width="2"/><circle cx="76" cy="385" r="2.5" fill="#fff"/><circle cx="124" cy="385" r="2.5" fill="#fff"/>`
+  }[L.ride] || '';
 
   // ----- the girl -----
   const eye = x => `
@@ -604,7 +749,8 @@ function guideSVG(look, view = 'head'){
     <path d="M146 226 L136 196" stroke="#3b2a55" stroke-width="7" stroke-linecap="round"/>
     <circle cx="135" cy="190" r="9" fill="#d8d9e6" stroke="#3b2a55" stroke-width="2.5"/>
     <path d="M129 187 h12 M128 192 h14" stroke="#9a9ab0" stroke-width="1.2"/>
-    <circle cx="146" cy="226" r="8" fill="${SK}"/>`;
+    <circle cx="146" cy="226" r="8" fill="${SK}"/>
+    ${ring}${hand}${ride}${hs.over || ''}`;
   const headSVG = `
     <ellipse cx="48" cy="110" rx="8" ry="11" fill="${SKD}"/><ellipse cx="152" cy="110" rx="8" ry="11" fill="${SKD}"/>
     <ellipse cx="100" cy="102" rx="52" ry="54" fill="${SK}"/>
@@ -616,16 +762,19 @@ function guideSVG(look, view = 'head'){
     <ellipse cx="68" cy="128" rx="9" ry="5" fill="#f08f8f" opacity=".35"/><ellipse cx="132" cy="128" rx="9" ry="5" fill="#f08f8f" opacity=".35"/>
     ${L.mark === false ? '' : '<circle cx="71" cy="122" r="2.3" fill="#5a3527"/>'}
     <path d="M89 132 Q100 141 111 132 Q100 136 89 132Z" fill="#d9707e" stroke="#b5525e" stroke-width="2" stroke-linejoin="round"/>
-    ${face}${head}`;
-  const vb = view === 'full' ? '0 -6 200 392' : '28 0 144 160';
+    ${ears}${face}${head}`;
+  const low = L.ride || sh.id === 's6';
+  const vb = view === 'bust' ? '34 40 132 170' : view === 'full' ? `0 -6 200 ${low ? 410 : 392}` : '28 0 144 160';
+  if (view === 'bust') view = 'full';
   return `<svg viewBox="${vb}" aria-hidden="true">
     <defs>
       <linearGradient id="hg${n}" x1="0" y1="0" x2="${hc.length > 2 ? 1 : 0}" y2="1">${stops(hc)}</linearGradient>
       <linearGradient id="tg${n}" x1="0" y1="0" x2="1" y2="1">${stops(top.c)}</linearGradient>
       <linearGradient id="bg${n}" x1="0" y1="0" x2="0" y2="1">${stops(bot.c)}</linearGradient>
       <linearGradient id="sg${n}" x1="0" y1="0" x2="0" y2="1">${stops(sh.c)}</linearGradient>
+      ${L.back === 'w4' ? `<linearGradient id="rw${n}" x1="0" y1="0" x2="1" y2="1">${stops(['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#b16cf0'])}</linearGradient>` : ''}
     </defs>
-    ${hs.back}${view === 'full' ? body : `<rect x="90" y="146" width="20" height="22" rx="7" fill="${SKD}"/><path d="M58 186 Q62 164 84 162 H116 Q138 164 142 186Z" fill="url(#tg${n})"/>${neck}`}
+    ${view === 'full' ? back : ''}${hs.back}${view === 'full' ? body : `<rect x="90" y="146" width="20" height="22" rx="7" fill="${SKD}"/><path d="M58 186 Q62 164 84 162 H116 Q138 164 142 186Z" fill="url(#tg${n})"/>${neck}${hs.over || ''}`}
     ${headSVG}
   </svg>`;
 }
@@ -1024,13 +1173,13 @@ function splash(){
   screen.innerHTML = `<div class="center">
     <div class="uni full bounce">${guideSVG(null, 'full')}</div>
     <h1 class="title">Bella's<br>Pop Star Stage</h1>
-    <button class="big-btn" id="go">▶ Play</button>
+    <button class="big-btn" id="go">▶ ${Array.isArray(S.where) && SCREENS[S.where[0]] && S.where[0] !== 'mapScreen' ? 'Keep playing' : 'Play'}</button>
   </div>`;
   $('#go').onclick = () => {
     tone([1], .01); // wakes up sound on iPhone/iPad
     try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
-    mapScreen();
-    say('Hi Bella! Where do you want to play?');
+    started = true; pushStep();
+    if (!resume()) say('Hi Bella! Where do you want to play?');
   };
 }
 
@@ -1523,13 +1672,20 @@ function coinGame(){
 }
 
 function itemSwatch(it){
+  const headView = ['head', 'face', 'ears'], fullView = ['dress', 'back'];
   return it.slot === 'hairStyle'
       ? `<span class="sw-svg">${guideSVG(Object.assign({}, S.look, { hairStyle:it.id, head:null, face:null }))}</span>`
+    : headView.includes(it.slot) && !it.svg && !it.icon
+      ? `<span class="sw-svg">${guideSVG(Object.assign({}, S.look, { [it.slot]:it.id }))}</span>`
+    : it.slot === 'neck' && !it.svg
+      ? `<span class="sw-svg">${guideSVG(Object.assign({}, S.look, { neck:it.id, hand:null, back:null }), 'bust')}</span>`
+    : fullView.includes(it.slot)
+      ? `<span class="sw-svg sw-full">${guideSVG(Object.assign({}, S.look, { [it.slot]:it.id, hand:null, ride:null }), 'full')}</span>`
     : it.svg ? `<span class="sw-svg">${it.svg}</span>`
     : it.icon ? `<span class="sw-ico">${it.icon}</span>`
     : `<span class="sw" style="background:linear-gradient(135deg,${it.c.join(',')})"></span>`;
 }
-const closetTab = slot => OPTIONAL.includes(slot) ? 'extras' : slot;
+const closetTab = slot => (CLOSET_TABS.find(t => t[2].includes(slot)) || CLOSET_TABS[0])[0];
 
 /* ---------- Treasure chests ---------- */
 const CHEST_SVG = `<svg viewBox="0 0 120 104">
@@ -1547,7 +1703,9 @@ const CHEST_SVG = `<svg viewBox="0 0 120 104">
   <path class="crack" d="M58 70l3 6-3 6 3 8" stroke="#3a1d08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 </svg>`;
 function rollPrize(){
-  const free = ITEMS.filter(it => it.cost > 0 && !S.owned.includes(it.id));
+  const free = ITEMS.filter(it => (it.cost > 0 || it.chest) && !S.owned.includes(it.id));
+  const secret = free.filter(it => it.chest);
+  if (secret.length && Math.random() < .2) return { item: pick(secret) };
   if (free.length && Math.random() < .7) return { item: pick(free) };
   return { gems: pick([['blue','blue'], ['gold'], ['blue','blue','blue'], ['gold','blue'], ['gold','gold']]) };
 }
@@ -1574,6 +1732,7 @@ function offerChest(chance, after){
     const close = '<button class="big-btn" id="prizeOk">Yay! ✨</button>';
     if (p.item){
       S.owned.push(p.item.id); save();
+      if (p.item.chest) setTimeout(() => sfx.sparkle(), 300);
       box.innerHTML = `${itemSwatch(p.item)}<b>You found ${esc(p.item.name)}!</b><div class="row"><button class="soft-btn" id="tryOn">👗 Try it on</button>${close}</div>`;
       say(`You found ${p.item.name}! It's yours to keep!`);
     } else {
@@ -1590,40 +1749,49 @@ function offerChest(chance, after){
       document.body.appendChild(ov);
       $('#prizeOk').onclick = () => { sfx.pop(); ov.remove(); };
       const t = $('#tryOn');
-      if (t) t.onclick = () => { ov.remove(); sfx.pop(); S.look[p.item.slot] = p.item.id; save(); closetScreen(closetTab(p.item.slot)); say(`Ooh, ${p.item.name}!`); };
+      if (t) t.onclick = () => { ov.remove(); sfx.pop(); S.look[p.item.slot] = p.item.id; if (p.item.slot === 'top' || p.item.slot === 'bottom') S.look.dress = null; save(); closetScreen(closetTab(p.item.slot)); say(`Ooh, ${p.item.name}!`); };
     }, 450);
   };
   return true;
 }
 
+const CLOSET_TABS = [['hairStyle','💇 Style',['hairStyle']],['hairColor','🎨 Color',['hairColor']],['top','👚 Top',['top']],
+  ['bottom','🩳 Bottom',['bottom']],['dress','👗 Dress',['dress']],['shoes','👟 Shoes',['shoes']],['head','👑 Hats',['head']],
+  ['jewelry','💍 Jewelry',['ears','neck','ring']],['face','🕶️ Face',['face']],['back','🧚 Wings',['back']],['hand','🪄 Hold',['hand']],['ride','🛹 Ride',['ride']]];
 function closetScreen(tab){
   setTop(true, true);
-  const TABS = [['hairStyle','💇 Style'],['hairColor','🎨 Color'],['top','👚 Top'],['bottom','👗 Bottom'],['shoes','👟 Shoes'],['extras','✨ Extras']];
-  const list = ITEMS.filter(it => tab === 'extras' ? OPTIONAL.includes(it.slot) : it.slot === tab);
+  if (tab === 'extras') tab = 'head';
+  const T = CLOSET_TABS.find(t => t[0] === tab) || CLOSET_TABS[0]; tab = T[0];
+  const list = ITEMS.filter(it => T[2].includes(it.slot));
   const swatch = itemSwatch;
+  const isOn = it => S.look[it.slot] === it.id && !(S.look.dress && (it.slot === 'top' || it.slot === 'bottom'));
   screen.innerHTML = `<div class="closet">
     <div class="uni preview" id="preview">${guideSVG(null, 'full')}</div>
-    <div class="tabs">${TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <div class="tabs">${CLOSET_TABS.map(([k, l]) => `<button class="tab${k === tab ? ' on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="items">${list.map(it => {
-      const own = S.owned.includes(it.id), wearing = S.look[it.slot] === it.id;
-      const tag = wearing ? 'Wearing ✓' : own ? 'Wear' : '💎 ' + it.cost;
-      return `<button class="item${wearing ? ' on' : ''}${own ? '' : ' locked-item'}" data-id="${it.id}">
+      const own = S.owned.includes(it.id), wearing = isOn(it);
+      const tag = wearing ? 'Wearing ✓' : own ? 'Wear' : it.chest ? '🎁 In a chest' : '💎 ' + it.cost;
+      return `<button class="item${wearing ? ' on' : ''}${own ? '' : ' locked-item'}${!own && it.chest ? ' chest-item' : ''}" data-id="${it.id}">
         ${swatch(it)}<b>${it.name}</b><small>${tag}</small></button>`;
     }).join('')}</div>
   </div>`;
   const tabsEl = screen.querySelector('.tabs'), onTab = tabsEl.querySelector('.on');
   if (onTab) tabsEl.scrollLeft = onTab.offsetLeft - 20;
   screen.querySelectorAll('.tab').forEach(b => b.onclick = () => { sfx.pop(); closetScreen(b.dataset.t); });
+  const wear = it => { S.look[it.slot] = it.id; if (it.slot === 'top' || it.slot === 'bottom') S.look.dress = null; };
   screen.querySelectorAll('.item').forEach(b => b.onclick = () => {
     const it = item(b.dataset.id);
-    const own = S.owned.includes(it.id), wearing = S.look[it.slot] === it.id;
+    const own = S.owned.includes(it.id), wearing = isOn(it);
     if (own && wearing && OPTIONAL.includes(it.slot)){
       S.look[it.slot] = null; save(); sfx.pop(); closetScreen(tab);
     } else if (own){
-      S.look[it.slot] = it.id; save(); sfx.chime();
+      wear(it); save(); sfx.chime();
       closetScreen(tab); say(`Ooh, ${it.name}!`);
+    } else if (it.chest){
+      b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
+      say(`${it.name} is a secret treasure! You can only find it in a treasure chest!`);
     } else if (S.gems >= it.cost){
-      S.gems -= it.cost; S.owned.push(it.id); S.look[it.slot] = it.id; save();
+      S.gems -= it.cost; S.owned.push(it.id); wear(it); save();
       sfx.tada(); sfx.cheer(); confetti(40);
       closetScreen(tab); say(`You got ${it.name}! It looks amazing!`);
     } else {
@@ -1882,6 +2050,7 @@ function storyLevel(k, i){
     if (firstClear){
       if (boss){ st.chapter = k + 1; st.level = 0; } else st.level = i + 1;
     }
+    S.where = boss ? ['worldScreen'] : ['chapterMap', k];
     save();
     if (boss) return c.final ? finaleScene(earned) : rescueScene(k, earned);
     sfx.tada(); sfx.cheer(); confetti(50);
@@ -2230,6 +2399,56 @@ if (!S.look){
   S.look = Object.assign({}, BELLA_LOOK);
   delete S.closet; save();
 }
+
+/* ---------- Remember where she is (so a reload or Home button doesn't start over) ---------- */
+// Each screen saves its name; if the phone reloads the app, "Keep playing" brings her back there.
+const RESUME = ['mapScreen','gardenScreen','closetScreen','worldScreen','chapterMap','storyLevel',
+  'balloonGame','mathGame','countGame','shapeGame','clockGame','coinGame'];
+const SCREENS = {};
+RESUME.forEach(name => {
+  const orig = window[name]; SCREENS[name] = orig;
+  window[name] = function(...a){ S.where = [name, ...a.filter(x => typeof x !== 'function')]; save(); return orig.apply(this, a); };
+});
+// These are written as plain function names inside the app, so point them at the wrapped versions.
+mapScreen = window.mapScreen; gardenScreen = window.gardenScreen; closetScreen = window.closetScreen;
+worldScreen = window.worldScreen; chapterMap = window.chapterMap; storyLevel = window.storyLevel;
+balloonGame = window.balloonGame; mathGame = window.mathGame; countGame = window.countGame;
+shapeGame = window.shapeGame; clockGame = window.clockGame; coinGame = window.coinGame;
+const _rescue = rescueScene; rescueScene = (...a) => { S.where = ['worldScreen']; save(); return _rescue(...a); };
+const _voice = voiceScreen; voiceScreen = (...a) => { S.where = ['voiceScreen']; save(); return _voice(...a); };
+const _finale = finaleScene; finaleScene = (...a) => { S.where = ['mapScreen']; save(); return _finale(...a); };
+function resume(){
+  const w = Array.isArray(S.where) ? S.where : null;
+  if (w && SCREENS[w[0]] && w[0] !== 'mapScreen'){
+    try { window[w[0]](...w.slice(1)); return true; } catch(e){}
+  }
+  mapScreen(); return false;
+}
+
+/* ---------- Phone Back button stays inside the app ---------- */
+// Every screen change adds a history step; Back goes up one level instead of closing the app.
+function backTarget(){
+  const w = Array.isArray(S.where) ? S.where[0] : 'mapScreen';
+  if (['mathGame','countGame','shapeGame','clockGame','coinGame'].includes(w)) return () => gardenScreen();
+  if (w === 'storyLevel') return () => chapterMap(S.where[1]);
+  if (w === 'chapterMap') return () => worldScreen();
+  if (w === 'mapScreen') return null;
+  return () => mapScreen();
+}
+let started = false;
+const pushStep = () => { try { history.pushState({ bella:1 }, ''); } catch(e){} };
+const _setTop = setTop;
+setTop = function(...a){ if (started) pushStep(); return _setTop.apply(this, a); };
+addEventListener('popstate', () => {
+  if (!started) return;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  document.querySelectorAll('.prize-ov').forEach(e => e.remove());
+  const go = backTarget();
+  if (go) go(); else { needGuard = true; pushStep(); }
+});
+// After Back on the home screen, her next tap re-arms the guard (Chrome only keeps steps made by a tap).
+let needGuard = false;
+addEventListener('pointerdown', () => { if (started && needGuard){ needGuard = false; pushStep(); } }, true);
 
 splash();
 </script>
