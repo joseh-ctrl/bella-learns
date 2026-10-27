@@ -432,33 +432,61 @@ function guideSVG(look){
   </svg>`;
 }
 
-/* ---------- Word progress ---------- */
-function st(w){ return S.words[w] || (S.words[w] = { seen:0, right:0, miss:0, said:0, streak:0 }); }
-const mastered = w => !!(S.words[w] && S.words[w].streak >= 3);
-const activePool = () => WORDS.slice(0, S.level + 1).flat();
+/* ---------- Word progress (spaced practice) ---------- */
+// Each word has a "box" 0-5. 0 = not met yet, 1 = learning, 5 = mastered.
+// Words she knows move up fast and come back rarely; misses drop to box 1 and come back soon.
+const ALL_WORDS = WORDS.flat();
+const GAP = [0, 1, 2, 4, 8, 16];          // rounds to wait before showing a word again, by box
+const MAX_LEARNING = 6;                    // how many shaky words she juggles at once
+// A short sentence for words that sound like other words, so she knows which one to find.
+const CLUES = {
+  to:'I go to school.', two:'I have two hands.', too:'Me too!',
+  for:'This gift is for you.', four:'A dog has four legs.',
+  no:'No, thank you.', know:'I know the answer.',
+  one:'I have one nose.', there:'Look over there.', here:'Come here.',
+  be:'Be nice.', see:'I see you.', ate:'I ate my lunch.', by:'Sit by me.',
+  red:'My shirt is red.', blue:'The sky is blue.', new:'I have new shoes.',
+  our:'This is our house.', are:'We are friends.', some:'I want some.', him:'Give it to him.',
+  so:'I am so happy.', I:'I am happy.'
+};
+function st(w){
+  const o = S.words[w] || (S.words[w] = { box:0, due:0, seen:0, right:0, miss:0, said:0 });
+  if (o.box === undefined){ // progress saved by the first version
+    o.box = (o.streak || 0) >= 3 ? 4 : (o.streak || 0) >= 1 ? 3 : (o.seen || o.miss) ? 1 : 0;
+    o.due = 0; delete o.streak;
+  }
+  return o;
+}
+const box = w => (S.words[w] ? st(w).box : 0);
+const met = w => box(w) > 0;
+const mastered = w => box(w) >= 3;
+const upcoming = n => ALL_WORDS.filter(w => !met(w)).slice(0, n);
 const sameSound = w => (SAME_SOUND.find(g => g.includes(w)) || [w]);
-function levelPct(){ const cur = WORDS[S.level]; return Math.round(cur.filter(mastered).length / cur.length * 100); }
+function wordFloor(){ // which list she is on: the list of the next new word
+  const nxt = upcoming(1)[0];
+  return nxt ? WORDS.findIndex(l => l.includes(nxt)) : WORDS.length - 1;
+}
+function levelPct(){ const cur = WORDS[wordFloor()]; return Math.round(cur.filter(mastered).length / cur.length * 100); }
 
 function pickRound(n){
-  // Words she hasn't mastered (and misses most) come up more often.
-  let pool = activePool().map(w => {
-    const s = S.words[w];
-    let wt = !s ? 3 : mastered(w) ? 0.5 : 3 + s.miss * 2;
-    if (WORDS[S.level].includes(w)) wt *= 1.5;
-    return [w, wt];
-  });
+  const R = S.rounds;
+  const seen = ALL_WORDS.filter(met);
+  const learning = seen.filter(w => box(w) <= 2).sort((a, b) => st(a).due - st(b).due || st(b).miss - st(a).miss);
+  const reviews = seen.filter(w => box(w) >= 3 && st(w).due <= R).sort((a, b) => st(a).due - st(b).due);
   const out = [];
-  while (out.length < n && pool.length){
-    const total = pool.reduce((a, [, wt]) => a + wt, 0);
-    let r = Math.random() * total, k = 0;
-    while (r > pool[k][1]) { r -= pool[k][1]; k++; }
-    out.push(pool[k][0]); pool.splice(k, 1);
-  }
-  return out;
+  const add = w => { if (w && !out.includes(w) && out.length < n) out.push(w); };
+  learning.filter(w => st(w).due <= R).slice(0, 3).forEach(add);           // shaky words that are due
+  const room = Math.max(0, MAX_LEARNING - learning.length);
+  upcoming(Math.min(room, n - out.length - (reviews.length ? 1 : 0), 3)).forEach(add); // a few new words
+  reviews.slice(0, 2).forEach(add);                                          // a quick check on known words
+  learning.forEach(add);                                                     // fill: other shaky words
+  upcoming(n).forEach(add);                                                  // fill: more new words
+  seen.sort((a, b) => st(a).due - st(b).due).forEach(add);                   // fill: soonest reviews
+  return shuffle(out);
 }
 function distractors(w, n){
   const block = sameSound(w);
-  const pool = shuffle(activePool().filter(x => x !== w && !block.includes(x)));
+  const pool = shuffle([...new Set([...ALL_WORDS.filter(met), ...upcoming(12)])].filter(x => x !== w && !block.includes(x)));
   const out = [];
   const lookAlike = pool.find(x => x[0].toLowerCase() === w[0].toLowerCase());
   if (lookAlike) out.push(lookAlike);
@@ -468,10 +496,18 @@ function distractors(w, n){
   }
   return out;
 }
-function checkLevelUp(){
-  if (S.level >= WORDS.length - 1) return false;
-  if (levelPct() >= 80){ S.level++; return true; }
-  return false;
+// Called once per word per round, the first time she sees it.
+function scoreWord(w, firstTry, saidOk){
+  const o = st(w), R = S.rounds;
+  o.seen++;
+  if (firstTry){
+    o.right++;
+    o.box = o.box === 0 ? 3 : Math.min(5, o.box + 1);   // new word she already knows: skip ahead
+    if (saidOk === false) o.box = Math.min(o.box, 2);     // couldn't say it: keep it close
+  } else {
+    o.miss++; o.box = 1;
+  }
+  o.due = R + GAP[o.box];
 }
 
 /* ---------- Math (Number Garden) ---------- */
@@ -806,7 +842,7 @@ function mapScreen(){
     </div>
     <div class="map">
       <button class="place open" id="tower"><span class="ico">🎤</span><b>Word Stage</b>
-        <small>${LEVEL_NAMES[S.level]}</small><span class="bar"><i style="width:${levelPct()}%"></i></span></button>
+        <small>${LEVEL_NAMES[wordFloor()]}</small><span class="bar"><i style="width:${levelPct()}%"></i></span></button>
       <button class="place open" id="garden"><span class="ico">🎧</span><b>Number Studio</b>
         <small>Math · Level ${S.math.stage + 1}</small><span class="bar"><i style="width:${mathPct()}%"></i></span></button>
       <button class="place open" id="closetTile"><span class="ico">👗</span><b>Dressing Room</b><small>Spend your 💎</small></button>
@@ -1337,7 +1373,8 @@ function roundDone(earned, unlock, again){
 
 function balloonGame(){
   setTop(true, true);
-  const my = nav, round = pickRound(6);
+  const my = nav, round = pickRound(6), floorBefore = wordFloor();
+  const scored = new Set(), requeued = new Set();
   let i = 0, earned = 0;
   screen.innerHTML = `
     <div class="game-head">
@@ -1345,30 +1382,35 @@ function balloonGame(){
       <div class="bubble" id="prompt">Pop the word you hear!</div>
       <button class="icon-btn" id="hear" aria-label="Hear the word">🔊</button>
     </div>
-    <div class="dots" id="dots">${round.map(() => '<span></span>').join('')}</div>
+    <div class="dots" id="dots"></div>
     <div class="field" id="field"></div>
     <div class="say-panel" id="sayPanel" hidden></div>`;
   const field = $('#field'), panel = $('#sayPanel'), prompt = $('#prompt');
-  $('#hear').onclick = () => sayWord(round[i]);
+  const sayTarget = w => sayWord(w).then(() => CLUES[w] ? say(CLUES[w]).then(() => sayWord(w)) : null);
+  $('#hear').onclick = () => sayTarget(round[i]);
 
   function dots(){
-    screen.querySelectorAll('#dots span').forEach((d, k) => {
-      d.className = k < i ? 'done' : k === i ? 'now' : '';
-    });
+    $('#dots').innerHTML = round.map((_, k) => `<span class="${k < i ? 'done' : k === i ? 'now' : ''}"></span>`).join('');
+  }
+  // Put a word back later in this round (once), so she gets another go at it.
+  function comeBack(w){
+    if (requeued.has(w)) return;
+    requeued.add(w);
+    round.splice(Math.min(round.length, i + 3), 0, w);
   }
 
   function next(){
     if (i >= round.length) return finish();
     dots();
-    const w = round[i];
+    const w = round[i], again = scored.has(w);
     let firstTry = true, solved = false;
     panel.hidden = true; field.hidden = false;
-    prompt.textContent = 'Pop the word you hear!';
+    prompt.textContent = again ? "Let's try this one again!" : 'Pop the word you hear!';
     const colors = shuffle([0,1,2,3,4,5]);
     field.innerHTML = shuffle([w, ...distractors(w, 3)]).map((c, k) =>
       `<button class="balloon c${colors[k]}" data-w="${esc(c)}" style="--d:-${(Math.random()*3).toFixed(2)}s"><span>${esc(c)}</span></button>`
     ).join('');
-    say('Find the word').then(() => sayWord(w));
+    say(again ? "Let's try this one again. Find the word" : 'Find the word').then(() => sayTarget(w));
 
     field.querySelectorAll('.balloon').forEach(b => b.onclick = () => {
       if (solved) return;
@@ -1376,20 +1418,24 @@ function balloonGame(){
       if (c === w){
         solved = true;
         b.classList.add('popped'); sfx.pop(); setTimeout(sfx.chime, 120); confetti(14);
-        const s = st(w); s.seen++;
-        if (firstTry){ s.right++; s.streak++; earned++; addGems(1); } else { s.streak = 0; }
-        save();
-        setTimeout(() => { if (my === nav) sayIt(w); }, 650);
+        if (firstTry && !again){ earned++; addGems(1); }
+        setTimeout(() => { if (my === nav) sayIt(w, firstTry, again); }, 650);
       } else {
+        if (firstTry && !again){ scoreWord(w, false); scored.add(w); save(); comeBack(w); dots(); }
         firstTry = false;
-        const s = st(w); s.miss++; s.streak = 0; save();
         b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); sfx.oops();
-        say(`That one says ${c}. Try again!`).then(() => sayWord(w));
+        say(`That one says ${c}. Try again!`).then(() => sayTarget(w));
       }
     });
   }
 
-  function sayIt(w){
+  function sayIt(w, popFirstTry, again){
+    // Score a first-try pop after we know whether she could say it.
+    const settle = saidOk => {
+      if (!again && popFirstTry && !scored.has(w)){ scoreWord(w, true, saidOk); scored.add(w); }
+      if (saidOk) st(w).said++;
+      save();
+    };
     field.hidden = true; panel.hidden = false;
     prompt.textContent = 'Now you say it!';
     const canMic = SR && !micBlocked;
@@ -1407,14 +1453,14 @@ function balloonGame(){
     const msg = $('#sayMsg');
     say(pick(['You found it!','Great job!','Yay!']) + ' Now you say it.').then(() => sayWord(w));
     $('#again').onclick = () => sayWord(w);
-    $('#skip').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); advance(); };
+    $('#skip').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); settle(null); advance(); };
 
     const honorButton = () => {
       $('#sayBtnWrap').innerHTML = `<button class="big-btn" id="saidIt">I said it! ⭐</button>`;
       bindHonor();
     };
     const bindHonor = () => {
-      $('#saidIt').onclick = () => { st(w).said++; save(); earned++; addGems(1); sfx.chime(); advance(); };
+      $('#saidIt').onclick = () => { settle(true); earned++; addGems(1); sfx.chime(); advance(); };
     };
     if (!canMic){ bindHonor(); return; }
 
@@ -1433,7 +1479,7 @@ function balloonGame(){
         return;
       }
       if (heard(w, r.alts || [])){
-        st(w).said++; save();
+        settle(true);
         earned += 2; addGems(2); sfx.tada(); confetti(30);
         msg.textContent = 'Perfect! ⭐⭐';
         await say(pick(['Perfect!','You said it!','Amazing!','Super star!']));
@@ -1447,8 +1493,10 @@ function balloonGame(){
           : "I didn't hear you. Try again!";
         await say('Almost! Listen.'); await sayWord(w);
       } else {
-        msg.textContent = 'Good try! 💜';
-        await say(`Good try! This word is ${w}.`);
+        // Move on now, but bring this word back later in the round.
+        settle(false); comeBack(w);
+        msg.textContent = "Good try! We'll come back to it. 💜";
+        await say(`Good try! This word is ${w}. We'll come back to it.`);
         advance();
       }
     };
@@ -1458,8 +1506,8 @@ function balloonGame(){
 
   function finish(){
     S.rounds++;
-    const up = checkLevelUp();
-    roundDone(earned, up ? `${LEVEL_NAMES[S.level]} on the Word Stage` : null, balloonGame);
+    const f = wordFloor();
+    roundDone(earned, f > floorBefore ? `${LEVEL_NAMES[f]} on the Word Stage` : null, balloonGame);
   }
 
   next();
