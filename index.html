@@ -221,6 +221,11 @@ h1.title{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1.05;
 .big-stars{display:flex;gap:10px;font-size:clamp(2.6rem,12vw,3.6rem)}
 .big-stars span{filter:grayscale(1) brightness(.6);transition:.3s}.big-stars span.on{filter:none;animation:bump .6s}
 .duo{display:flex;gap:6px;align-items:flex-end}
+.bubble-cage{--left:5;position:absolute;inset:-14% -40%;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.7) 0 7%,rgba(180,230,255,.18) 8% 60%,rgba(130,210,255,.35) 75%,rgba(255,255,255,.55) 100%);
+  border:3px solid rgba(255,255,255,.7);opacity:calc(.35 + var(--left) * .13);transition:opacity .4s,transform .3s}
+.bubble-cage i{display:none}
+.bubble-cage.popped{transform:scale(1.6);opacity:0;transition:transform .35s,opacity .35s}
 /* dressing room */
 .closet{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:640px}
 .uni.preview{width:clamp(120px,34vw,180px);cursor:default}
@@ -1503,7 +1508,20 @@ const CHAPTERS = [
       'There she is! Grumble trapped your friend in a vine cage!'
     ],
     names:['Luna','Melody','Ruby','Coco','Sky'] },
-  { id:'ocean', name:'Coral Ocean', icon:'🌊', ready:false, bg:'linear-gradient(180deg,#0e4f7a,#1b86b5)', deco:['🐠','🐚','🪸','🫧','🐙','🐢','🐬','🦀'] },
+  { id:'ocean', name:'Coral Ocean', icon:'🌊', ready:true,
+    bg:'linear-gradient(180deg,#0b3d63 0%,#13679a 50%,#1f9cc4 100%)', deco:['🐠','🐚','🪸','🫧','🐙','🐢','🐬','🦀','🫧','🐡'],
+    cage:'bubble', cageName:'giant bubble',
+    levels:[
+      'Splash! Welcome to the Coral Ocean. Let\'s swim down!',
+      'A sea turtle wants to race. Answer to swim fast!',
+      'Some shiny shells are buried in the sand. Let\'s dig!',
+      'A friendly octopus has eight puzzles. Well, three!',
+      'Look! A sparkly hair clip. It belongs to your friend!',
+      'The dolphins will give us a ride if we get it right!',
+      'Bubbles everywhere! We must be close!',
+      'There she is! Grumble trapped your friend in a giant bubble!'
+    ],
+    names:['Pearl','Marina','Coral','Nova','Jade'] },
   { id:'castle', name:'Crystal Castle', icon:'🏰', ready:false, bg:'linear-gradient(180deg,#5a3d8f,#a77fd6)', deco:['🏰','✨','🦄','👑','💎','🌙'] },
   { id:'concert', name:'The Big Concert', icon:'🎤', ready:false, bg:'linear-gradient(180deg,#2a1350,#7a2d8f)', deco:['🎤','🎸','🥁','🎹','⭐','🎶'] }
 ];
@@ -1530,7 +1548,8 @@ function worldScreen(){
   screen.innerHTML = `
     <div class="guide">
       <div class="uni sm grumble">${grumbleSVG()}</div>
-      <div class="bubble">Oh no! Grumble blew your band away before the big concert! Let's find them!</div>
+      <div class="bubble">${st.chapter === 0 ? "Oh no! Grumble blew your band away before the big concert! Let's find them!"
+        : `You've rescued ${Math.min(st.chapter, 3)} of 3 friends! ${st.chapter < 3 ? 'Keep going!' : 'Time for the big concert!'}`}</div>
     </div>
     <div class="map">${CHAPTERS.map((c, k) => {
       const open = c.ready && k <= st.chapter, done = k < st.chapter;
@@ -1627,7 +1646,9 @@ function storyLevel(k, i){
     </div>
     <div class="scene" style="background:${c.bg}">
       <div class="scene-me">${guideSVG(null, 'full')}</div>
-      ${boss ? `<div class="scene-friend">${guideSVG(FRIEND_LOOKS[k], 'full')}<div class="cage" id="cage">${'<i></i>'.repeat(N)}</div></div>`
+      ${boss ? `<div class="scene-friend">${guideSVG(FRIEND_LOOKS[k], 'full')}${c.cage === 'bubble'
+          ? `<div class="bubble-cage" id="cage">${'<i></i>'.repeat(N)}</div>`
+          : `<div class="cage" id="cage">${'<i></i>'.repeat(N)}</div>`}</div>`
              : `<div class="scene-goal">${c.deco[i % c.deco.length]}</div>`}
       <div class="dots scene-dots" id="dots">${'<span></span>'.repeat(N)}</div>
     </div>
@@ -1649,7 +1670,10 @@ function storyLevel(k, i){
     if (q >= N) return finish();
     CHALLENGES[kinds[q]](ctx, ok => {
       if (ok) firstTries++;
-      if (boss){ const bar = $('#cage').children[q]; if (bar) bar.classList.add('broke'); }
+      if (boss){
+        const cg = $('#cage'), bar = cg.children[q]; if (bar) bar.classList.add('broke');
+        if (c.cage === 'bubble'){ cg.style.setProperty('--left', N - q - 1); if (q === N - 1){ cg.classList.add('popped'); sfx.pop(); } }
+      }
       q++; setTimeout(next, 350);
     });
   }
