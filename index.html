@@ -425,10 +425,53 @@ function pickVoice(){
   voice = vs.find(v => v.name === S.voiceName) || vs[0] || null;
 }
 if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function say(text, opts = {}){
+/* Natural voice: recorded clips in audio/ (made by voice/make_voices.py). Each sentence is looked up;
+   anything without a clip is spoken by the device voice instead. */
+let CLIPS = null, voiceTok = 0, clipAudio = null;
+try { fetch('audio/manifest.json', { cache:'no-cache' }).then(r => r.ok ? r.json() : null).then(m => { CLIPS = m; }).catch(() => {}); } catch(e){}
+const vkey = (t, slow) => (slow ? 'slow:' : '') + String(t).toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
+function segments(text){ // sentences; a counting list like "4, 5, 6!" becomes single numbers
+  const out = [];
+  (String(text).match(/[^.!?:]+[.!?:]*/g) || []).forEach(s0 => {
+    const t = s0.trim(); if (!t) return;
+    if (/^(\d+|hmm)(\s*,\s*(\d+|hmm))+[.!?]*$/i.test(t)) t.replace(/[.!?]/g, '').split(',').forEach(n => out.push(n.trim()));
+    else out.push(t);
+  });
+  return out;
+}
+function stopVoice(){
+  voiceTok++;
+  try { if (clipAudio){ clipAudio.pause(); clipAudio = null; } } catch(e){}
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+function playClip(file, tok){
+  return new Promise(res => {
+    if (tok !== voiceTok) return res(true);
+    let done = false; const fin = ok => { if (!done){ done = true; res(ok); } };
+    try {
+      const a = new Audio('audio/' + file); clipAudio = a;
+      a.onended = () => fin(true); a.onerror = () => fin(false);
+      setTimeout(() => fin(true), 9000);
+      const pr = a.play(); if (pr && pr.catch) pr.catch(() => fin(false));
+    } catch(e){ fin(false); }
+  });
+}
+async function say(text, opts = {}){
+  stopVoice(); const tok = voiceTok;
+  const slow = !!opts.rate && opts.rate < .9;
+  if (!CLIPS || S.natural === false) return ttsOnce(text, opts);
+  const segs = segments(text), files = segs.map(sg => CLIPS[vkey(sg, slow)]);
+  if (!files.some(Boolean)) return ttsOnce(text, opts);
+  for (let k = 0; k < segs.length; k++){
+    if (tok !== voiceTok) return;
+    const ok = files[k] ? await playClip(files[k], tok) : false;
+    if (!ok && tok === voiceTok) await ttsOnce(segs[k], opts);
+  }
+}
+function ttsOnce(text, opts = {}){
+  text = String(text ?? '');
   return new Promise(res => {
     if (!('speechSynthesis' in window)) return res();
-    speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     if (voice) u.voice = voice;
     u.lang = voice ? voice.lang : 'en-US'; u.rate = opts.rate || 0.95; u.pitch = 1.05;
@@ -1156,7 +1199,7 @@ const coinPct = () => Math.round(S.coin.stage / (COIN_STAGES.length - 1) * 100);
 /* ---------- Top bar ---------- */
 let nav = 0; // changes every time the screen changes, so old games stop talking
 function setTop(show, home = true){
-  nav++;
+  nav++; stopVoice();
   document.querySelectorAll('.prize-ov').forEach(e => e.remove());
   $('#topbar').hidden = !show;
   $('#homeBtn').hidden = !home;
@@ -1217,7 +1260,7 @@ function lucky(){ // a right answer: usually a pink gem, sometimes a lucky blue 
   if (kind !== 'pink') sfx.sparkle();
   return v;
 }
-$('#homeBtn').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); mapScreen(); };
+$('#homeBtn').onclick = () => { stopVoice(); mapScreen(); };
 $('#setBtn').onclick = () => parentGate();
 function parentGate(){
   setTop(true, true);
@@ -1307,7 +1350,8 @@ function voiceScreen(){
   setTop(true, true);
   const vs = 'speechSynthesis' in window ? englishVoices() : [];
   screen.innerHTML = `<div class="center" style="justify-content:flex-start">
-    <div class="bubble">Grown-ups: tap a voice to hear it.<br>The one you tap last is saved.</div>
+    ${CLIPS ? `<button class="soft-btn" id="vNat">Natural recorded voice: <b>${S.natural === false ? 'OFF' : 'ON'}</b></button>` : ''}
+    <div class="bubble">${CLIPS && S.natural !== false ? 'Lines without a recording use this device voice.<br>' : ''}Grown-ups: tap a voice to hear it.<br>The one you tap last is saved.</div>
     <div class="voice-list">${vs.length ? vs.map((v, k) =>
       `<button class="voice-row${voice && v.name === voice.name ? ' on' : ''}" data-k="${k}">
         <span>${esc(v.name.replace(/\s*-\s*English.*$/i, ''))}</span>${k === 0 ? '<small>⭐ most natural</small>' : ''}
@@ -1319,6 +1363,8 @@ function voiceScreen(){
     screen.querySelectorAll('.voice-row').forEach(x => x.classList.toggle('on', x === b));
     say('Hi Bella! Do you like this voice?');
   });
+  const nb = $('#vNat');
+  if (nb) nb.onclick = () => { S.natural = S.natural === false; save(); voiceScreen(); say('Hi Bella! Do you like this voice?'); };
   $('#vDone').onclick = () => mapScreen();
 }
 
@@ -2552,7 +2598,7 @@ const CHALLENGES = {
       const mic = $('#mic'), sm = $('#sm');
       mic.onclick = async () => {
         if (mic.classList.contains('listening')) return;
-        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        stopVoice();
         mic.classList.add('listening'); sm.textContent = 'Listening… 👂';
         const r = await listen(); mic.classList.remove('listening');
         if (!r.ok && ['not-allowed','service-not-allowed','audio-capture','unsupported','start'].includes(r.err)){
@@ -2725,7 +2771,7 @@ function balloonGame(){
     const msg = $('#sayMsg');
     say(pick(['You found it!','Great job!','Yay!']) + ' Now you say it.').then(() => sayWord(w));
     $('#again').onclick = () => sayWord(w);
-    $('#skip').onclick = () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); settle(null); advance(); };
+    $('#skip').onclick = () => { stopVoice(); settle(null); advance(); };
 
     const honorButton = () => {
       $('#sayBtnWrap').innerHTML = `<button class="big-btn" id="saidIt">I said it! ⭐</button>`;
@@ -2739,7 +2785,7 @@ function balloonGame(){
     const mic = $('#mic');
     mic.onclick = async () => {
       if (mic.classList.contains('listening')) return;
-      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      stopVoice();
       mic.classList.add('listening'); msg.textContent = 'Listening… 👂';
       const r = await listen();
       mic.classList.remove('listening');
@@ -2837,7 +2883,7 @@ const _setTop = setTop;
 setTop = function(...a){ if (started) pushStep(); return _setTop.apply(this, a); };
 addEventListener('popstate', () => {
   if (!started) return;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  stopVoice();
   document.querySelectorAll('.prize-ov').forEach(e => e.remove());
   const go = backTarget();
   if (go) go(); else { needGuard = true; pushStep(); }
